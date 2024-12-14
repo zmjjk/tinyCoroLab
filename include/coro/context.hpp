@@ -5,6 +5,7 @@
 
 #include "config/config.hpp"
 #include "coro/worker.hpp"
+#include "coro/task.hpp"
 
 namespace coro
 {
@@ -34,6 +35,17 @@ namespace coro
     void stop()
     {
       job_->request_stop();
+    }
+
+    template <typename T>
+    void submit_task(Task<T> &&task)
+    {
+      submit_task(task);
+    }
+
+    template <typename T>
+    void submit_task(Task<T> &task)
+    {
     }
 
   private:
