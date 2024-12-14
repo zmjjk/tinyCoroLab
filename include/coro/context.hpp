@@ -23,19 +23,9 @@ namespace coro
     Context &operator=(Context &&) = delete;
 
   public:
-    void start()
-    {
-      job_ = make_unique<jthread>([this](stop_token token)
-                                  {
-        this->init();
-        this->run(token);
-        this->deinit(); });
-    }
+    void start() noexcept;
 
-    void stop()
-    {
-      job_->request_stop();
-    }
+    void stop() noexcept;
 
     template <typename T>
     void submit_task(Task<T> &&task)
@@ -46,36 +36,19 @@ namespace coro
     template <typename T>
     void submit_task(Task<T> &task)
     {
+      worker_.submit_task(task.get_handler());
     }
 
   private:
-    void init() { worker_.init(); }
+    void init() noexcept;
 
-    void deinit() { worker_.deinit(); }
+    void deinit() noexcept;
 
-    void run(stop_token token)
-    {
-      while (!token.stop_requested())
-      {
-        // TODO: work
-        process_work();
-        poll_submit();
-      }
-    }
+    void run(stop_token token) noexcept;
 
-    void process_work()
-    {
-      auto num = worker_.num_task_schedule();
-      for (int i = 0; i < num; i++)
-      {
-        worker_.exec_one_task();
-      }
-    }
+    void process_work() noexcept;
 
-    void poll_submit()
-    {
-      worker_.poll_submit();
-    }
+    void poll_submit() noexcept;
 
   private:
     alignas(config::kCacheLineSize) Worker worker_;

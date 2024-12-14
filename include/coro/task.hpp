@@ -201,6 +201,11 @@ namespace coro
       }
     }
 
+    coroutine_handle<> get_handler() noexcept
+    {
+      return handle_;
+    }
+
     inline bool is_ready() const noexcept
     {
       !handle || handle.done();

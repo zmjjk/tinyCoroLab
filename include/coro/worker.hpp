@@ -22,83 +22,29 @@ namespace coro
     Worker() noexcept : num_task_wait_submit_(0), num_task_running_(0) {};
     ~Worker() noexcept {};
 
-    void init()
-    {
-      urpxy_.init(config::kEntryLength);
-    }
+    void init() noexcept;
 
-    void deinit()
-    {
-      urpxy_.deinit();
-    }
+    void deinit() noexcept;
 
-    inline bool has_task_ready() noexcept
-    {
-      return !rcur_.isEmpty();
-    }
+    inline bool has_task_ready() noexcept;
 
-    ursptr get_free_urs() noexcept
-    {
-      return urpxy_.get_free_sqe();
-    }
+    inline ursptr get_free_urs() noexcept;
 
-    size_t num_task_schedule() noexcept
-    {
-      return rcur_.size();
-    }
+    inline size_t num_task_schedule() noexcept;
 
-    coroutine_handle<> schedule() noexcept
-    {
-      assert(!rcur_.isEmpty());
-      auto coro = rbuf_[rcur_.head()];
-      rcur_.pop();
-      assert(bool(coro));
-      return coro;
-    }
+    coroutine_handle<> schedule() noexcept;
 
-    void exec_one_task() noexcept
-    {
-      auto coro = schedule();
-      coro.resume();
-    }
+    void submit_task(coroutine_handle<> handle) noexcept;
 
-    bool peek_uring()
-    {
-      return urpxy_.peek_uring();
-    }
+    void exec_one_task() noexcept;
 
-    void wait_uring(int num = 1)
-    {
-      urpxy_.wait_uring(num);
-    }
+    inline bool peek_uring() noexcept;
 
-    void handle_cqe_entry(urcptr cqe)
-    {
-      num_task_running_--;
-      // TODO:
-    }
+    inline void wait_uring(int num = 1) noexcept;
 
-    void poll_submit()
-    {
-      if (num_task_wait_submit_ > 0)
-      {
-        int num = urpxy_.submit();
-        num_task_wait_submit_ -= num;
-        assert(num_task_wait_submit_ == 0);
-        num_task_running_ += num;
-      }
+    void handle_cqe_entry(urcptr cqe);
 
-      if (peek_uring())
-      {
-        [[__attribute_maybe_unused__]]
-        auto num = urpxy_.handle_for_each_cqe([this](urcptr cqe)
-                                              { this->handle_cqe_entry(cqe); });
-      }
-      else
-      {
-        wait_uring();
-      }
-    }
+    void poll_submit();
 
   private:
     alignas(config::kCacheLineSize) UringProxy urpxy_;
