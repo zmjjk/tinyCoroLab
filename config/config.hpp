@@ -2,9 +2,24 @@
 
 #include <cstddef>
 #include <cstdint>
+#include <string>
 
 namespace coro::config
 {
+  // ========================== log configuration =============================
+  // #define TRACE 0
+  // #define DEBUG 1
+  // #define INFO 2
+  // #define WARN 3
+  // #define ERR 4
+  // #define CRITICAL 5
+  // #define OFF 6
+
+#define LOG_LEVEL info
+
+  constexpr const char *kLogFileName = "logs/coro.log";
+  constexpr int64_t kFlushDura = 3;
+
   // ========================== uring configuration ===========================
   constexpr unsigned int kEntryLength = 1024;
 

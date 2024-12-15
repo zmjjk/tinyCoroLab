@@ -1,4 +1,5 @@
 #include "coro/context.hpp"
+#include "coro/thread_info.hpp"
 
 namespace coro
 {
@@ -16,9 +17,17 @@ namespace coro
     job_->request_stop();
   }
 
-  void Context::init() { worker_.init(); }
+  void Context::init()
+  {
+    thread_info.context = this;
+    worker_.init();
+  }
 
-  void Context::deinit() { worker_.deinit(); }
+  void Context::deinit()
+  {
+    thread_info.context = nullptr;
+    worker_.deinit();
+  }
 
   void Context::run(stop_token token)
   {
@@ -42,5 +51,10 @@ namespace coro
   void Context::poll_submit()
   {
     worker_.poll_submit();
+  }
+
+  Context *local_thread_context() noexcept
+  {
+    return thread_info.context;
   }
 };

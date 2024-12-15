@@ -39,6 +39,11 @@ namespace coro
       worker_.submit_task(task.get_handler());
     }
 
+    void submit_task(coroutine_handle<> handle)
+    {
+      worker_.submit_task(handle);
+    }
+
   private:
     void init() noexcept;
 
@@ -54,4 +59,6 @@ namespace coro
     alignas(config::kCacheLineSize) Worker worker_;
     unique_ptr<jthread> job_;
   };
+
+  Context *local_thread_context() noexcept;
 };
