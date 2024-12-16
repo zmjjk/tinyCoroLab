@@ -3,12 +3,15 @@
 #include <atomic>
 #include <coroutine>
 
+#include "lock/lock_guard.hpp"
+
 namespace coro
 {
   using std::atomic;
   using std::coroutine_handle;
   using std::memory_order_acquire;
   using std::memory_order_relaxed;
+  using std::memory_order_release;
   using std::uintptr_t;
 
   class Mutex
@@ -16,6 +19,8 @@ namespace coro
   public:
     class LockAwaiter
     {
+      friend Mutex;
+
     public:
       explicit LockAwaiter(Mutex &mtx) noexcept : mtx_(mtx) {}
 
@@ -42,6 +47,21 @@ namespace coro
     protected:
       Mutex &mtx_;
       coroutine_handle<> wait_handle_;
+      LockAwaiter *next_{nullptr};
+    };
+
+    class LockGuardAwaiter : public LockAwaiter
+    {
+    public:
+      using LockGuardType = LockGuard<Mutex>;
+
+      LockGuardAwaiter(Mutex &mtx) noexcept : LockAwaiter(mtx) {}
+
+    public:
+      LockGuardType await_resume() noexcept
+      {
+        return LockGuardType(mtx_);
+      }
     };
 
   public:
@@ -52,9 +72,16 @@ namespace coro
 
     LockAwaiter lock() noexcept { return LockAwaiter(*this); }
 
+    void unlock() noexcept;
+
+    LockGuardAwaiter lock_guard() noexcept
+    {
+      return LockGuardAwaiter(*this);
+    }
+
   private:
-    inline static constexpr uintptr_t nolocked = 0;
-    inline static constexpr uintptr_t locked_no_waiting = 1;
+    inline static constexpr uintptr_t nolocked = 1;
+    inline static constexpr uintptr_t locked_no_waiting = 0; // nullptr
     atomic<uintptr_t> state_;
   };
 

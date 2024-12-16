@@ -17,6 +17,7 @@ namespace coro
   class Context
   {
   public:
+    Context() noexcept = default;
     Context(const Context &) = delete;
     Context(Context &&) = delete;
     Context &operator=(const Context &) = delete;

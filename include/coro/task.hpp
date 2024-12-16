@@ -77,6 +77,7 @@ namespace coro
     friend FinalAwaiter<T>;
 
   public:
+    PromiseBase() noexcept = default;
     PromiseBase(const PromiseBase &) = delete;
     PromiseBase(PromiseBase &&) = delete;
     PromiseBase &operator=(const PromiseBase &) = delete;
