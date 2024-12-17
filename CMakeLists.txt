@@ -13,3 +13,15 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY
 ${CMAKE_BINARY_DIR}/${CMAKE_INSTALL_LIBDIR})
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY
 ${CMAKE_BINARY_DIR}/${CMAKE_INSTALL_BINDIR})
+
+set(SRC_INCLUDE_DIR "${PROJECT_SOURCE_DIR}/include")
+set(THIRD_PARTY_INCLUDE_DIR
+    "${PROJECT_SOURCE_DIR}/third_party/spdlog/include/spdlog")
+
+include_directories(${EASY_STREAM_SRC_INCLUDE_DIR} ${EASY_STREAM_THIRD_PARTY_INCLUDE_DIR})
+
+add_subdirectory(third_party)
+
+add_subdirectory(src)
+
+add_subdirectory(examples)

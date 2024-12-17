@@ -10,10 +10,15 @@ namespace coro
 
     efd_ = eventfd(0, 0);
     assert(efd_ >= 0);
+
+    res = io_uring_register_eventfd(&ring_, efd_);
+    assert(res == 0);
   }
 
   void UringProxy::deinit()
   {
+    io_uring_unregister_eventfd(&ring_);
+    close(efd_);
     io_uring_queue_exit(&ring_);
   }
 
@@ -65,8 +70,17 @@ namespace coro
       f(cqe);
       i++;
     };
-    io_uring_cq_advance(&ring_, i);
+    // io_uring_cq_advance(&ring_, i);
     return i;
   }
 
+  int UringProxy::peek_batch_cqe(urcptr *cqes, unsigned int num)
+  {
+    return io_uring_peek_batch_cqe(&ring_, cqes, num);
+  }
+
+  void UringProxy::write_eventfd(uint64_t num)
+  {
+    write(efd_, &num, sizeof(num));
+  }
 };

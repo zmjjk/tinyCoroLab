@@ -74,4 +74,11 @@ namespace coro
     }
   }
 
+  uint64_t UringProxy::wait_eventfd()
+  {
+    uint64_t u;
+    read(efd_, &u, sizeof(u));
+    return u;
+  }
+
 };

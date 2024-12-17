@@ -51,6 +51,7 @@ namespace coro
     std::queue<std::coroutine_handle<>> task_que_;
     RingCursor<size_t, config::kQueCap> rcur_;
     array<coroutine_handle<>, config::kQueCap> rbuf_;
+    array<urcptr, config::kQueCap> cqe_;
     size_t num_task_wait_submit_;
     size_t num_task_running_;
   };

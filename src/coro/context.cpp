@@ -33,7 +33,6 @@ namespace coro
   {
     while (!token.stop_requested())
     {
-      // TODO: work
       process_work();
       poll_submit();
     }

@@ -8,6 +8,9 @@
 
 namespace coro
 {
+#define GETURINGNUM(number) (number & 0xffff)
+#define SETTASKNUM (uint64_t(1) << 32)
+
   using ursptr = io_uring_sqe *;
   using urcptr = io_uring_cqe *;
   using urchandler = std::function<void(urcptr)>;
@@ -30,6 +33,12 @@ namespace coro
     inline int submit() noexcept;
 
     size_t handle_for_each_cqe(urchandler f) noexcept;
+
+    uint64_t wait_eventfd() noexcept;
+
+    inline int peek_batch_cqe(urcptr *cqes, unsigned int num) noexcept;
+
+    inline void write_eventfd(uint64_t num) noexcept;
 
   private:
     [[__attribute_maybe_unused__]] int efd_;

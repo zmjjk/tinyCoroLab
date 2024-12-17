@@ -1,0 +1,6 @@
+add_subdirectory(coro)
+add_subdirectory(lock)
+add_subdirectory(uring)
+
+add_library(tinyCoro STATIC ${ALL_OBJECT_FILES})
+target_link_libraries(tinyCoro)

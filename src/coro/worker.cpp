@@ -40,6 +40,7 @@ namespace coro
   {
     rbuf_[rcur_.tail()] = handle;
     rcur_.push();
+    urpxy_.write_eventfd(SETTASKNUM);
   }
 
   void Worker::exec_one_task()
@@ -74,15 +75,26 @@ namespace coro
       num_task_running_ += num;
     }
 
-    if (peek_uring())
+    auto cnt = urpxy_.wait_eventfd();
+
+    auto uringnum = GETURINGNUM(cnt);
+    auto num = urpxy_.peek_batch_cqe(cqe_.data(), uringnum);
+    assert(num == uringnum);
+    for (int i = 0; i < num; i++)
     {
-      [[__attribute_maybe_unused__]]
-      auto num = urpxy_.handle_for_each_cqe([this](urcptr cqe)
-                                            { this->handle_cqe_entry(cqe); });
+      handle_cqe_entry(cqe_[i]);
+      // TODO: use io_uring_cq_advance
     }
-    else
-    {
-      wait_uring();
-    }
+
+    // if (peek_uring())
+    // {
+    //   [[__attribute_maybe_unused__]]
+    //   auto num = urpxy_.handle_for_each_cqe([this](urcptr cqe)
+    //                                         { this->handle_cqe_entry(cqe); });
+    // }
+    // else
+    // {
+    //   wait_uring();
+    // }
   }
 };
