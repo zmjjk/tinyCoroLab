@@ -1,9 +1,11 @@
 #include "coro/context.hpp"
 #include "coro/thread_info.hpp"
 
+#include <iostream>
+
 namespace coro
 {
-  void Context::start()
+  void Context::start() noexcept
   {
     job_ = make_unique<jthread>([this](stop_token token)
                                 {
@@ -12,33 +14,36 @@ namespace coro
         this->deinit(); });
   }
 
-  void Context::stop()
+  void Context::stop() noexcept
   {
     job_->request_stop();
+    // job_->join();
   }
 
-  void Context::init()
+  void Context::init() noexcept
   {
+    id_ = global_info.context_num++;
     thread_info.context = this;
     worker_.init();
   }
 
-  void Context::deinit()
+  void Context::deinit() noexcept
   {
     thread_info.context = nullptr;
     worker_.deinit();
   }
 
-  void Context::run(stop_token token)
+  void Context::run(stop_token token) noexcept
   {
     while (!token.stop_requested())
     {
       process_work();
       poll_submit();
     }
+    process_work();
   }
 
-  void Context::process_work()
+  void Context::process_work() noexcept
   {
     auto num = worker_.num_task_schedule();
     for (int i = 0; i < num; i++)
@@ -47,7 +52,7 @@ namespace coro
     }
   }
 
-  void Context::poll_submit()
+  void Context::poll_submit() noexcept
   {
     worker_.poll_submit();
   }

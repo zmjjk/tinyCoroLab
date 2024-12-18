@@ -49,10 +49,14 @@ namespace coro
   class FinalAwaiter
   {
   public:
-    inline constexpr bool await_ready() noexcept { return false; }
+    inline constexpr bool await_ready() noexcept
+    {
+      return false;
+    }
     coroutine_handle<> await_suspend(coroutine_handle<Promise<T>> handle) noexcept
     {
-      return handle.promise().pare_coro_;
+      coroutine_handle<> pare = handle.promise().pare_coro_;
+      return pare ? pare : noop_coroutine();
     }
     inline constexpr void await_resume() const noexcept {}
   };
@@ -106,7 +110,7 @@ namespace coro
     }
 
   private:
-    coroutine_handle<> pare_coro_;
+    coroutine_handle<> pare_coro_{nullptr};
     [[__attribute_maybe_unused__]] exception_ptr exception_{nullptr};
   };
 
@@ -139,28 +143,6 @@ namespace coro
     optional<T> value_{nullopt};
   };
 
-  template <>
-  class Promise<void> final : public PromiseBase<void>
-  {
-  public:
-    friend FinalAwaiter<void>;
-    friend Task<void>;
-
-  public:
-    Task<void> get_return_object() noexcept
-    {
-      return Task<void>{
-          std::coroutine_handle<Promise>::from_promise(*this)};
-    }
-
-    inline constexpr void return_void() noexcept {}
-
-    void get_result() noexcept
-    {
-      // TODO: add check
-    }
-  };
-
   template <typename T = void>
   class Task
   {
@@ -183,7 +165,7 @@ namespace coro
     {
       if (this == addressof(other))
       {
-        return;
+        return this;
       }
 
       if (handle_)
@@ -192,11 +174,12 @@ namespace coro
         handle_ = other.handle_;
         other.handle_ = nullptr;
       }
+      return this;
     }
 
     ~Task() noexcept
     {
-      if (handle_)
+      if (handle_.done())
       {
         handle_.destroy();
       }
@@ -209,12 +192,12 @@ namespace coro
 
     inline bool is_ready() const noexcept
     {
-      !handle || handle.done();
+      return !handle_ || handle_.done();
     }
 
     auto operator co_await() const & noexcept
     {
-      class Awaiter : public AwaiterBase
+      class Awaiter : public AwaiterBase<T>
       {
       public:
         auto await_resume() noexcept
@@ -227,7 +210,7 @@ namespace coro
 
     auto operator co_await() const && noexcept
     {
-      class Awaiter : public AwaiterBase
+      class Awaiter : public AwaiterBase<T>
       {
       public:
         auto await_resume() noexcept
@@ -240,6 +223,28 @@ namespace coro
 
   private:
     coroutine_handle<promise_type> handle_;
+  };
+
+  template <>
+  class Promise<void> final : public PromiseBase<void>
+  {
+  public:
+    friend FinalAwaiter<void>;
+    // friend Task<void>;
+
+  public:
+    Task<void> get_return_object() noexcept
+    {
+      return Task<void>{
+          coroutine_handle<Promise>::from_promise(*this)};
+    }
+
+    inline constexpr void return_void() noexcept {}
+
+    void get_result() noexcept
+    {
+      // TODO: add check
+    }
   };
 
 };

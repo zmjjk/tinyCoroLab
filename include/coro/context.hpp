@@ -2,13 +2,15 @@
 
 #include <memory>
 #include <thread>
+#include <iostream>
 
-#include "config/config.hpp"
+#include "config.hpp"
 #include "coro/worker.hpp"
 #include "coro/task.hpp"
 
 namespace coro
 {
+  using config::ctx_id;
   using std::jthread;
   using std::make_unique;
   using std::stop_token;
@@ -29,20 +31,25 @@ namespace coro
     void stop() noexcept;
 
     template <typename T>
-    void submit_task(Task<T> &&task)
+    void submit_task(Task<T> &&task) noexcept
     {
       submit_task(task);
     }
 
     template <typename T>
-    void submit_task(Task<T> &task)
+    void submit_task(Task<T> &task) noexcept
     {
       worker_.submit_task(task.get_handler());
     }
 
-    void submit_task(coroutine_handle<> handle)
+    void submit_task(coroutine_handle<> handle) noexcept
     {
       worker_.submit_task(handle);
+    }
+
+    inline ctx_id get_ctx_id() noexcept
+    {
+      return id_;
     }
 
   private:
@@ -59,6 +66,7 @@ namespace coro
   private:
     alignas(config::kCacheLineSize) Worker worker_;
     unique_ptr<jthread> job_;
+    ctx_id id_;
   };
 
   Context *local_thread_context() noexcept;

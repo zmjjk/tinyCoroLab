@@ -4,7 +4,7 @@
 #include "spdlog/spdlog.h"
 #include "spdlog/sinks/basic_file_sink.h"
 
-#include "config/config.hpp"
+#include "config.hpp"
 
 namespace coro::log
 {
@@ -29,7 +29,7 @@ namespace coro::log
     Logger &operator=(Logger &&) = delete;
 
   private:
-    Logger()
+    Logger() noexcept
     {
       logger_ = spdlog::basic_logger_mt("corolog", config::kLogFileName);
       logger_->set_pattern("[%n][%Y-%m-%d %H:%M:%S.%e] [%l] [%t]  %v");
@@ -37,7 +37,7 @@ namespace coro::log
       spdlog::flush_every(std::chrono::seconds(5));
     }
 
-    ~Logger()
+    ~Logger() noexcept
     {
       logger_->flush_on(CONFIG_LOG_LEVEL(LOG_LEVEL));
     }

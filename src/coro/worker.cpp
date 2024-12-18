@@ -1,33 +1,30 @@
 #include "coro/worker.hpp"
 
+#include <iostream>
+
 namespace coro
 {
-  void Worker::init()
+  void Worker::init() noexcept
   {
     urpxy_.init(config::kEntryLength);
   }
 
-  void Worker::deinit()
+  void Worker::deinit() noexcept
   {
     urpxy_.deinit();
   }
 
-  bool Worker::has_task_ready()
+  bool Worker::has_task_ready() noexcept
   {
     return !rcur_.isEmpty();
   }
 
-  ursptr Worker::get_free_urs()
+  ursptr Worker::get_free_urs() noexcept
   {
     return urpxy_.get_free_sqe();
   }
 
-  size_t Worker::num_task_schedule()
-  {
-    return rcur_.size();
-  }
-
-  coroutine_handle<> Worker::schedule()
+  coroutine_handle<> Worker::schedule() noexcept
   {
     assert(!rcur_.isEmpty());
     auto coro = rbuf_[rcur_.head()];
@@ -36,36 +33,36 @@ namespace coro
     return coro;
   }
 
-  void Worker::submit_task(coroutine_handle<> handle)
+  void Worker::submit_task(coroutine_handle<> handle) noexcept
   {
     rbuf_[rcur_.tail()] = handle;
     rcur_.push();
     urpxy_.write_eventfd(SETTASKNUM);
   }
 
-  void Worker::exec_one_task()
+  void Worker::exec_one_task() noexcept
   {
     auto coro = schedule();
     coro.resume();
   }
 
-  bool Worker::peek_uring()
+  bool Worker::peek_uring() noexcept
   {
     return urpxy_.peek_uring();
   }
 
-  void Worker::wait_uring(int num = 1)
+  void Worker::wait_uring(int num) noexcept
   {
     urpxy_.wait_uring(num);
   }
 
-  void Worker::handle_cqe_entry(urcptr cqe)
+  void Worker::handle_cqe_entry(urcptr cqe) noexcept
   {
     num_task_running_--;
     // TODO: process
   }
 
-  void Worker::poll_submit()
+  void Worker::poll_submit() noexcept
   {
     if (num_task_wait_submit_ > 0)
     {

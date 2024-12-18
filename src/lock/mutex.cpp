@@ -1,4 +1,5 @@
 #include <cassert>
+#include <iostream>
 
 #include "lock/mutex.hpp"
 #include "coro/context.hpp"
@@ -6,7 +7,7 @@
 // TODO: use memory order
 namespace coro
 {
-  bool Mutex::LockAwaiter::register_lock()
+  bool Mutex::LockAwaiter::register_lock() noexcept
   {
     while (true)
     {
@@ -17,6 +18,8 @@ namespace coro
         if (mtx_.state_.compare_exchange_strong(
                 state, Mutex::locked_no_waiting))
         {
+          std::cout << "context " << local_thread_context()->get_ctx_id()
+                    << " suspend false" << std::endl;
           return false;
         }
       }
@@ -26,30 +29,32 @@ namespace coro
         if (mtx_.state_.compare_exchange_strong(
                 state, reinterpret_cast<uintptr_t>(this)))
         {
+          std::cout << "context " << local_thread_context()->get_ctx_id()
+                    << " suspend true" << std::endl;
           return true;
         }
       }
     }
   }
 
-  void Mutex::LockAwaiter::submit_task()
+  void Mutex::LockAwaiter::submit_task() noexcept
   {
     local_thread_context()->submit_task(wait_handle_);
   }
 
-  Mutex::~Mutex()
+  Mutex::~Mutex() noexcept
   {
     [[__attribute_maybe_unused__]] auto state = state_.load();
     assert(state == nolocked);
   }
 
-  bool Mutex::try_lock()
+  bool Mutex::try_lock() noexcept
   {
     auto target = nolocked;
     return state_.compare_exchange_strong(target, locked_no_waiting);
   }
 
-  void Mutex::unlock()
+  void Mutex::unlock() noexcept
   {
     assert(state_.load() != nolocked);
     LockAwaiter *awaiter{nullptr};
@@ -74,7 +79,7 @@ namespace coro
     }
   }
 
-  uint64_t UringProxy::wait_eventfd()
+  uint64_t UringProxy::wait_eventfd() noexcept
   {
     uint64_t u;
     read(efd_, &u, sizeof(u));

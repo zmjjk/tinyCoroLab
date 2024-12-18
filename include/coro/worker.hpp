@@ -7,7 +7,7 @@
 
 #include "uring/uring.hpp"
 #include "uds/ring_cursor.hpp"
-#include "config/config.hpp"
+#include "config.hpp"
 
 namespace coro
 {
@@ -30,7 +30,7 @@ namespace coro
 
     inline ursptr get_free_urs() noexcept;
 
-    inline size_t num_task_schedule() noexcept;
+    inline size_t num_task_schedule() noexcept { return rcur_.size(); }
 
     coroutine_handle<> schedule() noexcept;
 
@@ -42,9 +42,9 @@ namespace coro
 
     inline void wait_uring(int num = 1) noexcept;
 
-    void handle_cqe_entry(urcptr cqe);
+    void handle_cqe_entry(urcptr cqe) noexcept;
 
-    void poll_submit();
+    void poll_submit() noexcept;
 
   private:
     alignas(config::kCacheLineSize) UringProxy urpxy_;

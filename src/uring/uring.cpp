@@ -3,7 +3,7 @@
 namespace coro
 {
 
-  void UringProxy::init(unsigned int entry_length)
+  void UringProxy::init(unsigned int entry_length) noexcept
   {
     int res = io_uring_queue_init(entry_length, &ring_, 0);
     assert(res == 0);
@@ -15,14 +15,14 @@ namespace coro
     assert(res == 0);
   }
 
-  void UringProxy::deinit()
+  void UringProxy::deinit() noexcept
   {
     io_uring_unregister_eventfd(&ring_);
     close(efd_);
     io_uring_queue_exit(&ring_);
   }
 
-  bool UringProxy::peek_uring()
+  bool UringProxy::peek_uring() noexcept
   {
     urcptr cqe{nullptr};
     int ret = io_uring_peek_cqe(&ring_, &cqe);
@@ -30,7 +30,7 @@ namespace coro
     return cqe != nullptr;
   }
 
-  void UringProxy::wait_uring(int num)
+  void UringProxy::wait_uring(int num) noexcept
   {
     [[__attribute_maybe_unused__]] urcptr cqe;
     int ret;
@@ -45,22 +45,22 @@ namespace coro
     assert(ret == 0);
   }
 
-  void UringProxy::seen_cqe_entry(urcptr cqe)
+  void UringProxy::seen_cqe_entry(urcptr cqe) noexcept
   {
     io_uring_cqe_seen(&ring_, cqe);
   }
 
-  ursptr UringProxy::get_free_sqe()
+  ursptr UringProxy::get_free_sqe() noexcept
   {
     return io_uring_get_sqe(&ring_);
   }
 
-  int UringProxy::submit()
+  int UringProxy::submit() noexcept
   {
     return io_uring_submit(&ring_);
   }
 
-  size_t UringProxy::handle_for_each_cqe(urchandler f)
+  size_t UringProxy::handle_for_each_cqe(urchandler f) noexcept
   {
     urcptr cqe;
     unsigned head;
@@ -74,12 +74,12 @@ namespace coro
     return i;
   }
 
-  int UringProxy::peek_batch_cqe(urcptr *cqes, unsigned int num)
+  int UringProxy::peek_batch_cqe(urcptr *cqes, unsigned int num) noexcept
   {
     return io_uring_peek_batch_cqe(&ring_, cqes, num);
   }
 
-  void UringProxy::write_eventfd(uint64_t num)
+  void UringProxy::write_eventfd(uint64_t num) noexcept
   {
     write(efd_, &num, sizeof(num));
   }

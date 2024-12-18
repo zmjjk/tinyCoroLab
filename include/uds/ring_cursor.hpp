@@ -26,8 +26,8 @@ namespace coro::ds
   class RingCursor
   {
   public:
-    RingBuf() noexcept {}
-    ~RingBuf() noexcept {}
+    RingCursor() noexcept {}
+    ~RingCursor() noexcept {}
 
   public:
     inline T head() const noexcept
@@ -99,7 +99,7 @@ namespace coro::ds
 
     T head_{0};
     T tail_{0};
-    mutex mtx_;
+    mutable mutex mtx_;
   };
 
 };

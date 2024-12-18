@@ -2,6 +2,7 @@
 
 #include <atomic>
 #include <coroutine>
+#include <iostream>
 
 #include "lock/lock_guard.hpp"
 
@@ -24,9 +25,12 @@ namespace coro
     public:
       explicit LockAwaiter(Mutex &mtx) noexcept : mtx_(mtx) {}
 
-      constexpr bool await_ready() noexcept { return false; }
+      constexpr bool await_ready() noexcept
+      {
+        return false;
+      }
 
-      bool await_suspend(coroutine_handle<> handle)
+      bool await_suspend(coroutine_handle<> handle) noexcept
       {
         wait_handle_ = handle;
         return register_lock();

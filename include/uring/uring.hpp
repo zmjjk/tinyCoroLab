@@ -4,7 +4,7 @@
 #include <functional>
 #include <liburing.h>
 #include <sys/eventfd.h>
-#include "config/config.hpp"
+#include "config.hpp"
 
 namespace coro
 {
@@ -15,6 +15,7 @@ namespace coro
   using urcptr = io_uring_cqe *;
   using urchandler = std::function<void(urcptr)>;
 
+  // FIXME: why inline funciton cause undefined errro?
   class UringProxy
   {
   public:
@@ -30,19 +31,19 @@ namespace coro
 
     inline ursptr get_free_sqe() noexcept;
 
-    inline int submit() noexcept;
+    int submit() noexcept;
 
     size_t handle_for_each_cqe(urchandler f) noexcept;
 
     uint64_t wait_eventfd() noexcept;
 
-    inline int peek_batch_cqe(urcptr *cqes, unsigned int num) noexcept;
+    int peek_batch_cqe(urcptr *cqes, unsigned int num) noexcept;
 
-    inline void write_eventfd(uint64_t num) noexcept;
+    void write_eventfd(uint64_t num) noexcept;
 
   private:
-    [[__attribute_maybe_unused__]] int efd_;
-    [[__attribute_maybe_unused__]] io_uring_params para_;
+    int efd_;
+    [[__maybe_unused__]] io_uring_params para_;
     alignas(config::kCacheLineSize) io_uring ring_;
   };
 };
