@@ -15,6 +15,7 @@ namespace coro::config
   // #define CRITICAL 5
   // #define OFF 6
 
+// #define LOGTOFILE
 #define LOG_LEVEL info
 
   constexpr const char *kLogFileName = "logs/coro.log";

@@ -1,4 +1,5 @@
 #include <iostream>
+#include <chrono>
 
 #include "coro/context.hpp"
 #include "lock/mutex.hpp"
@@ -6,37 +7,45 @@
 
 using namespace coro;
 
+#define CONTEXTNUM 10
+
 Mutex mtx;
 uint64_t data = 0;
 
 Task<> run()
 {
+  auto cid = thread_info.context->get_ctx_id();
   auto lock = co_await mtx.lock_guard();
   for (int i = 0; i < 10000; i++)
   {
     data++;
   }
-  std::cout << "task finish, run: " << data << std::endl;
+  std::this_thread::sleep_for(std::chrono::seconds(1));
+  log::info("context {} task finish run, data: {}",
+            cid, data);
+  co_return;
 }
 
 int main(int argc, char const *argv[])
 {
   /* code */
-  log::info("logtest: {}", 123);
   Context ctx[10];
-  for (int i = 0; i < 3; i++)
+  for (int i = 0; i < CONTEXTNUM; i++)
   {
     ctx[i].submit_task(run());
-    std::cout << "context " << i << " submit task" << std::endl;
+    log::info("context {} submit task", i);
   }
 
-  for (int i = 0; i < 3; i++)
+  for (int i = 0; i < CONTEXTNUM; i++)
   {
     ctx[i].start();
-    std::cout << "context " << i << " start task" << std::endl;
+    log::info("context {} start task", i);
   }
 
-  ctx[0].stop();
+  for (int i = 0; i < CONTEXTNUM; i++)
+  {
+    ctx[i].stop();
+  }
 
   return 0;
 }

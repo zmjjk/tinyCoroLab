@@ -31,7 +31,8 @@ namespace coro::log
   private:
     Logger() noexcept
     {
-      logger_ = spdlog::basic_logger_mt("corolog", config::kLogFileName);
+      logger_ = spdlog::create<spdlog::sinks::basic_file_sink_mt>("corolog",
+                                                                  config::kLogFileName, false);
       logger_->set_pattern("[%n][%Y-%m-%d %H:%M:%S.%e] [%l] [%t]  %v");
       logger_->set_level(CONFIG_LOG_LEVEL(LOG_LEVEL));
       spdlog::flush_every(std::chrono::seconds(5));
@@ -52,7 +53,11 @@ namespace coro::log
   {
     if constexpr ((CONFIG_LOG_LEVEL(LOG_LEVEL)) <= spdlog::level::trace)
     {
-      Logger::get_logger()->trace(fmt, args...);
+#ifdef LOGTOFILE
+      Logger::get_logger()->trace(spdlog::fmt_runtime_string<char>{fmt}, args...);
+#else
+      spdlog::trace(spdlog::fmt_runtime_string<char>{fmt}, args...);
+#endif
     }
   }
 
@@ -61,7 +66,11 @@ namespace coro::log
   {
     if constexpr ((CONFIG_LOG_LEVEL(LOG_LEVEL)) <= spdlog::level::debug)
     {
-      Logger::get_logger()->debug(fmt, args...);
+#ifdef LOGTOFILE
+      Logger::get_logger()->debug(spdlog::fmt_runtime_string<char>{fmt}, args...);
+#else
+      spdlog::debug(spdlog::fmt_runtime_string<char>{fmt}, args...);
+#endif
     }
   }
 
@@ -70,7 +79,11 @@ namespace coro::log
   {
     if constexpr ((CONFIG_LOG_LEVEL(LOG_LEVEL)) <= spdlog::level::info)
     {
-      Logger::get_logger()->info(fmt, args...);
+#ifdef LOGTOFILE
+      Logger::get_logger()->info(spdlog::fmt_runtime_string<char>{fmt}, args...);
+#else
+      spdlog::info(spdlog::fmt_runtime_string<char>{fmt}, args...);
+#endif
     }
   }
 
@@ -79,7 +92,11 @@ namespace coro::log
   {
     if constexpr ((CONFIG_LOG_LEVEL(LOG_LEVEL)) <= spdlog::level::warn)
     {
-      Logger::get_logger()->warn(fmt, args...);
+#ifdef LOGTOFILE
+      Logger::get_logger()->warn(spdlog::fmt_runtime_string<char>{fmt}, args...);
+#else
+      spdlog::warn(spdlog::fmt_runtime_string<char>{fmt}, args...);
+#endif
     }
   }
 
@@ -88,7 +105,11 @@ namespace coro::log
   {
     if constexpr ((CONFIG_LOG_LEVEL(LOG_LEVEL)) <= spdlog::level::err)
     {
-      Logger::get_logger()->error(fmt, args...);
+#ifdef LOGTOFILE
+      Logger::get_logger()->error(spdlog::fmt_runtime_string<char>{fmt}, args...);
+#else
+      spdlog::error(spdlog::fmt_runtime_string<char>{fmt}, args...);
+#endif
     }
   }
 
@@ -97,7 +118,11 @@ namespace coro::log
   {
     if constexpr ((CONFIG_LOG_LEVEL(LOG_LEVEL)) <= spdlog::level::critical)
     {
-      Logger::get_logger()->critical(fmt, args...);
+#ifdef LOGTOFILE
+      Logger::get_logger()->critical(spdlog::fmt_runtime_string<char>{fmt}, args...);
+#else
+      spdlog::critical(spdlog::fmt_runtime_string<char>{fmt}, args...);
+#endif
     }
   }
 

@@ -46,6 +46,8 @@ namespace coro
 
     void poll_submit() noexcept;
 
+    void wake_up() noexcept;
+
   private:
     alignas(config::kCacheLineSize) UringProxy urpxy_;
     std::queue<std::coroutine_handle<>> task_que_;

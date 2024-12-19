@@ -5,6 +5,7 @@
 #include <iostream>
 
 #include "lock/lock_guard.hpp"
+#include "coro/thread_info.hpp"
 
 namespace coro
 {
@@ -14,6 +15,7 @@ namespace coro
   using std::memory_order_relaxed;
   using std::memory_order_release;
   using std::uintptr_t;
+  class Context;
 
   class Mutex
   {
@@ -23,7 +25,7 @@ namespace coro
       friend Mutex;
 
     public:
-      explicit LockAwaiter(Mutex &mtx) noexcept : mtx_(mtx) {}
+      explicit LockAwaiter(Mutex &mtx, Context &ctx) noexcept : mtx_(mtx), ctx_(ctx) {}
 
       constexpr bool await_ready() noexcept
       {
@@ -50,6 +52,7 @@ namespace coro
 
     protected:
       Mutex &mtx_;
+      Context &ctx_;
       coroutine_handle<> wait_handle_;
       LockAwaiter *next_{nullptr};
     };
@@ -59,7 +62,7 @@ namespace coro
     public:
       using LockGuardType = LockGuard<Mutex>;
 
-      LockGuardAwaiter(Mutex &mtx) noexcept : LockAwaiter(mtx) {}
+      LockGuardAwaiter(Mutex &mtx, Context &ctx) noexcept : LockAwaiter(mtx, ctx) {}
 
     public:
       LockGuardType await_resume() noexcept
@@ -74,13 +77,13 @@ namespace coro
 
     bool try_lock() noexcept;
 
-    LockAwaiter lock() noexcept { return LockAwaiter(*this); }
+    LockAwaiter lock() noexcept { return LockAwaiter(*this, *(thread_info.context)); }
 
     void unlock() noexcept;
 
     LockGuardAwaiter lock_guard() noexcept
     {
-      return LockGuardAwaiter(*this);
+      return LockGuardAwaiter(*this, *(thread_info.context));
     }
 
   private:

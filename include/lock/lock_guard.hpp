@@ -19,7 +19,6 @@ namespace coro
     explicit LockGuard(T &mtx) noexcept : mtx_(mtx) {}
     ~LockGuard() noexcept
     {
-      std::cout << "unlock" << std::endl;
       mtx_.unlock();
     }
 

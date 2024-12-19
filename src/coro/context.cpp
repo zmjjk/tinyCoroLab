@@ -1,7 +1,7 @@
 #include "coro/context.hpp"
 #include "coro/thread_info.hpp"
 
-#include <iostream>
+#include "log/log.hpp"
 
 namespace coro
 {
@@ -17,7 +17,8 @@ namespace coro
   void Context::stop() noexcept
   {
     job_->request_stop();
-    // job_->join();
+    worker_.wake_up();
+    job_->join();
   }
 
   void Context::init() noexcept
@@ -35,10 +36,14 @@ namespace coro
 
   void Context::run(stop_token token) noexcept
   {
-    while (!token.stop_requested())
+    while (true)
     {
       process_work();
       poll_submit();
+      if (token.stop_requested() && empty_wait_task())
+      {
+        break;
+      }
     }
     process_work();
   }

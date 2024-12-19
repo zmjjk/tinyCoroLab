@@ -3,6 +3,7 @@
 
 #include "lock/mutex.hpp"
 #include "coro/context.hpp"
+#include "log/log.hpp"
 
 // TODO: use memory order
 namespace coro
@@ -18,8 +19,6 @@ namespace coro
         if (mtx_.state_.compare_exchange_strong(
                 state, Mutex::locked_no_waiting))
         {
-          std::cout << "context " << local_thread_context()->get_ctx_id()
-                    << " suspend false" << std::endl;
           return false;
         }
       }
@@ -29,8 +28,7 @@ namespace coro
         if (mtx_.state_.compare_exchange_strong(
                 state, reinterpret_cast<uintptr_t>(this)))
         {
-          std::cout << "context " << local_thread_context()->get_ctx_id()
-                    << " suspend true" << std::endl;
+          ctx_.register_wait_task();
           return true;
         }
       }
@@ -39,7 +37,8 @@ namespace coro
 
   void Mutex::LockAwaiter::submit_task() noexcept
   {
-    local_thread_context()->submit_task(wait_handle_);
+    ctx_.submit_task(wait_handle_);
+    ctx_.unregister_wait_task();
   }
 
   Mutex::~Mutex() noexcept

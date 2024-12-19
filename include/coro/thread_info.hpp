@@ -3,6 +3,7 @@
 
 namespace coro
 {
+  using std::atomic;
   class Context;
   struct ThreadInfo
   {

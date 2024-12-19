@@ -2,7 +2,7 @@
 
 #include <memory>
 #include <thread>
-#include <iostream>
+#include <atomic>
 
 #include "config.hpp"
 #include "coro/worker.hpp"
@@ -11,8 +11,10 @@
 namespace coro
 {
   using config::ctx_id;
+  using std::atomic;
   using std::jthread;
   using std::make_unique;
+  using std::memory_order_relaxed;
   using std::stop_token;
   using std::unique_ptr;
 
@@ -52,6 +54,21 @@ namespace coro
       return id_;
     }
 
+    inline void register_wait_task() noexcept
+    {
+      wait_task_++;
+    }
+
+    inline void unregister_wait_task() noexcept
+    {
+      wait_task_--;
+    }
+
+    inline bool empty_wait_task() noexcept
+    {
+      return wait_task_.load(memory_order_relaxed) == 0;
+    }
+
   private:
     void init() noexcept;
 
@@ -67,6 +84,7 @@ namespace coro
     alignas(config::kCacheLineSize) Worker worker_;
     unique_ptr<jthread> job_;
     ctx_id id_;
+    atomic<size_t> wait_task_{0};
   };
 
   Context *local_thread_context() noexcept;

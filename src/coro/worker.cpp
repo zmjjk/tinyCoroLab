@@ -94,4 +94,9 @@ namespace coro
     //   wait_uring();
     // }
   }
+
+  void Worker::wake_up() noexcept
+  {
+    urpxy_.write_eventfd(SETTASKNUM);
+  }
 };
