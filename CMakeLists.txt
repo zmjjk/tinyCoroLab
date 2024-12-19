@@ -19,7 +19,11 @@ set(SRC_INCLUDE_DIR
     "${PROJECT_SOURCE_DIR}/include"
     "${PROJECT_SOURCE_DIR}/config")
 set(THIRD_PARTY_INCLUDE_DIR
-    "${PROJECT_SOURCE_DIR}/third_party/spdlog/include")
+    "${PROJECT_SOURCE_DIR}/third_party/spdlog/include"
+    "${PROJECT_SOURCE_DIR}/third_party/googletest/googletest/include")
+
+option(ENABLE_UNIT_TESTS "Enable unit tests" ON)
+message(STATUS "Enable testing: ${ENABLE_UNIT_TESTS}")
 
 include_directories(${SRC_INCLUDE_DIR} ${THIRD_PARTY_INCLUDE_DIR})
 
@@ -27,4 +31,15 @@ add_subdirectory(third_party)
 
 add_subdirectory(src)
 
+add_subdirectory(tests)
+
 add_subdirectory(examples)
+
+if(ENABLE_UNIT_TESTS)
+  enable_testing()
+
+  add_test(
+    NAME base_test
+    COMMAND $<TARGET_FILE:base_test>
+    )
+endif()

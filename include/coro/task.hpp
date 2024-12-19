@@ -111,7 +111,7 @@ namespace coro
 
   private:
     coroutine_handle<> pare_coro_{nullptr};
-    [[__attribute_maybe_unused__]] exception_ptr exception_{nullptr};
+    [[__maybe_unused__]] exception_ptr exception_{nullptr};
   };
 
   template <typename T>
