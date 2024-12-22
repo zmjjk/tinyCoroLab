@@ -1,6 +1,6 @@
 #include "coro/worker.hpp"
-
-#include <iostream>
+#include "net/io_info.hpp"
+#include "log/log.hpp"
 
 namespace coro
 {
@@ -19,11 +19,6 @@ namespace coro
     return !rcur_.isEmpty();
   }
 
-  ursptr Worker::get_free_urs() noexcept
-  {
-    return urpxy_.get_free_sqe();
-  }
-
   coroutine_handle<> Worker::schedule() noexcept
   {
     assert(!rcur_.isEmpty());
@@ -37,7 +32,7 @@ namespace coro
   {
     rbuf_[rcur_.tail()] = handle;
     rcur_.push();
-    urpxy_.write_eventfd(SETTASKNUM);
+    wake_up();
   }
 
   void Worker::exec_one_task() noexcept
@@ -59,29 +54,51 @@ namespace coro
   void Worker::handle_cqe_entry(urcptr cqe) noexcept
   {
     num_task_running_--;
-    // TODO: process
+    auto data = reinterpret_cast<IoInfo *>(io_uring_cqe_get_data(cqe));
+    if (data == nullptr)
+    {
+      log::info("error when fetch data, res: {}, data: {}", cqe->res, cqe->user_data);
+    }
+    else
+    {
+      log::info("normal");
+    }
+
+    switch (data->type)
+    {
+    case Tasktype::Accept:
+      data->result = cqe->res;
+      log::info("receive accept task");
+      submit_task(data->handle);
+      break;
+    default:
+      break;
+    }
   }
 
   void Worker::poll_submit() noexcept
   {
-    if (num_task_wait_submit_ > 0)
+    int num_task_wait = num_task_wait_submit_.load(memory_order_relaxed);
+    if (num_task_wait > 0)
     {
       int num = urpxy_.submit();
-      num_task_wait_submit_ -= num;
-      assert(num_task_wait_submit_ == 0);
-      num_task_running_ += num;
+      num_task_wait -= num;
+      assert(num_task_wait == 0);
+      num_task_wait_submit_.fetch_sub(num, memory_order_relaxed);
     }
 
     auto cnt = urpxy_.wait_eventfd();
 
     auto uringnum = GETURINGNUM(cnt);
+
     auto num = urpxy_.peek_batch_cqe(cqe_.data(), uringnum);
+
     assert(num == uringnum);
     for (int i = 0; i < num; i++)
     {
       handle_cqe_entry(cqe_[i]);
-      // TODO: use io_uring_cq_advance
     }
+    urpxy_.cq_advance(num);
 
     // if (peek_uring())
     // {

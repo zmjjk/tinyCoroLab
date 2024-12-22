@@ -7,7 +7,7 @@
 
 using namespace coro;
 
-#define CONTEXTNUM 2
+#define CONTEXTNUM 10
 
 Mutex mtx;
 uint64_t data = 0;

@@ -29,7 +29,7 @@ namespace coro
 
     inline void seen_cqe_entry(urcptr cqe) noexcept;
 
-    inline ursptr get_free_sqe() noexcept;
+    ursptr get_free_sqe() noexcept;
 
     int submit() noexcept;
 
@@ -40,6 +40,11 @@ namespace coro
     int peek_batch_cqe(urcptr *cqes, unsigned int num) noexcept;
 
     void write_eventfd(uint64_t num) noexcept;
+
+    inline void cq_advance(unsigned int num) noexcept
+    {
+      io_uring_cq_advance(&ring_, num);
+    }
 
   private:
     int efd_;

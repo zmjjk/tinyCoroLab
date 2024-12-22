@@ -32,6 +32,8 @@ namespace coro
 
     void stop() noexcept;
 
+    void join() noexcept;
+
     template <typename T>
     void submit_task(Task<T> &&task) noexcept
     {
@@ -69,6 +71,11 @@ namespace coro
       return wait_task_.load(memory_order_relaxed) == 0;
     }
 
+    inline Worker &get_worker() noexcept
+    {
+      return worker_;
+    }
+
   private:
     void init() noexcept;
 
@@ -88,4 +95,15 @@ namespace coro
   };
 
   Context *local_thread_context() noexcept;
+
+  template <typename T>
+  void submit_task(Task<T> &task) noexcept
+  {
+    local_thread_context()->submit_task(task.get_handler());
+  }
+
+  inline void submit_task(coroutine_handle<> handle) noexcept
+  {
+    local_thread_context()->submit_task(handle);
+  }
 };

@@ -2,16 +2,26 @@
 
 #include <bit>
 #include <concepts>
-#include <mutex>
 
-#include "utils/atom.hpp"
+#ifdef USEMUTEX
+#include <mutex>
+#else
+#include <atomic>
+#endif
+
+#include "config.hpp"
 
 namespace coro::ds
 {
+#ifdef USEMUTEX
   using std::lock_guard;
   using std::mutex;
+#else
+  using std::atomic;
+#endif
+  using std::memory_order_relaxed;
 
-  // TODO: remove mutex
+  // FIXME: please test the correctness
   /**
    * @brief lock free ring cursor
    *
@@ -32,74 +42,82 @@ namespace coro::ds
   public:
     inline T head() const noexcept
     {
+#ifdef USEMUTEX
       lock_guard<mutex> lk(mtx_);
-      // if constexpr (thread_safe)
-      // {
-      //   return (cast_atomic(head_).load()) & kMask;
-      // }
-      // else
-      // {
-      //   return head_ & kMask;
-      // }
       return head_ & kMask;
+#else
+      return head_.load(memory_order_relaxed) & kMask;
+#endif
     }
 
     inline T tail() const noexcept
     {
+#ifdef USEMUTEX
       lock_guard<mutex> lk(mtx_);
-      // if constexpr (thread_safe)
-      // {
-      //   return (cast_atomic(tail_).load()) & kMask;
-      // }
-      // else
-      // {
-      //   return tail_ & kMask;
-      // }
       return tail_ & kMask;
-    }
-
-    inline T isEmpty() const noexcept
-    {
-      lock_guard<mutex> lk(mtx_);
-      return head_ == tail_;
+#else
+      return tail_.load(memory_order_relaxed) & kMask;
+#endif
     }
 
     inline T size() const noexcept
     {
+#ifdef USEMUTEX
       lock_guard<mutex> lk(mtx_);
       return tail_ - head_;
+#else
+      auto tail = tail_.load(memory_order_relaxed);
+      auto head = head_.load(memory_order_relaxed);
+      return tail_ - head_;
+#endif
     }
 
-    inline T leftSize() const noexcept
+    inline T isEmpty() const noexcept
     {
-      lock_guard<mutex> lk(mtx_);
-      return capacity - (tail_ - head_);
+      return size() == 0;
     }
 
-    inline T hasSpace() const noexcept
-    {
-      lock_guard<mutex> lk(mtx_);
-      return bool(leftSize());
-    }
+    // inline T leftSize() const noexcept
+    // {
+    //   lock_guard<mutex> lk(mtx_);
+    //   return capacity - (tail_ - head_);
+    // }
+
+    // inline T hasSpace() const noexcept
+    // {
+    //   lock_guard<mutex> lk(mtx_);
+    //   return bool(leftSize());
+    // }
 
     inline void push() noexcept
     {
-      lock_guard<mutex> lk(mtx_);
-      tail_ += 1;
+#ifdef USEMUTEX
+      tail_++;
+#else
+      tail_.fetch_add(1, memory_order_relaxed);
+#endif
     }
 
     inline void pop() noexcept
     {
-      lock_guard<mutex> lk(mtx_);
-      head_ += 1;
+#ifdef USEMUTEX
+      head_++;
+#else
+      head_.fetch_add(1, memory_order_relaxed);
+#endif
     }
 
   private:
     static constexpr T kMask = capacity - 1;
 
+#ifdef USEMUTEX
+    mutable mutex mtx_;
     T head_{0};
     T tail_{0};
-    mutable mutex mtx_;
+#else
+    atomic<T> head_{0};
+    atomic<T> tail_{0};
+#endif
   };
 
 };

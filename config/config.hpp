@@ -17,6 +17,7 @@ namespace coro::config
 
 // #define LOGTOFILE
 #define LOG_LEVEL info
+#define USEMUTEX
 
   constexpr const char *kLogFileName = "logs/coro.log";
   constexpr int64_t kFlushDura = 3;
@@ -30,4 +31,8 @@ namespace coro::config
   // ========================= context configuration ==========================
   using ctx_id = uint32_t;
   constexpr size_t kQueCap = 1024;
+
+  // =========================== net configuration ============================
+  constexpr int kDefaultPort = 8000;
+  constexpr int kBacklog = 5;
 };

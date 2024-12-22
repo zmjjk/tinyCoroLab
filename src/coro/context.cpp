@@ -21,6 +21,11 @@ namespace coro
     job_->join();
   }
 
+  void Context::join() noexcept
+  {
+    job_->join();
+  }
+
   void Context::init() noexcept
   {
     id_ = global_info.context_num++;
