@@ -26,8 +26,8 @@ namespace coro::net
     }
   }
 
-  TcpAcceptAwaiter TcpListener::accept() noexcept
+  TcpAcceptAwaiter TcpListener::accept(int flags) noexcept
   {
-    return TcpAcceptAwaiter(listenfd_);
+    return TcpAcceptAwaiter(listenfd_, flags);
   }
 };

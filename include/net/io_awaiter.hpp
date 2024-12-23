@@ -20,9 +20,7 @@ namespace coro::net
   public:
     IoAwaiter() noexcept : sqe_(local_thread_context()->get_worker().get_free_urs())
     {
-      std::cout << "ioawaiter construct begin " << (sqe_ == nullptr) << std::endl;
-      io_uring_sqe_set_data(sqe_, &info_);
-      std::cout << "ioawaiter construct finish" << std::endl;
+      // io_uring_sqe_set_data(sqe_, &info_);
     }
 
     constexpr bool await_ready() noexcept { return false; }
@@ -42,23 +40,44 @@ namespace coro::net
   class TcpAcceptAwaiter : public IoAwaiter
   {
   public:
-    TcpAcceptAwaiter(int listenfd)
+    TcpAcceptAwaiter(int listenfd, int flags) noexcept
     {
       info_.type = Tasktype::Accept;
 
       // FIXME: this isn't atomic, maybe cause bug?
-      io_uring_prep_accept(sqe_, listenfd, nullptr, &len, 0);
+      io_uring_prep_accept(sqe_, listenfd, nullptr, &len, flags);
+      // FIXME: old uring version need set data later
+      io_uring_sqe_set_data(sqe_, &info_);
       local_thread_context()->get_worker().add_wait_task();
-    }
-
-    // FIXME: remove
-    ~TcpAcceptAwaiter() noexcept
-    {
-      std::cout << "ioawaiter destruct" << std::endl;
     }
 
   private:
     inline static socklen_t len = sizeof(sockaddr_in);
   };
 
+  class TcpReadAwaiter : public IoAwaiter
+  {
+  public:
+    TcpReadAwaiter(int sockfd, char *buf, size_t len, int flags) noexcept
+    {
+      info_.type = Tasktype::TcpRead;
+
+      io_uring_prep_recv(sqe_, sockfd, buf, len, flags);
+      io_uring_sqe_set_data(sqe_, &info_);
+      local_thread_context()->get_worker().add_wait_task();
+    }
+  };
+
+  class TcpWriteAwaiter : public IoAwaiter
+  {
+  public:
+    TcpWriteAwaiter(int sockfd, char *buf, size_t len, int flags) noexcept
+    {
+      info_.type = Tasktype::TcpWrite;
+
+      io_uring_prep_send(sqe_, sockfd, buf, len, flags);
+      io_uring_sqe_set_data(sqe_, &info_);
+      local_thread_context()->get_worker().add_wait_task();
+    }
+  };
 };

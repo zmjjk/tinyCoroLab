@@ -102,6 +102,12 @@ namespace coro
     local_thread_context()->submit_task(task.get_handler());
   }
 
+  template <typename T>
+  void submit_task(Task<T> &&task) noexcept
+  {
+    local_thread_context()->submit_task(task.get_handler());
+  }
+
   inline void submit_task(coroutine_handle<> handle) noexcept
   {
     local_thread_context()->submit_task(handle);

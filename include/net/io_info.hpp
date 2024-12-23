@@ -9,6 +9,8 @@ namespace coro
   enum Tasktype
   {
     Accept,
+    TcpRead,
+    TcpWrite,
     None
   };
 
@@ -17,6 +19,7 @@ namespace coro
     coroutine_handle<> handle;
     int32_t result;
     Tasktype type;
+    uintptr_t data;
   };
 
   inline uintptr_t ioinfo_to_ptr(IoInfo *info) noexcept

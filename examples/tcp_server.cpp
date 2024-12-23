@@ -3,6 +3,18 @@
 #include "net/tcp.hpp"
 using namespace coro;
 
+Task<> session(int fd)
+{
+  char buf[10240] = {0};
+  auto client = net::TcpAcceptor(fd);
+  int ret = 0;
+  while ((ret = co_await client.read(buf, 10240)) > 0)
+  {
+    log::info("client {} receive data: {}", fd, buf);
+    ret = co_await client.write(buf, ret);
+  }
+}
+
 Task<> server(int port)
 {
   log::info("server start in {}", port);
@@ -11,6 +23,7 @@ Task<> server(int port)
   while ((client_fd = co_await server.accept()) > 0)
   {
     log::info("server receive new connect");
+    submit_task(session(client_fd));
   }
 }
 

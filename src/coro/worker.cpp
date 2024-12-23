@@ -55,22 +55,23 @@ namespace coro
   {
     num_task_running_--;
     auto data = reinterpret_cast<IoInfo *>(io_uring_cqe_get_data(cqe));
-    if (data == nullptr)
-    {
-      log::info("error when fetch data, res: {}, data: {}", cqe->res, cqe->user_data);
-    }
-    else
-    {
-      log::info("normal");
-    }
 
     switch (data->type)
     {
     case Tasktype::Accept:
       data->result = cqe->res;
-      log::info("receive accept task");
+      log::info("exec accept task");
       submit_task(data->handle);
       break;
+    case Tasktype::TcpRead:
+      data->result = cqe->res;
+      log::info("exec tcp read task");
+      submit_task(data->handle);
+      break;
+    case Tasktype::TcpWrite:
+      data->result = cqe->res;
+      log::info("exec tcp write task");
+      submit_task(data->handle);
     default:
       break;
     }

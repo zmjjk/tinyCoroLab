@@ -16,6 +16,21 @@ namespace coro::net
 {
   class TcpAcceptor
   {
+  public:
+    TcpAcceptor(int sockfd) noexcept : sockfd_(sockfd) {}
+
+    TcpReadAwaiter read(char *buf, size_t len, int flags = 0) noexcept
+    {
+      return TcpReadAwaiter(sockfd_, buf, len, flags);
+    }
+
+    TcpWriteAwaiter write(char *buf, size_t len, int flags = 0) noexcept
+    {
+      return TcpWriteAwaiter(sockfd_, buf, len, flags);
+    }
+
+  private:
+    int sockfd_;
   };
 
   class TcpListener
@@ -23,7 +38,7 @@ namespace coro::net
   public:
     TcpListener(int port = ::coro::config::kDefaultPort) noexcept;
 
-    TcpAcceptAwaiter accept() noexcept;
+    TcpAcceptAwaiter accept(int flags = 0) noexcept;
 
   private:
     int listenfd_;
