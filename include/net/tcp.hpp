@@ -29,6 +29,11 @@ namespace coro::net
       return TcpWriteAwaiter(sockfd_, buf, len, flags);
     }
 
+    TcpCloseAwaiter close() noexcept
+    {
+      return TcpCloseAwaiter(sockfd_);
+    }
+
   private:
     int sockfd_;
   };

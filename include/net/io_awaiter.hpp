@@ -42,7 +42,7 @@ namespace coro::net
   public:
     TcpAcceptAwaiter(int listenfd, int flags) noexcept
     {
-      info_.type = Tasktype::Accept;
+      info_.type = Tasktype::TcpAccept;
 
       // FIXME: this isn't atomic, maybe cause bug?
       io_uring_prep_accept(sqe_, listenfd, nullptr, &len, flags);
@@ -76,6 +76,19 @@ namespace coro::net
       info_.type = Tasktype::TcpWrite;
 
       io_uring_prep_send(sqe_, sockfd, buf, len, flags);
+      io_uring_sqe_set_data(sqe_, &info_);
+      local_thread_context()->get_worker().add_wait_task();
+    }
+  };
+
+  class TcpCloseAwaiter : public IoAwaiter
+  {
+  public:
+    TcpCloseAwaiter(int sockfd) noexcept
+    {
+      info_.type = Tasktype::TcpClose;
+
+      io_uring_prep_close(sqe_, sockfd);
       io_uring_sqe_set_data(sqe_, &info_);
       local_thread_context()->get_worker().add_wait_task();
     }

@@ -4,4 +4,4 @@ add_subdirectory(lock)
 add_subdirectory(net)
 
 add_library(tinyCoro STATIC ${ALL_OBJECT_FILES})
-target_link_libraries(tinyCoro PRIVATE uring)
+target_link_libraries(tinyCoro PRIVATE ${URING_PATH})

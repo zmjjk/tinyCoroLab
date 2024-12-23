@@ -58,9 +58,9 @@ namespace coro
 
     switch (data->type)
     {
-    case Tasktype::Accept:
+    case Tasktype::TcpAccept:
       data->result = cqe->res;
-      log::info("exec accept task");
+      log::info("exec tcp accept task");
       submit_task(data->handle);
       break;
     case Tasktype::TcpRead:
@@ -72,6 +72,12 @@ namespace coro
       data->result = cqe->res;
       log::info("exec tcp write task");
       submit_task(data->handle);
+      break;
+    case Tasktype::TcpClose:
+      data->result = cqe->res;
+      log::info("exec tcp close task");
+      submit_task(data->handle);
+      break;
     default:
       break;
     }

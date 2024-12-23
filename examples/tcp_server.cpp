@@ -13,6 +13,9 @@ Task<> session(int fd)
     log::info("client {} receive data: {}", fd, buf);
     ret = co_await client.write(buf, ret);
   }
+
+  ret = co_await client.close();
+  assert(ret == 0);
 }
 
 Task<> server(int port)

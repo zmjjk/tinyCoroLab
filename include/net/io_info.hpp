@@ -8,9 +8,10 @@ namespace coro
   using std::coroutine_handle;
   enum Tasktype
   {
-    Accept,
+    TcpAccept,
     TcpRead,
     TcpWrite,
+    TcpClose,
     None
   };
 

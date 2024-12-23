@@ -25,6 +25,13 @@ set(THIRD_PARTY_INCLUDE_DIR
 option(ENABLE_UNIT_TESTS "Enable unit tests" ON)
 message(STATUS "Enable testing: ${ENABLE_UNIT_TESTS}")
 
+find_library(URING_PATH NAMES uring)
+if (URING_PATH)
+    message(STATUS "Found mylibrary at ${URING_PATH}")
+else()
+    message(FATAL_ERROR "Could not find mylibrary")
+endif()
+
 include_directories(${SRC_INCLUDE_DIR} ${THIRD_PARTY_INCLUDE_DIR})
 
 add_subdirectory(third_party)
