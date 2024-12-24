@@ -78,6 +78,23 @@ namespace coro
       log::info("exec tcp close task");
       submit_task(data->handle);
       break;
+    case Tasktype::TcpConnect:
+      if (cqe->res != 0)
+      {
+        data->result = cqe->res;
+      }
+      else
+      {
+        data->result = static_cast<int>(data->data);
+      }
+      log::info("exec tcp connect task");
+      submit_task(data->handle);
+      break;
+    case Tasktype::Stdin:
+      data->result = cqe->res;
+      log::info("exec stdin input task");
+      submit_task(data->handle);
+      break;
     default:
       break;
     }

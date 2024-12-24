@@ -14,10 +14,10 @@
 
 namespace coro::net
 {
-  class TcpAcceptor
+  class TcpConnector
   {
   public:
-    TcpAcceptor(int sockfd) noexcept : sockfd_(sockfd) {}
+    explicit TcpConnector(int sockfd) noexcept : sockfd_(sockfd) {}
 
     TcpReadAwaiter read(char *buf, size_t len, int flags = 0) noexcept
     {
@@ -38,15 +38,30 @@ namespace coro::net
     int sockfd_;
   };
 
-  class TcpListener
+  class TcpServer
   {
   public:
-    TcpListener(int port = ::coro::config::kDefaultPort) noexcept;
+    explicit TcpServer(int port = ::coro::config::kDefaultPort) noexcept
+        : TcpServer(nullptr, port) {}
+    TcpServer(const char *addr, int port) noexcept;
 
     TcpAcceptAwaiter accept(int flags = 0) noexcept;
 
   private:
     int listenfd_;
+    int port_;
+    sockaddr_in servaddr_;
+  };
+
+  class TcpClient
+  {
+  public:
+    TcpClient(const char *addr, int port) noexcept;
+
+    TcpConnectAwaiter connect(int flags = 0) noexcept;
+
+  private:
+    int clientfd_;
     int port_;
     sockaddr_in servaddr_;
   };

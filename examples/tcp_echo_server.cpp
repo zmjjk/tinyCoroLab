@@ -3,25 +3,27 @@
 #include "net/tcp.hpp"
 using namespace coro;
 
+#define BUFFLEN 10240
+
 Task<> session(int fd)
 {
-  char buf[10240] = {0};
-  auto client = net::TcpAcceptor(fd);
+  char buf[BUFFLEN] = {0};
+  auto conn = net::TcpConnector(fd);
   int ret = 0;
-  while ((ret = co_await client.read(buf, 10240)) > 0)
+  while ((ret = co_await conn.read(buf, BUFFLEN)) > 0)
   {
     log::info("client {} receive data: {}", fd, buf);
-    ret = co_await client.write(buf, ret);
+    ret = co_await conn.write(buf, ret);
   }
 
-  ret = co_await client.close();
+  ret = co_await conn.close();
   assert(ret == 0);
 }
 
 Task<> server(int port)
 {
   log::info("server start in {}", port);
-  auto server = net::TcpListener(port);
+  auto server = net::TcpServer(port);
   int client_fd;
   while ((client_fd = co_await server.accept()) > 0)
   {

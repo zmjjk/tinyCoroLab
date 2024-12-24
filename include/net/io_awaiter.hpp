@@ -5,6 +5,7 @@
 #include <netdb.h>
 #include <sys/socket.h>
 #include <iostream>
+#include <unistd.h>
 
 #include "net/io_info.hpp"
 #include "uring/uring.hpp"
@@ -31,6 +32,8 @@ namespace coro::net
     }
 
     int32_t await_resume() noexcept { return info_.result; }
+
+    // inline uintptr_t get_data() noexcept { return info_.data; }
 
   protected:
     IoInfo info_;
@@ -84,11 +87,38 @@ namespace coro::net
   class TcpCloseAwaiter : public IoAwaiter
   {
   public:
-    TcpCloseAwaiter(int sockfd) noexcept
+    explicit TcpCloseAwaiter(int sockfd) noexcept
     {
       info_.type = Tasktype::TcpClose;
 
       io_uring_prep_close(sqe_, sockfd);
+      io_uring_sqe_set_data(sqe_, &info_);
+      local_thread_context()->get_worker().add_wait_task();
+    }
+  };
+
+  class TcpConnectAwaiter : public IoAwaiter
+  {
+  public:
+    TcpConnectAwaiter(int sockfd, const sockaddr *addr, socklen_t addrlen) noexcept
+    {
+      info_.type = Tasktype::TcpConnect;
+      info_.data = DATACAST(sockfd);
+
+      io_uring_prep_connect(sqe_, sockfd, addr, addrlen);
+      io_uring_sqe_set_data(sqe_, &info_);
+      local_thread_context()->get_worker().add_wait_task();
+    }
+  };
+
+  class StdinAwaiter : public IoAwaiter
+  {
+  public:
+    StdinAwaiter(char *buf, size_t len, int flags) noexcept
+    {
+      info_.type = Tasktype::Stdin;
+
+      io_uring_prep_read(sqe_, STDIN_FILENO, buf, len, flags);
       io_uring_sqe_set_data(sqe_, &info_);
       local_thread_context()->get_worker().add_wait_task();
     }

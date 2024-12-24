@@ -5,13 +5,18 @@
 
 namespace coro
 {
+#define PTRCAST(data) reinterpret_cast<uintptr_t>(data)
+#define DATACAST(data) static_cast<uintptr_t>(data)
+
   using std::coroutine_handle;
   enum Tasktype
   {
     TcpAccept,
+    TcpConnect,
     TcpRead,
     TcpWrite,
     TcpClose,
+    Stdin,
     None
   };
 
