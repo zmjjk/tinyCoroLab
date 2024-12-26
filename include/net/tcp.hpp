@@ -48,6 +48,7 @@ namespace coro::net
     TcpAcceptAwaiter accept(int flags = 0) noexcept;
 
   private:
+    // TODO: move to new class Socket?
     int listenfd_;
     int port_;
     sockaddr_in servaddr_;

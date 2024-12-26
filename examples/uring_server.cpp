@@ -30,10 +30,7 @@ int init_server(unsigned short port)
     return -1;
   }
 
-  listen(sockfd
-
-         ,
-         10);
+  listen(sockfd, 10);
 
   return sockfd;
 }

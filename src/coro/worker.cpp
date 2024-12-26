@@ -16,22 +16,19 @@ namespace coro
 
   bool Worker::has_task_ready() noexcept
   {
-    return !rcur_.isEmpty();
+    return !task_que_.was_empty();
   }
 
   coroutine_handle<> Worker::schedule() noexcept
   {
-    assert(!rcur_.isEmpty());
-    auto coro = rbuf_[rcur_.head()];
-    rcur_.pop();
+    auto coro = task_que_.pop();
     assert(bool(coro));
     return coro;
   }
 
   void Worker::submit_task(coroutine_handle<> handle) noexcept
   {
-    rbuf_[rcur_.tail()] = handle;
-    rcur_.push();
+    task_que_.push(handle);
     wake_up();
   }
 

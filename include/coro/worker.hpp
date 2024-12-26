@@ -7,12 +7,12 @@
 #include <atomic>
 
 #include "uring/uring.hpp"
-#include "uds/ring_cursor.hpp"
+#include "uds/atomic_que.hpp"
 #include "config.hpp"
 
 namespace coro
 {
-  using ds::RingCursor;
+  using ds::SpscQueue;
   using std::array;
   using std::atomic;
   using std::coroutine_handle;
@@ -36,7 +36,7 @@ namespace coro
       return urpxy_.get_free_sqe();
     }
 
-    inline size_t num_task_schedule() noexcept { return rcur_.size(); }
+    inline size_t num_task_schedule() noexcept { return task_que_.was_size(); }
 
     coroutine_handle<> schedule() noexcept;
 
@@ -61,9 +61,9 @@ namespace coro
 
   private:
     alignas(config::kCacheLineSize) UringProxy urpxy_;
-    std::queue<std::coroutine_handle<>> task_que_;
-    RingCursor<size_t, config::kQueCap> rcur_;
-    array<coroutine_handle<>, config::kQueCap> rbuf_;
+    // RingCursor<size_t, config::kQueCap> rcur_;
+    SpscQueue<coroutine_handle<>> task_que_;
+    // array<coroutine_handle<>, config::kQueCap> rbuf_;
     array<urcptr, config::kQueCap> cqe_;
     atomic<size_t> num_task_wait_submit_;
     size_t num_task_running_;
