@@ -33,7 +33,7 @@ namespace coro::ds
       template <std::unsigned_integral T, T capacity,
                 bool thread_safe = true,
                 typename = std::enable_if<std::has_single_bit(capacity) && (capacity > 1)>::type>
-      class [[deprecated("Use SpscQueue instead")]] RingCursor
+      class RingCursor // [[deprecated("Use SpscQueue instead")]]
       {
       public:
             RingCursor() noexcept {}

@@ -12,12 +12,16 @@
 
 namespace coro
 {
-  using ds::SpscQueue;
+  using ds::AtomicQueue;
+  using ds::RingQueue;
   using std::array;
   using std::atomic;
   using std::coroutine_handle;
   using std::memory_order_relaxed;
   using std::queue;
+
+  template <typename T>
+  using SpscQueue = AtomicQueue<T>;
 
   class Worker
   {
@@ -61,9 +65,7 @@ namespace coro
 
   private:
     alignas(config::kCacheLineSize) UringProxy urpxy_;
-    // RingCursor<size_t, config::kQueCap> rcur_;
     SpscQueue<coroutine_handle<>> task_que_;
-    // array<coroutine_handle<>, config::kQueCap> rbuf_;
     array<urcptr, config::kQueCap> cqe_;
     atomic<size_t> num_task_wait_submit_;
     size_t num_task_running_;

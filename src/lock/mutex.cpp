@@ -5,7 +5,8 @@
 #include "coro/context.hpp"
 #include "log/log.hpp"
 
-// TODO: use memory order
+// TODO: optimize memory order
+// TODO: change compare_exchange_strong to weak
 namespace coro
 {
   bool Mutex::LockAwaiter::register_lock() noexcept
@@ -50,7 +51,8 @@ namespace coro
   bool Mutex::try_lock() noexcept
   {
     auto target = nolocked;
-    return state_.compare_exchange_strong(target, locked_no_waiting);
+    return state_.compare_exchange_strong(target, locked_no_waiting, memory_order_relaxed,
+                                          memory_order_relaxed);
   }
 
   void Mutex::unlock() noexcept
@@ -77,12 +79,4 @@ namespace coro
       awaiter->submit_task();
     }
   }
-
-  uint64_t UringProxy::wait_eventfd() noexcept
-  {
-    uint64_t u;
-    read(efd_, &u, sizeof(u));
-    return u;
-  }
-
 };

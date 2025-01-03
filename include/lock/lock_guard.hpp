@@ -8,7 +8,8 @@ namespace coro
   // FIXME: why complie error?
   using std::same_as;
   template <typename T>
-  concept unlockype = requires(T mtx) {
+  concept lockype = requires(T mtx) {
+    { mtx.lock() } -> same_as<void>;
     { mtx.unlock() } -> same_as<void>;
   };
 

@@ -83,4 +83,11 @@ namespace coro
   {
     write(efd_, &num, sizeof(num));
   }
+
+  uint64_t UringProxy::wait_eventfd() noexcept
+  {
+    uint64_t u;
+    read(efd_, &u, sizeof(u));
+    return u;
+  }
 };

@@ -25,7 +25,7 @@ namespace coro
       friend Mutex;
 
     public:
-      explicit LockAwaiter(Mutex &mtx, Context &ctx) noexcept : mtx_(mtx), ctx_(ctx) {}
+      LockAwaiter(Mutex &mtx, Context &ctx) noexcept : mtx_(mtx), ctx_(ctx) {}
 
       constexpr bool await_ready() noexcept
       {
@@ -48,7 +48,7 @@ namespace coro
         return wait_handle_;
       }
 
-      void submit_task() noexcept;
+      virtual void submit_task() noexcept;
 
     protected:
       Mutex &mtx_;

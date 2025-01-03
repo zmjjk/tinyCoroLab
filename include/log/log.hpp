@@ -1,3 +1,4 @@
+#pragma once
 #include <iostream>
 #include <memory>
 
@@ -49,7 +50,7 @@ namespace coro::log
 
   // TODO: can you switch to use macro to avoid duplicate function calls?
   template <typename... T>
-  void trace(const char *__restrict__ fmt, const T &...args)
+  inline void trace(const char *__restrict__ fmt, const T &...args)
   {
     if constexpr ((CONFIG_LOG_LEVEL(LOG_LEVEL)) <= spdlog::level::trace)
     {
@@ -62,7 +63,7 @@ namespace coro::log
   }
 
   template <typename... T>
-  void debug(const char *__restrict__ fmt, const T &...args)
+  inline void debug(const char *__restrict__ fmt, const T &...args)
   {
     if constexpr ((CONFIG_LOG_LEVEL(LOG_LEVEL)) <= spdlog::level::debug)
     {
@@ -75,7 +76,7 @@ namespace coro::log
   }
 
   template <typename... T>
-  void info(const char *__restrict__ fmt, const T &...args)
+  inline void info(const char *__restrict__ fmt, const T &...args)
   {
     if constexpr ((CONFIG_LOG_LEVEL(LOG_LEVEL)) <= spdlog::level::info)
     {
@@ -88,7 +89,7 @@ namespace coro::log
   }
 
   template <typename... T>
-  void warn(const char *__restrict__ fmt, const T &...args)
+  inline void warn(const char *__restrict__ fmt, const T &...args)
   {
     if constexpr ((CONFIG_LOG_LEVEL(LOG_LEVEL)) <= spdlog::level::warn)
     {
@@ -101,7 +102,7 @@ namespace coro::log
   }
 
   template <typename... T>
-  void error(const char *__restrict__ fmt, const T &...args)
+  inline void error(const char *__restrict__ fmt, const T &...args)
   {
     if constexpr ((CONFIG_LOG_LEVEL(LOG_LEVEL)) <= spdlog::level::err)
     {
@@ -114,7 +115,7 @@ namespace coro::log
   }
 
   template <typename... T>
-  void critical(const char *__restrict__ fmt, const T &...args)
+  inline void critical(const char *__restrict__ fmt, const T &...args)
   {
     if constexpr ((CONFIG_LOG_LEVEL(LOG_LEVEL)) <= spdlog::level::critical)
     {
