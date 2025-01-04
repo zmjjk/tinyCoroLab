@@ -14,6 +14,8 @@ namespace coro
   using std::nullopt;
   using std::optional;
 
+  class Context;
+
   template <typename T>
   class Task;
 

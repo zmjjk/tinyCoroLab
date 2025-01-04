@@ -19,6 +19,7 @@ namespace coro
   class UringProxy
   {
   public:
+    UringProxy() noexcept;
     void init(unsigned int entry_length) noexcept;
 
     void deinit() noexcept;

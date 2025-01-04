@@ -29,7 +29,8 @@ namespace coro
         if (mtx_.state_.compare_exchange_strong(
                 state, reinterpret_cast<uintptr_t>(this)))
         {
-          ctx_.register_wait_task();
+          ctx_.register_wait_task(registered_);
+          registered_ = false;
           return true;
         }
       }
@@ -40,6 +41,7 @@ namespace coro
   {
     ctx_.submit_task(wait_handle_);
     ctx_.unregister_wait_task();
+    registered_ = true;
   }
 
   Mutex::~Mutex() noexcept

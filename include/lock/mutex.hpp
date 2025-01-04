@@ -51,6 +51,7 @@ namespace coro
       virtual void submit_task() noexcept;
 
     protected:
+      bool registered_{true};
       Mutex &mtx_;
       Context &ctx_;
       coroutine_handle<> wait_handle_;

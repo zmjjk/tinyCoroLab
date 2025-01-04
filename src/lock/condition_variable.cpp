@@ -1,5 +1,6 @@
-#pragma once
 #include "lock/condition_variable.hpp"
+#include "log/log.hpp"
+#include "coro/context.hpp"
 
 namespace coro
 {
@@ -17,6 +18,10 @@ namespace coro
   void CondVar::CvAwaiter::register_cv() noexcept
   {
     // no need lock
+    ctx_.register_wait_task(registered_);
+    registered_ = false;
+
+    this->next_ = nullptr;
     if (cv_.tail_ == nullptr)
     {
       cv_.head_ = cv_.tail_ = this;
@@ -60,12 +65,15 @@ namespace coro
 
   void CondVar::notify_all() noexcept
   {
-    while (head_ != nullptr)
+    CvAwaiter *nxt{nullptr};
+    auto cur_head = head_;
+    head_ = tail_ = nullptr;
+    while (cur_head != nullptr)
     {
-      head_->wake_up();
-      head_ = reinterpret_cast<CvAwaiter *>(head_->next_);
+      nxt = reinterpret_cast<CvAwaiter *>(cur_head->next_);
+      cur_head->wake_up();
+      cur_head = nxt;
     }
-    tail_ = nullptr;
   }
 
 };

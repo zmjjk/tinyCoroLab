@@ -1,15 +1,18 @@
 #include "uring/uring.hpp"
+#include "log/log.hpp"
 
 namespace coro
 {
+  UringProxy::UringProxy() noexcept
+  {
+    efd_ = eventfd(0, 0);
+    assert(efd_ >= 0);
+  }
 
   void UringProxy::init(unsigned int entry_length) noexcept
   {
     int res = io_uring_queue_init(entry_length, &ring_, 0);
     assert(res == 0);
-
-    efd_ = eventfd(0, 0);
-    assert(efd_ >= 0);
 
     res = io_uring_register_eventfd(&ring_, efd_);
     assert(res == 0);

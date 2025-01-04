@@ -7,6 +7,7 @@
 #include "config.hpp"
 #include "coro/worker.hpp"
 #include "coro/task.hpp"
+#include "log/log.hpp"
 
 namespace coro
 {
@@ -56,14 +57,14 @@ namespace coro
       return id_;
     }
 
-    inline void register_wait_task() noexcept
+    inline void register_wait_task(bool registered) noexcept
     {
-      wait_task_++;
+      wait_task_.fetch_add(int(registered), memory_order_relaxed);
     }
 
     inline void unregister_wait_task() noexcept
     {
-      wait_task_--;
+      wait_task_.fetch_sub(1, memory_order_relaxed);
     }
 
     inline bool empty_wait_task() noexcept

@@ -23,6 +23,12 @@ namespace coro
       CvAwaiter(Mutex &mtx, Context &ctx, CondVar &cv, CondType &cond) noexcept
           : LockAwaiter(mtx, ctx), cv_(cv), cond_(cond) {}
 
+      bool await_suspend(coroutine_handle<> handle) noexcept
+      {
+        wait_handle_ = handle;
+        return register_lock();
+      }
+
     protected:
       bool register_lock() noexcept;
 
@@ -41,6 +47,11 @@ namespace coro
     CvAwaiter wait(Mutex &mtx) noexcept
     {
       return CvAwaiter(mtx, *(thread_info.context), *this);
+    }
+
+    CvAwaiter wait(Mutex &mtx, CondType &&cond) noexcept
+    {
+      return CvAwaiter(mtx, *(thread_info.context), *this, cond);
     }
 
     CvAwaiter wait(Mutex &mtx, CondType &cond) noexcept
