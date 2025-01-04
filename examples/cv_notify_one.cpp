@@ -28,13 +28,13 @@ Task<> consumer()
       cnt++;
     }
     log::info("consumer cnt: {}", cnt);
+    cv.notify_one();
   }
   log::info("consumer finish");
 }
 
 Task<> producer()
 {
-  std::this_thread::sleep_for(std::chrono::seconds(2));
   for (int i = 0; i < 10; i++)
   {
     auto lock = co_await mtx.lock_guard();

@@ -44,13 +44,16 @@ namespace coro
     while (true)
     {
       process_work();
-      poll_submit();
       if (token.stop_requested() && empty_wait_task())
       {
         break;
       }
+      poll_submit();
+      if (token.stop_requested() && empty_wait_task() && worker_.task_empty())
+      {
+        break;
+      }
     }
-    process_work();
   }
 
   void Context::process_work() noexcept

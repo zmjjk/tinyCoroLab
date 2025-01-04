@@ -40,6 +40,11 @@ namespace coro
       return urpxy_.get_free_sqe();
     }
 
+    inline bool task_empty() noexcept
+    {
+      return num_task_schedule() == 0;
+    }
+
     inline size_t num_task_schedule() noexcept { return task_que_.was_size(); }
 
     coroutine_handle<> schedule() noexcept;
