@@ -1,0 +1,46 @@
+#ifndef CONFIG_H
+#define CONFIG_H
+
+// #define VERSION_MAJOR @PROJECT_VERSION_MAJOR @
+// #define VERSION_MINOR @PROJECT_VERSION_MINOR @
+// #define INSTALL_PREFIX "@CMAKE_INSTALL_PREFIX@"
+
+#define SOURCE_DIR "@PROJECT_SOURCE_DIR@"
+
+namespace coro::config
+{
+#include <cstddef>
+#include <cstdint>
+#include <string>
+
+// ========================== log configuration =============================
+// #define TRACE 0
+// #define DEBUG 1
+// #define INFO 2
+// #define WARN 3
+// #define ERR 4
+// #define CRITICAL 5
+// #define OFF 6
+
+// #define LOGTOFILE
+#define LOG_LEVEL info
+#define USEMUTEX
+
+constexpr const char* kLogFileName = "temp/logs/coro.log";
+constexpr int64_t     kFlushDura   = 3; // seconds
+
+// ========================== uring configuration ===========================
+constexpr unsigned int kEntryLength = 1024;
+
+// =========================== cpu configuration ============================
+constexpr size_t kCacheLineSize = 64; // alignas(config::kCacheLineSize)
+
+// ========================= context configuration ==========================
+using ctx_id             = uint32_t;
+constexpr size_t kQueCap = 1024;
+
+// =========================== net configuration ============================
+constexpr int kDefaultPort = 8000;
+constexpr int kBacklog     = 5;
+}; // namespace coro::config
+#endif // CONFIG_H
