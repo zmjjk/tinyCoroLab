@@ -19,8 +19,6 @@ endif()
 include(GNUInstallDirs)
 include(GenerateExportHeader)
 
-# TODO: add more options
-
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY
 ${CMAKE_BINARY_DIR}/${CMAKE_INSTALL_LIBDIR})
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY
@@ -37,7 +35,11 @@ set(THIRD_PARTY_INCLUDE_DIR
     "${PROJECT_SOURCE_DIR}/third_party/atomic_queue/include")
 
 option(ENABLE_UNIT_TESTS "Enable unit tests" ON)
+option(ENABLE_COMPILE_OPTIMIZE "Enable compile options -O3" ON)
+# TODO: add more options
+
 message(STATUS "Enable testing: ${ENABLE_UNIT_TESTS}")
+message(STATUS "Enable compile options -O3: ${ENABLE_COMPILE_OPTIMIZE}")
 
 find_library(URING_PATH NAMES uring)
 if (URING_PATH)
@@ -46,14 +48,21 @@ else()
     message(FATAL_ERROR "Could not find liburing")
 endif()
 
-include_directories(${SRC_INCLUDE_DIR} ${THIRD_PARTY_INCLUDE_DIR})
 add_subdirectory(third_party)
-# add_subdirectory(src)
-add_subdirectory(tests)
-# add_subdirectory(examples)
-generate_export_header(${PROJECT_NAME} BASE_NAME CORO EXPORT_FILE_NAME include/coro/export.hpp)
+add_subdirectory(src)
 configure_file(${PROJECT_SOURCE_DIR}/config/config.h.in ${PROJECT_SOURCE_DIR}/config/config.h @ONLY)
-configure_file(tinycoro.pc.in tinycoro.pc @ONLY)
+
+add_library(${PROJECT_NAME} ${TINYCORO_SOURCE_FILES})
+set_target_properties(${PROJECT_NAME} PROPERTIES LINKER_LANGUAGE CXX PREFIX "" VERSION ${PROJECT_VERSION} SOVERSION ${PROJECT_VERSION_MAJOR})
+if(ENABLE_COMPILE_OPTIMIZE)
+  target_compile_options(${PROJECT_NAME} PUBLIC -O3)
+endif()
+target_compile_features(${PROJECT_NAME} PUBLIC cxx_std_20)
+target_include_directories(${PROJECT_NAME} PUBLIC ${SRC_INCLUDE_DIR} ${THIRD_PARTY_INCLUDE_DIR})
+generate_export_header(${PROJECT_NAME} BASE_NAME CORO EXPORT_FILE_NAME include/coro/export.hpp)
+
+add_subdirectory(tests)
+add_subdirectory(examples)
 
 if(ENABLE_UNIT_TESTS)
   enable_testing()
@@ -63,6 +72,8 @@ if(ENABLE_UNIT_TESTS)
     COMMAND $<TARGET_FILE:base_test>
     )
 endif()
+
+configure_file(tinycoro.pc.in tinycoro.pc @ONLY)
 
 # TODO: add install command
 # install(TARGETS tinycoro)
