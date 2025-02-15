@@ -7,6 +7,7 @@
 #include <sys/eventfd.h>
 
 #include "config.h"
+#include "coro/attribute.hpp"
 
 namespace coro::uring
 {
@@ -67,11 +68,11 @@ public:
         }
     }
 
-    inline auto seen_cqe_entry(urcptr cqe) noexcept -> void { io_uring_cqe_seen(&m_uring, cqe); }
+    inline auto seen_cqe_entry(urcptr cqe) noexcept -> void CORO_INLINE { io_uring_cqe_seen(&m_uring, cqe); }
 
-    inline auto get_free_sqe() noexcept -> ursptr { return io_uring_get_sqe(&m_uring); }
+    inline auto get_free_sqe() noexcept -> ursptr CORO_INLINE { return io_uring_get_sqe(&m_uring); }
 
-    inline auto submit() noexcept -> int { return io_uring_submit(&m_uring); }
+    inline auto submit() noexcept -> int CORO_INLINE { return io_uring_submit(&m_uring); }
 
     auto handle_for_each_cqe(urchandler f, bool mark_finish = false) noexcept -> size_t
     {
@@ -85,7 +86,7 @@ public:
         };
         if (mark_finish)
         {
-            io_uring_cq_advance(&m_uring, i);
+            cq_advance(i);
         }
         return i;
     }
@@ -93,18 +94,23 @@ public:
     auto wait_eventfd() noexcept -> uint64_t
     {
         uint64_t u;
-        read(m_efd, &u, sizeof(u));
+        auto     ret = read(m_efd, &u, sizeof(u));
+        assert(ret == 0 && "eventfd read error");
         return u;
     }
 
-    inline auto peek_batch_cqe(urcptr* cqes, unsigned int num) noexcept -> int
+    inline auto peek_batch_cqe(urcptr* cqes, unsigned int num) noexcept -> int CORO_INLINE
     {
         return io_uring_peek_batch_cqe(&m_uring, cqes, num);
     }
 
-    inline auto write_eventfd(uint64_t num) noexcept -> void { write(m_efd, &num, sizeof(num)); }
+    inline auto write_eventfd(uint64_t num) noexcept -> void CORO_INLINE
+    {
+        auto ret = write(m_efd, &num, sizeof(num));
+        assert(ret == 0 && "eventfd write error");
+    }
 
-    inline auto cq_advance(unsigned int num) noexcept -> void { io_uring_cq_advance(&m_uring, num); }
+    inline auto cq_advance(unsigned int num) noexcept -> void CORO_INLINE { io_uring_cq_advance(&m_uring, num); }
 
 private:
     int             m_efd{0};

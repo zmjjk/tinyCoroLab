@@ -58,7 +58,7 @@ public:
 
     auto wake_up() noexcept -> void;
 
-    inline auto add_wait_task() noexcept -> void { m_num_io_wait_submit.fetch_add(1, memory_order_relaxed); }
+    inline auto add_wait_task() noexcept -> void { m_num_io_wait_submit.fetch_add(1, std::memory_order_relaxed); }
 
 private:
     uring_proxy                    m_upxy;

@@ -56,9 +56,8 @@ inline void trace(const char* __restrict__ fmt, const T&... args)
     {
 #ifdef LOGTOFILE
         logger::get_logger()->trace(spdlog::fmt_runtime_string<char>{fmt}, args...);
-#else
-        spdlog::trace(spdlog::fmt_runtime_string<char>{fmt}, args...);
 #endif
+        spdlog::trace(spdlog::fmt_runtime_string<char>{fmt}, args...);
     }
 }
 
@@ -69,9 +68,8 @@ inline void debug(const char* __restrict__ fmt, const T&... args)
     {
 #ifdef LOGTOFILE
         logger::get_logger()->debug(spdlog::fmt_runtime_string<char>{fmt}, args...);
-#else
-        spdlog::debug(spdlog::fmt_runtime_string<char>{fmt}, args...);
 #endif
+        spdlog::debug(spdlog::fmt_runtime_string<char>{fmt}, args...);
     }
 }
 
@@ -82,9 +80,8 @@ inline void info(const char* __restrict__ fmt, const T&... args)
     {
 #ifdef LOGTOFILE
         logger::get_logger()->info(spdlog::fmt_runtime_string<char>{fmt}, args...);
-#else
-        spdlog::info(spdlog::fmt_runtime_string<char>{fmt}, args...);
 #endif
+        spdlog::info(spdlog::fmt_runtime_string<char>{fmt}, args...);
     }
 }
 
@@ -95,9 +92,8 @@ inline void warn(const char* __restrict__ fmt, const T&... args)
     {
 #ifdef LOGTOFILE
         logger::get_logger()->warn(spdlog::fmt_runtime_string<char>{fmt}, args...);
-#else
-        spdlog::warn(spdlog::fmt_runtime_string<char>{fmt}, args...);
 #endif
+        spdlog::warn(spdlog::fmt_runtime_string<char>{fmt}, args...);
     }
 }
 
@@ -108,9 +104,8 @@ inline void error(const char* __restrict__ fmt, const T&... args)
     {
 #ifdef LOGTOFILE
         logger::get_logger()->error(spdlog::fmt_runtime_string<char>{fmt}, args...);
-#else
-        spdlog::error(spdlog::fmt_runtime_string<char>{fmt}, args...);
 #endif
+        spdlog::error(spdlog::fmt_runtime_string<char>{fmt}, args...);
     }
 }
 
@@ -121,9 +116,8 @@ inline void critical(const char* __restrict__ fmt, const T&... args)
     {
 #ifdef LOGTOFILE
         logger::get_logger()->critical(spdlog::fmt_runtime_string<char>{fmt}, args...);
-#else
-        spdlog::critical(spdlog::fmt_runtime_string<char>{fmt}, args...);
 #endif
+        spdlog::critical(spdlog::fmt_runtime_string<char>{fmt}, args...);
     }
 }
 

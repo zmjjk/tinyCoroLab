@@ -196,7 +196,7 @@ public:
 
     inline auto value_ready() noexcept -> bool { return std::holds_alternative<stored_type>(m_storage); }
 
-    inline auto in_exception() noexcept -> bool { return if (std::holds_alternative<std::exception_ptr>(m_storage)); }
+    inline auto in_exception() noexcept -> bool { return std::holds_alternative<std::exception_ptr>(m_storage); }
 
     inline auto value_unset() noexcept -> bool { return !value_ready() && !in_exception(); }
 
