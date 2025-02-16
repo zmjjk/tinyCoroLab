@@ -1,6 +1,6 @@
 file(GLOB SOURCES "*.cpp")
 
-# 输出找到的文件名
+# 自动化构建目标文件
 foreach(SOURCE ${SOURCES})
     get_filename_component(FILENAME "${SOURCE}" NAME)
     get_filename_component(TARNAME "${SOURCE}" NAME_WE)

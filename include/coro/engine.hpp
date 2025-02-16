@@ -8,7 +8,13 @@
 
 #include "config.h"
 #include "coro/atomic_que.hpp"
+#include "coro/attribute.hpp"
 #include "coro/uring_proxy.hpp"
+
+namespace coro
+{
+class context;
+};
 
 namespace coro::detail
 {
@@ -26,6 +32,8 @@ using spsc_queue = AtomicQueue<T>;
 
 class engine
 {
+    friend class ::coro::context;
+
 public:
     engine() noexcept : m_num_io_wait_submit(0), m_num_io_running(0) {}
     ~engine() noexcept = default;
@@ -36,17 +44,18 @@ public:
     auto operator=(const engine&) -> engine& = delete;
     auto operator=(engine&&) -> engine&      = delete;
 
+private:
     auto init() noexcept -> void;
 
     auto deinit() noexcept -> void;
 
     inline auto ready() noexcept -> bool { return !m_task_queue.was_empty(); }
 
-    inline auto get_free_urs() noexcept -> ursptr { return m_upxy.get_free_sqe(); }
+    [[CORO_DISCARD_HINT]] inline auto get_free_urs() noexcept -> ursptr { return m_upxy.get_free_sqe(); }
 
     inline auto num_task_schedule() noexcept -> size_t { return m_task_queue.was_size(); }
 
-    auto schedule() noexcept -> coroutine_handle<>;
+    [[CORO_DISCARD_HINT]] auto schedule() noexcept -> coroutine_handle<>;
 
     auto submit_task(coroutine_handle<> handle) noexcept -> void;
 

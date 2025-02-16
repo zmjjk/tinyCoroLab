@@ -28,6 +28,8 @@ public:
         assert(m_efd >= 0 && "uring_proxy init event_fd failed");
     }
 
+    ~uring_proxy() = default;
+
     auto init(unsigned int entry_length) noexcept -> void
     {
         // Don't need to set m_para
@@ -45,8 +47,6 @@ public:
         close(m_efd);
         io_uring_queue_exit(&m_uring);
     }
-
-    ~uring_proxy() = default;
 
     auto peek_uring() noexcept -> bool
     {
@@ -95,7 +95,7 @@ public:
     {
         uint64_t u;
         auto     ret = read(m_efd, &u, sizeof(u));
-        assert(ret == 0 && "eventfd read error");
+        assert(ret != -1 && "eventfd read error");
         return u;
     }
 
@@ -107,7 +107,7 @@ public:
     inline auto write_eventfd(uint64_t num) noexcept -> void CORO_INLINE
     {
         auto ret = write(m_efd, &num, sizeof(num));
-        assert(ret == 0 && "eventfd write error");
+        assert(ret != -1 && "eventfd write error");
     }
 
     inline auto cq_advance(unsigned int num) noexcept -> void CORO_INLINE { io_uring_cq_advance(&m_uring, num); }

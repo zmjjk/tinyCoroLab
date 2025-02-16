@@ -6,6 +6,7 @@
 
 #include "config.h"
 #include "coro/engine.hpp"
+#include "coro/log.hpp"
 #include "coro/meta_info.hpp"
 #include "coro/task.hpp"
 
@@ -27,7 +28,8 @@ using engine = detail::engine;
 class context
 {
 public:
-    context() noexcept                 = default;
+    context() noexcept { init(); }
+    ~context() noexcept { deinit(); }
     context(const context&)            = delete;
     context(context&&)                 = delete;
     context& operator=(const context&) = delete;
@@ -42,8 +44,9 @@ public:
     template<typename T>
     inline auto submit_task(task<T>&& task) noexcept -> void
     {
+        auto handle = task.handle();
         task.detach();
-        this->submit_task(task);
+        this->submit_task(handle);
     }
 
     template<typename T>
@@ -91,8 +94,9 @@ inline context& local_context() noexcept
 template<typename T>
 inline void submit_task(task<T>&& task) noexcept
 {
+    auto handle = task.handle();
     task.detach();
-    submit_task(task);
+    submit_task(handle);
 }
 
 template<typename T>

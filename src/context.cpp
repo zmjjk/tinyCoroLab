@@ -1,16 +1,11 @@
 #include "coro/context.hpp"
+#include "coro/log.hpp"
 
 namespace coro
 {
 auto context::start() noexcept -> void
 {
-    m_job = make_unique<jthread>(
-        [this](stop_token token)
-        {
-            this->init();
-            this->run(token);
-            this->deinit();
-        });
+    m_job = make_unique<jthread>([this](stop_token token) { this->run(token); });
 }
 
 auto context::stop() noexcept -> void

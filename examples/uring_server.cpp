@@ -37,7 +37,7 @@ int init_server(unsigned short port)
 #define ENTRIES_LENGTH 1024
 #define BUFFER_LENGTH  1024
 
-int set_event_recv(struct io_uring* ring, int sockfd, void* buf, size_t len, int flags)
+void set_event_recv(struct io_uring* ring, int sockfd, void* buf, size_t len, int flags)
 {
     struct io_uring_sqe* sqe = io_uring_get_sqe(ring);
 
@@ -50,7 +50,7 @@ int set_event_recv(struct io_uring* ring, int sockfd, void* buf, size_t len, int
     memcpy(&sqe->user_data, &accept_info, sizeof(struct conn_info));
 }
 
-int set_event_send(struct io_uring* ring, int sockfd, void* buf, size_t len, int flags)
+void set_event_send(struct io_uring* ring, int sockfd, void* buf, size_t len, int flags)
 {
     struct io_uring_sqe* sqe = io_uring_get_sqe(ring);
 
@@ -63,7 +63,7 @@ int set_event_send(struct io_uring* ring, int sockfd, void* buf, size_t len, int
     memcpy(&sqe->user_data, &accept_info, sizeof(struct conn_info));
 }
 
-int set_event_accept(struct io_uring* ring, int sockfd, struct sockaddr* addr, socklen_t* addrlen, int flags)
+void set_event_accept(struct io_uring* ring, int sockfd, struct sockaddr* addr, socklen_t* addrlen, int flags)
 {
     struct io_uring_sqe* sqe = io_uring_get_sqe(ring);
 

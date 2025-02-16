@@ -1,4 +1,5 @@
 #include "coro/engine.hpp"
+#include "coro/log.hpp"
 
 namespace coro::detail
 {
@@ -28,6 +29,7 @@ auto engine::schedule() noexcept -> coroutine_handle<>
 
 auto engine::submit_task(coroutine_handle<> handle) noexcept -> void
 {
+    assert(handle != nullptr && "engine get nullptr task handle");
     m_task_queue.push(handle);
     wake_up();
 }
@@ -36,6 +38,7 @@ auto engine::exec_one_task() noexcept -> void
 {
     auto coro = schedule();
     coro.resume();
+    // FIXME: clean task handle
 }
 
 auto engine::handle_cqe_entry(urcptr cqe) noexcept -> void

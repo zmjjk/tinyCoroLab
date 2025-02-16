@@ -15,7 +15,7 @@ class task;
 
 namespace detail
 {
-enum class promise_state : uint8_t
+enum class coro_state : uint8_t
 {
     normal,
     detach,
@@ -49,13 +49,15 @@ struct promise_base
 
     auto continuation(std::coroutine_handle<> continuation) noexcept -> void { m_continuation = continuation; }
 
-    inline auto set_state(promise_state state) -> void { m_state = state; }
+    inline auto set_state(coro_state state) -> void { m_state = state; }
 
-    inline auto get_state() -> promise_state { return m_state; }
+    inline auto get_state() -> coro_state { return m_state; }
+
+    inline auto is_detach() -> bool { return m_state == coro_state::detach; }
 
 protected:
     std::coroutine_handle<> m_continuation{nullptr};
-    promise_state           m_state;
+    coro_state              m_state;
 };
 
 template<typename return_type>
@@ -320,8 +322,8 @@ public:
     auto detach() -> void
     {
         assert(m_coroutine != nullptr && "detach func expected no-nullptr coroutine_handler");
-        auto promise = m_coroutine.promise();
-        promise.set_state(detail::promise_state::detach);
+        auto& promise = m_coroutine.promise();
+        promise.set_state(detail::coro_state::detach);
         m_coroutine = nullptr;
     }
 
@@ -336,7 +338,7 @@ public:
         auto promise = handle.promise();
         switch (promise.get_state)
         {
-            case detail::promise_state::detach:
+            case detail::coro_state::detach:
                 handle.destroy();
                 break;
             default:
