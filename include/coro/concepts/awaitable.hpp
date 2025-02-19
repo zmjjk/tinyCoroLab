@@ -11,6 +11,11 @@ namespace coro::concepts
 template<typename type, typename... types>
 concept in_types = (std::same_as<type, types> || ...);
 
+template<typename type>
+concept list_type = requires(type t) {
+    { t.next() } -> std::same_as<type*>;
+};
+
 /**
  * This concept declares a type that is required to meet the c++20 coroutine operator co_await()
  * retun type.  It requires the following three member functions:
@@ -66,6 +71,9 @@ concept global_co_await_awaitable_void = requires(type t)
 
 template<typename type>
 concept awaitable_void = member_co_await_awaitable_void<type> || global_co_await_awaitable_void<type> || awaiter_void<type>;
+
+template<typename type>
+concept list_awaiter = awaiter<type> && list_type<type>;
 
 template<awaitable awaitable, typename = void>
 struct awaitable_traits

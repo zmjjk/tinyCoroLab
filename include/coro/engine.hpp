@@ -73,7 +73,7 @@ private:
     uring_proxy                    m_upxy;
     spsc_queue<coroutine_handle<>> m_task_queue;
     array<urcptr, config::kQueCap> m_urc;
-    atomic<size_t>                 m_num_io_wait_submit;
-    size_t                         m_num_io_running;
+    atomic<size_t>                 m_num_io_wait_submit{0};
+    size_t                         m_num_io_running{0};
 };
 }; // namespace coro::detail

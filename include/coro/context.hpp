@@ -28,8 +28,8 @@ using engine = detail::engine;
 class context
 {
 public:
-    context() noexcept { init(); }
-    ~context() noexcept { deinit(); }
+    context() noexcept                 = default;
+    ~context() noexcept                = default;
     context(const context&)            = delete;
     context(context&&)                 = delete;
     context& operator=(const context&) = delete;
@@ -59,7 +59,7 @@ public:
 
     inline auto get_ctx_id() noexcept -> ctx_id { return m_id; }
 
-    inline auto register_wait_task(bool registered) noexcept -> void
+    inline auto register_wait_task(bool registered = true) noexcept -> void
     {
         m_num_wait_task.fetch_add(int(registered), memory_order_relaxed);
     }

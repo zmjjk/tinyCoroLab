@@ -1,0 +1,28 @@
+#pragma once
+#include <atomic>
+#include <memory>
+
+#include "coro/concepts/awaitable.hpp"
+#include "coro/detail/types.hpp"
+
+namespace coro::detail
+{
+using std::uintptr_t;
+
+class strategy
+{
+public:
+    strategy() noexcept  = default;
+    ~strategy() noexcept = default;
+
+    strategy(const strategy&)            = delete;
+    strategy(strategy&&)                 = delete;
+    strategy& operator=(const strategy&) = delete;
+    strategy& operator=(strategy&&)      = delete;
+
+    auto is_no_waiter() noexcept -> bool;
+};
+
+std::unique_ptr<strategy> strategy_factory(schedule_strategy st);
+
+}; // namespace coro::detail

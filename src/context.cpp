@@ -5,7 +5,13 @@ namespace coro
 {
 auto context::start() noexcept -> void
 {
-    m_job = make_unique<jthread>([this](stop_token token) { this->run(token); });
+    m_job = make_unique<jthread>(
+        [this](stop_token token)
+        {
+            this->init();
+            this->run(token);
+            this->deinit();
+        });
 }
 
 auto context::stop() noexcept -> void

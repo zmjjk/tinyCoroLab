@@ -1,5 +1,6 @@
 #include "coro/engine.hpp"
 #include "coro/log.hpp"
+#include "coro/task.hpp"
 
 namespace coro::detail
 {
@@ -8,16 +9,15 @@ using std::memory_order_relaxed;
 auto engine::init() noexcept -> void
 {
     m_upxy.init(config::kEntryLength);
-    m_num_io_wait_submit = 0;
-    m_num_io_running     = 0;
-
-    spsc_queue<coroutine_handle<>> task_queue;
-    m_task_queue.swap(task_queue);
 }
 
 auto engine::deinit() noexcept -> void
 {
     m_upxy.deinit();
+    m_num_io_wait_submit = 0;
+    m_num_io_running     = 0;
+    spsc_queue<coroutine_handle<>> task_queue;
+    m_task_queue.swap(task_queue);
 }
 
 auto engine::schedule() noexcept -> coroutine_handle<>
@@ -38,7 +38,10 @@ auto engine::exec_one_task() noexcept -> void
 {
     auto coro = schedule();
     coro.resume();
-    // FIXME: clean task handle
+    if (coro.done())
+    {
+        clean(coro);
+    }
 }
 
 auto engine::handle_cqe_entry(urcptr cqe) noexcept -> void

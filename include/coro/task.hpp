@@ -19,6 +19,7 @@ enum class coro_state : uint8_t
 {
     normal,
     detach,
+    cancel,
     none
 };
 
@@ -57,7 +58,7 @@ struct promise_base
 
 protected:
     std::coroutine_handle<> m_continuation{nullptr};
-    coro_state              m_state;
+    coro_state              m_state{coro_state::normal};
 };
 
 template<typename return_type>
@@ -108,7 +109,7 @@ public:
         }
     }
 
-    auto return_value(stored_type value) -> void
+    auto return_value(stored_type&& value) -> void
         requires(not return_type_is_reference)
     {
         if constexpr (std::is_move_constructible_v<stored_type>)
@@ -327,25 +328,6 @@ public:
         m_coroutine = nullptr;
     }
 
-    static auto clean(std::coroutine_handle<> handle) noexcept -> void
-    {
-        auto specific_handle = coroutine_handle::from_address(handle.address());
-        clean(specific_handle);
-    }
-
-    static auto clean(coroutine_handle handle) noexcept -> void
-    {
-        auto promise = handle.promise();
-        switch (promise.get_state)
-        {
-            case detail::coro_state::detach:
-                handle.destroy();
-                break;
-            default:
-                break;
-        }
-    }
-
     auto operator co_await() const& noexcept
     {
         struct awaitable : public awaitable_base
@@ -375,6 +357,27 @@ public:
 private:
     coroutine_handle m_coroutine{nullptr};
 };
+
+using coroutine_handle = task<>::coroutine_handle;
+
+inline auto clean(coroutine_handle handle) noexcept -> void
+{
+    auto& promise = handle.promise();
+    switch (promise.get_state())
+    {
+        case detail::coro_state::detach:
+            handle.destroy();
+            break;
+        default:
+            break;
+    }
+}
+
+inline auto clean(std::coroutine_handle<> handle) noexcept -> void
+{
+    auto specific_handle = coroutine_handle::from_address(handle.address());
+    clean(specific_handle);
+}
 
 namespace detail
 {
