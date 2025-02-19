@@ -6,7 +6,7 @@
     #include <immintrin.h>
 #endif
 
-namespace coro
+namespace coro::detail
 {
 using std::atomic;
 using std::memory_order_acquire;

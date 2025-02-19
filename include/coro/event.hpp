@@ -2,6 +2,7 @@
 #include <atomic>
 #include <coroutine>
 
+#include "coro/attribute.hpp"
 #include "coro/concepts/awaitable.hpp"
 #include "coro/detail/types.hpp"
 
@@ -15,7 +16,7 @@ class context;
 class event
 {
 public:
-    struct awaiter
+    struct [[CORO_AWAIT_HINT]] awaiter
     {
         awaiter(context& ctx, event& e) noexcept : m_ctx(ctx), m_ev(e) {}
         inline awaiter* next() noexcept { return m_next; }
