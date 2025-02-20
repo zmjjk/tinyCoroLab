@@ -4,21 +4,20 @@ using namespace coro;
 
 #define CONTEXTNUM 5
 
-event<int> ev;
+latch l(CONTEXTNUM - 1);
 
 task<> set_task(int i)
 {
+    latch_guard guard(l);
     log::info("set task ready to sleep");
-    utils::sleep(3);
-    log::info("ready to set event");
-    ev.set(i);
+    utils::sleep(2);
     co_return;
 }
 
 task<> wait_task(int i)
 {
-    auto val = co_await ev.wait();
-    log::info("task {} wake up by event, get value: {}", i, val);
+    co_await l.wait();
+    log::info("task {} wake up by latch", i);
     co_return;
 }
 
@@ -26,11 +25,12 @@ int main(int argc, char const* argv[])
 {
     /* code */
     context ctx[CONTEXTNUM];
+
+    ctx[CONTEXTNUM - 1].submit_task(wait_task(CONTEXTNUM - 1));
     for (int i = 0; i < CONTEXTNUM - 1; i++)
     {
-        ctx[i].submit_task(wait_task(i));
+        ctx[i].submit_task(set_task(i));
     }
-    ctx[CONTEXTNUM - 1].submit_task(set_task(CONTEXTNUM - 1));
 
     for (int i = 0; i < CONTEXTNUM; i++)
     {

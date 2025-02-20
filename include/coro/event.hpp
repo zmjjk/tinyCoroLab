@@ -34,7 +34,7 @@ public:
         std::coroutine_handle<> m_await_coro{nullptr};
     };
 
-    event_base() noexcept  = default;
+    event_base(bool initial_set = false) noexcept : m_state((initial_set) ? this : nullptr) {}
     ~event_base() noexcept = default;
 
     event_base(const event_base&)            = delete;
@@ -59,6 +59,7 @@ template<typename return_type = void>
 class event : public detail::event_base, public detail::container<return_type>
 {
 public:
+    using event_base::event_base;
     struct [[CORO_AWAIT_HINT]] awaiter : public detail::event_base::awaiter_base
     {
         using awaiter_base::awaiter_base;
@@ -79,6 +80,7 @@ template<>
 class event<void> : public detail::event_base
 {
 public:
+    using event_base::event_base;
     struct [[CORO_AWAIT_HINT]] awaiter : public detail::event_base::awaiter_base
     {
         using awaiter_base::awaiter_base;
@@ -88,6 +90,18 @@ public:
     [[CORO_AWAIT_HINT]] awaiter wait() noexcept { return awaiter(local_context(), *this); }
 
     void set() noexcept { set_state(); }
+};
+
+class event_guard
+{
+    using guard_type = event<>;
+
+public:
+    event_guard(guard_type& ev) noexcept : m_ev(ev) {}
+    ~event_guard() noexcept { m_ev.set(); }
+
+private:
+    guard_type& m_ev;
 };
 
 }; // namespace coro

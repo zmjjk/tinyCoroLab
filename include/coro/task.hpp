@@ -230,12 +230,12 @@ private:
     coroutine_handle m_coroutine{nullptr};
 };
 
-// FIXME: Refactor clean
-using coroutine_handle = task<>::coroutine_handle;
+using coroutine_handle = std::coroutine_handle<detail::promise_base>;
 
-inline auto clean(coroutine_handle handle) noexcept -> void
+inline auto clean(std::coroutine_handle<> handle) noexcept -> void
 {
-    auto& promise = handle.promise();
+    auto  specific_handle = coroutine_handle::from_address(handle.address());
+    auto& promise         = specific_handle.promise();
     switch (promise.get_state())
     {
         case detail::coro_state::detach:
@@ -244,12 +244,6 @@ inline auto clean(coroutine_handle handle) noexcept -> void
         default:
             break;
     }
-}
-
-inline auto clean(std::coroutine_handle<> handle) noexcept -> void
-{
-    auto specific_handle = coroutine_handle::from_address(handle.address());
-    clean(specific_handle);
 }
 
 namespace detail

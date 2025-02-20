@@ -6,16 +6,16 @@ using namespace coro;
 
 event<> ev;
 
-task<void> set_task()
+task<> set_task()
 {
     log::info("set task ready to sleep");
-    std::this_thread::sleep_for(std::chrono::seconds(3));
+    utils::sleep(3);
     log::info("ready to set event");
     ev.set();
     co_return;
 }
 
-task<void> wait_task(int i)
+task<> wait_task(int i)
 {
     co_await ev.wait();
     log::info("task {} wake up by event", i);

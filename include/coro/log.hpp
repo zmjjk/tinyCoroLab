@@ -47,8 +47,6 @@ private:
     spdlogger m_logger;
 };
 
-// TODO: Can you switch to use macro to avoid duplicate function calls?
-// TODO: When LOGTOFILE is defined, log should also be output to stdout.
 template<typename... T>
 inline void trace(const char* __restrict__ fmt, const T&... args)
 {

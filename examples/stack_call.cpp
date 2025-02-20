@@ -7,7 +7,7 @@ task<int> add(int x, int y)
     co_return x + y;
 }
 
-task<void> func(int x, int y)
+task<> func(int x, int y)
 {
     auto result = co_await add(x, y);
     log::info("func result: {}", result);
