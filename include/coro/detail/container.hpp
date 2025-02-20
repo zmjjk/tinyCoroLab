@@ -6,6 +6,7 @@
 namespace coro::detail
 {
 template<typename T>
+    requires(!std::same_as<T, void>)
 struct container
 {
 private:
