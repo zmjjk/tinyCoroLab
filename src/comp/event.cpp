@@ -1,4 +1,4 @@
-#include "coro/event.hpp"
+#include "coro/comp/event.hpp"
 
 namespace coro::detail
 {

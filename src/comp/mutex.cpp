@@ -1,4 +1,4 @@
-#include "coro/mutex.hpp"
+#include "coro/comp/mutex.hpp"
 #include "coro/context.hpp"
 
 namespace coro

@@ -5,8 +5,8 @@
 #include <coroutine>
 #include <type_traits>
 
+#include "coro/comp/mutex_guard.hpp"
 #include "coro/detail/types.hpp"
-#include "coro/mutex_guard.hpp"
 
 namespace coro
 {
