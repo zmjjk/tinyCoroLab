@@ -58,26 +58,32 @@ auto mutex::lock() noexcept -> mutex_awaiter
 auto mutex::unlock() noexcept -> void
 {
     assert(m_state.load(std::memory_order_acquire) != nolocked);
-    mutex_awaiter* awaiter{nullptr};
-    while (true)
+
+    auto to_resume = reinterpret_cast<mutex_awaiter*>(m_resume_list_head);
+    if (to_resume == nullptr)
     {
         auto target = locked_no_waiting;
-        if (m_state.compare_exchange_weak(target, nolocked, std::memory_order_acq_rel, std::memory_order_relaxed))
+        if (m_state.compare_exchange_strong(target, nolocked, std::memory_order_acq_rel, std::memory_order_relaxed))
         {
             return;
         }
-        auto state = m_state.load();
-        awaiter    = reinterpret_cast<mutex_awaiter*>(state);
-        auto nxt   = reinterpret_cast<awaiter_ptr>(awaiter->m_next);
-        if (m_state.compare_exchange_weak(state, nxt, std::memory_order_acq_rel, std::memory_order_relaxed))
+
+        auto head = m_state.exchange(locked_no_waiting, std::memory_order_acq_rel);
+        assert(head != nolocked && head != locked_no_waiting);
+
+        auto awaiter = reinterpret_cast<mutex_awaiter*>(head);
+        do
         {
-            break;
-        }
+            auto temp       = awaiter->m_next;
+            awaiter->m_next = to_resume;
+            to_resume       = awaiter;
+            awaiter         = temp;
+        } while (awaiter != nullptr);
     }
-    if (awaiter != nullptr)
-    {
-        awaiter->resume();
-    }
+
+    assert(to_resume != nullptr && "unexpected to_resume value: nullptr");
+    m_resume_list_head = to_resume->m_next;
+    to_resume->resume();
 }
 
 auto mutex::lock_guard() noexcept -> mutex_guard_awaiter

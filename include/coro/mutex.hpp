@@ -48,7 +48,7 @@ public:
     };
 
 public:
-    mutex() noexcept : m_state(nolocked) {}
+    mutex() noexcept : m_state(nolocked), m_resume_list_head(nullptr) {}
     ~mutex() noexcept { assert(m_state.load(std::memory_order_acquire) == mutex::nolocked); }
 
     auto try_lock() noexcept -> bool;
@@ -64,6 +64,7 @@ private:
     inline static awaiter_ptr nolocked          = reinterpret_cast<awaiter_ptr>(1);
     inline static awaiter_ptr locked_no_waiting = 0; // nullptr
     std::atomic<awaiter_ptr>  m_state;
+    awaiter_ptr               m_resume_list_head;
 };
 
 }; // namespace coro

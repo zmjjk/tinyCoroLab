@@ -8,8 +8,8 @@ namespace coro::detail
 // TODO: Add lifo and fifo strategy support
 enum class schedule_strategy : uint8_t
 {
+    FIFO, // default
     LIFO,
-    FIFO,
     None
 };
 
