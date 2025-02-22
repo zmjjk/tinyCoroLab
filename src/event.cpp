@@ -3,13 +3,13 @@
 namespace coro::detail
 {
 
-bool event_base::awaiter_base::await_suspend(std::coroutine_handle<> handle) noexcept
+auto event_base::awaiter_base::await_suspend(std::coroutine_handle<> handle) noexcept -> bool
 {
     m_await_coro = handle;
     return m_ev.register_awaiter(this);
 }
 
-void event_base::set_state() noexcept
+auto event_base::set_state() noexcept -> void
 {
     auto flag = m_state.exchange(this, std::memory_order_acq_rel);
     if (flag != this)
@@ -19,7 +19,7 @@ void event_base::set_state() noexcept
     }
 }
 
-void event_base::resume_all_awaiter(awaiter_ptr waiter) noexcept
+auto event_base::resume_all_awaiter(awaiter_ptr waiter) noexcept -> void
 {
     while (waiter != nullptr)
     {
@@ -30,7 +30,7 @@ void event_base::resume_all_awaiter(awaiter_ptr waiter) noexcept
     }
 }
 
-bool event_base::register_awaiter(awaiter_base* waiter) noexcept
+auto event_base::register_awaiter(awaiter_base* waiter) noexcept -> bool
 {
     const auto  set_state = this;
     awaiter_ptr old_value = nullptr;

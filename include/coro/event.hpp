@@ -20,13 +20,14 @@ public:
     struct awaiter_base
     {
         awaiter_base(context& ctx, event_base& e) noexcept : m_ctx(ctx), m_ev(e) {}
-        inline awaiter_base* next() noexcept { return m_next; }
 
-        inline bool await_ready() const noexcept { return m_ev.is_set(); }
+        inline auto next() noexcept -> awaiter_base* { return m_next; }
 
-        bool await_suspend(std::coroutine_handle<> handle) noexcept;
+        inline auto await_ready() const noexcept -> bool { return m_ev.is_set(); }
 
-        constexpr void await_resume() noexcept {}
+        auto await_suspend(std::coroutine_handle<> handle) noexcept -> bool;
+
+        constexpr auto await_resume() noexcept -> void {}
 
         context&                m_ctx;
         event_base&             m_ev;
@@ -42,13 +43,13 @@ public:
     event_base& operator=(const event_base&) = delete;
     event_base& operator=(event_base&&)      = delete;
 
-    inline bool is_set() const noexcept { return m_state.load(std::memory_order_acquire) == this; }
+    inline auto is_set() const noexcept -> bool { return m_state.load(std::memory_order_acquire) == this; }
 
-    void set_state() noexcept;
+    auto set_state() noexcept -> void;
 
-    void resume_all_awaiter(awaiter_ptr waiter) noexcept;
+    auto resume_all_awaiter(awaiter_ptr waiter) noexcept -> void;
 
-    bool register_awaiter(awaiter_base* waiter) noexcept;
+    auto register_awaiter(awaiter_base* waiter) noexcept -> bool;
 
 private:
     std::atomic<awaiter_ptr> m_state{nullptr};
@@ -69,7 +70,7 @@ public:
     [[CORO_AWAIT_HINT]] awaiter wait() noexcept { return awaiter(local_context(), *this); }
 
     template<typename value_type>
-    void set(value_type&& value) noexcept
+    auto set(value_type&& value) noexcept -> void
     {
         this->return_value(std::forward<value_type>(value));
         set_state();
@@ -89,7 +90,7 @@ public:
 
     [[CORO_AWAIT_HINT]] awaiter wait() noexcept { return awaiter(local_context(), *this); }
 
-    void set() noexcept { set_state(); }
+    auto set() noexcept -> void { set_state(); }
 };
 
 class event_guard
