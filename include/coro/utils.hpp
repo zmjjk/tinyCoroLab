@@ -12,4 +12,14 @@ inline void sleep(int64_t t) noexcept
 {
     std::this_thread::sleep_for(std::chrono::seconds(t));
 }
+
+inline void msleep(int64_t t) noexcept
+{
+    std::this_thread::sleep_for(std::chrono::milliseconds(t));
+}
+
+inline void usleep(int64_t t) noexcept
+{
+    std::this_thread::sleep_for(std::chrono::microseconds(t));
+}
 }; // namespace coro::utils

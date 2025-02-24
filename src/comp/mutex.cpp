@@ -6,10 +6,10 @@ namespace coro
 auto mutex::mutex_awaiter::await_suspend(std::coroutine_handle<> handle) noexcept -> bool
 {
     m_await_coro = handle;
-    return register_mutex();
+    return register_lock();
 }
 
-auto mutex::mutex_awaiter::register_mutex() noexcept -> bool
+auto mutex::mutex_awaiter::register_lock() noexcept -> bool
 {
     while (true)
     {

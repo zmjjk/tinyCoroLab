@@ -28,9 +28,9 @@ public:
 
         constexpr auto await_resume() noexcept -> void {}
 
-        auto register_mutex() noexcept -> bool;
+        auto register_lock() noexcept -> bool;
 
-        auto resume() noexcept -> void;
+        virtual auto resume() noexcept -> void;
 
         context&                m_ctx;
         mutex&                  m_mtx;
