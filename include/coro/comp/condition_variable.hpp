@@ -33,20 +33,20 @@ public:
         {
         }
 
-        bool await_suspend(std::coroutine_handle<> handle) noexcept
+        auto await_suspend(std::coroutine_handle<> handle) noexcept -> bool
         {
             m_await_coro = handle;
             return register_lock();
         }
 
     protected:
-        bool register_lock() noexcept;
+        auto register_lock() noexcept -> bool;
 
-        void register_cv() noexcept;
+        auto register_cv() noexcept -> void;
 
-        void wake_up() noexcept;
+        auto wake_up() noexcept -> void;
 
-        void resume() noexcept override;
+        auto resume() noexcept -> void override;
 
         cond_type m_cond;
         cond_var& m_cv;
@@ -62,9 +62,9 @@ public:
 
     auto wait(mutex& mtx, cond_type& cond) noexcept -> cv_awaiter;
 
-    void notify_one() noexcept;
+    auto notify_one() noexcept -> void;
 
-    void notify_all() noexcept;
+    auto notify_all() noexcept -> void;
 
 private:
     // Spinlock lock_; // maybe unused

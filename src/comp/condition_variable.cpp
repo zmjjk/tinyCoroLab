@@ -4,7 +4,7 @@
 
 namespace coro
 {
-bool condition_variable::cv_awaiter::register_lock() noexcept
+auto condition_variable::cv_awaiter::register_lock() noexcept -> bool
 {
     if (m_cond && m_cond())
     {
@@ -16,7 +16,7 @@ bool condition_variable::cv_awaiter::register_lock() noexcept
     return true;
 }
 
-void condition_variable::cv_awaiter::register_cv() noexcept
+auto condition_variable::cv_awaiter::register_cv() noexcept -> void
 {
     m_ctx.register_wait_task(m_register_state);
     m_register_state = false;
@@ -33,12 +33,12 @@ void condition_variable::cv_awaiter::register_cv() noexcept
     }
 }
 
-void condition_variable::cv_awaiter::wake_up() noexcept
+auto condition_variable::cv_awaiter::wake_up() noexcept -> void
 {
     mutex_awaiter::register_lock();
 }
 
-void condition_variable::cv_awaiter::resume() noexcept
+auto condition_variable::cv_awaiter::resume() noexcept -> void
 {
     if (m_cond && !m_cond())
     {
@@ -64,7 +64,7 @@ auto condition_variable::wait(mutex& mtx, cond_type& cond) noexcept -> cv_awaite
     return cv_awaiter(local_context(), mtx, *this, cond);
 }
 
-void condition_variable::notify_one() noexcept
+auto condition_variable::notify_one() noexcept -> void
 {
     auto cur = m_head;
     if (cur != nullptr)
@@ -78,7 +78,7 @@ void condition_variable::notify_one() noexcept
     }
 }
 
-void condition_variable::notify_all() noexcept
+auto condition_variable::notify_all() noexcept -> void
 {
     cv_awaiter* nxt{nullptr};
     auto        cur_head = m_head;
