@@ -67,7 +67,7 @@ public:
     auto notify_all() noexcept -> void;
 
 private:
-    // Spinlock lock_; // maybe unused
+    // Spinlock lock_;
     cv_awaiter* m_head{nullptr};
     cv_awaiter* m_tail{nullptr};
 };
