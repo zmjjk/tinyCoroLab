@@ -5,13 +5,14 @@
 // #define VERSION_MINOR @PROJECT_VERSION_MINOR @
 // #define INSTALL_PREFIX "@CMAKE_INSTALL_PREFIX@"
 
+#include <cstddef>
+#include <cstdint>
+#include <string>
+
 #define SOURCE_DIR "@PROJECT_SOURCE_DIR@"
 
 namespace coro::config
 {
-#include <cstddef>
-#include <cstdint>
-#include <string>
 
 // ========================== log configuration =============================
 // #define TRACE 0
