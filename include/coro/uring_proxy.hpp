@@ -43,7 +43,7 @@ public:
 
     auto deinit() noexcept -> void
     {
-        io_uring_unregister_eventfd(&m_uring);
+        // io_uring_unregister_eventfd(&m_uring);
         close(m_efd);
         io_uring_queue_exit(&m_uring);
     }
@@ -68,9 +68,15 @@ public:
         }
     }
 
-    inline auto seen_cqe_entry(urcptr cqe) noexcept -> void CORO_INLINE { io_uring_cqe_seen(&m_uring, cqe); }
+    inline auto seen_cqe_entry(urcptr cqe) noexcept -> void CORO_INLINE
+    {
+        io_uring_cqe_seen(&m_uring, cqe);
+    }
 
-    inline auto get_free_sqe() noexcept -> ursptr CORO_INLINE { return io_uring_get_sqe(&m_uring); }
+    inline auto get_free_sqe() noexcept -> ursptr CORO_INLINE
+    {
+        return io_uring_get_sqe(&m_uring);
+    }
 
     inline auto submit() noexcept -> int CORO_INLINE { return io_uring_submit(&m_uring); }
 
@@ -110,7 +116,10 @@ public:
         assert(ret != -1 && "eventfd write error");
     }
 
-    inline auto cq_advance(unsigned int num) noexcept -> void CORO_INLINE { io_uring_cq_advance(&m_uring, num); }
+    inline auto cq_advance(unsigned int num) noexcept -> void CORO_INLINE
+    {
+        io_uring_cq_advance(&m_uring, num);
+    }
 
 private:
     int             m_efd{0};
