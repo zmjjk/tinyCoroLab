@@ -41,7 +41,14 @@ auto context::run(stop_token token) noexcept -> void
         process_work();
         if (token.stop_requested() && empty_wait_task())
         {
-            break;
+            if (!m_engine.ready())
+            {
+                break;
+            }
+            else
+            {
+                continue;
+            }
         }
         poll_work();
         if (token.stop_requested() && empty_wait_task() && !m_engine.ready())

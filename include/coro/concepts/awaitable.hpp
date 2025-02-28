@@ -1,28 +1,16 @@
 #pragma once
 
-#include <concepts>
-#include <coroutine>
-#include <type_traits>
-#include <utility>
+#include "coro/concepts/common.hpp"
 
 namespace coro::concepts
 {
-
-template<typename type, typename... types>
-concept in_types = (std::same_as<type, types> || ...);
-
-template<typename type>
-concept list_type = requires(type t) {
-    { t.next() } -> std::same_as<type*>;
-};
-
 /**
- * This concept declares a type that is required to meet the c++20 coroutine operator co_await()
- * retun type.  It requires the following three member functions:
- *      await_ready() -> bool
- *      await_suspend(std::coroutine_handle<>) -> void|bool|std::coroutine_handle<>
+ * This concept declares a type that is required to meet the c++20 coroutine operator
+ * co_await() retun type.  It requires the following three member functions: await_ready()
+ * -> bool await_suspend(std::coroutine_handle<>) -> void|bool|std::coroutine_handle<>
  *      await_resume() -> decltype(auto)
- *          Where the return type on await_resume is the requested return of the awaitable.
+ *          Where the return type on await_resume is the requested return of the
+ * awaitable.
  */
 // clang-format off
 template<typename type>
