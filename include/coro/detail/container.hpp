@@ -3,10 +3,12 @@
 #include <exception>
 #include <variant>
 
+#include "coro/concepts/common.hpp"
+
 namespace coro::detail
 {
 template<typename T>
-    requires(!std::same_as<T, void>)
+// requires(!std::same_as<T, void> && !concepts::noref_pod_type<T>)
 struct container
 {
 private:
@@ -137,6 +139,68 @@ public:
 
 private:
     variant_type m_storage{};
+};
+
+template<concepts::noref_pod_type T>
+struct container<T>
+{
+public:
+    container() noexcept : m_state(value_state::none) {}
+    ~container() noexcept
+    {
+        if (m_state == value_state::exception)
+        {
+            m_exception_ptr.~exception_ptr();
+        }
+    };
+
+    void return_value(T value) noexcept
+    {
+        m_value = value;
+        m_state = value_state::value;
+    }
+
+    T result() noexcept
+    {
+        if (m_state == value_state::value)
+        {
+            return m_value;
+        }
+        else if (m_state == value_state::exception)
+        {
+            std::rethrow_exception(m_exception_ptr);
+        }
+        else
+        {
+            // throw std::runtime_error{"The return value was never set, did you execute the coroutine?"};
+            return T{};
+        }
+    }
+
+    auto set_exception() noexcept -> void
+    {
+        m_exception_ptr = std::current_exception();
+        m_state         = value_state::exception;
+    }
+
+    inline auto value_ready() noexcept -> bool { return m_state == value_state::value; }
+
+    inline auto value_exception() noexcept -> bool { return m_state == value_state::exception; }
+
+    inline auto value_unset() noexcept -> bool { return m_state == value_state::none; }
+
+private:
+    union
+    {
+        T                  m_value;
+        std::exception_ptr m_exception_ptr;
+    };
+    enum class value_state : uint8_t
+    {
+        none,
+        value,
+        exception
+    } m_state;
 };
 
 }; // namespace coro::detail

@@ -28,41 +28,94 @@ public:
 };
 
 template<typename... task_types>
-class when_all_ready_awaitable<std::tuple<task_types...>>
+class when_all_ready_awaitable_base
 {
 public:
-    explicit when_all_ready_awaitable(task_types&&... tasks) noexcept
+    explicit when_all_ready_awaitable_base(task_types&&... tasks) noexcept
         : m_latch(sizeof...(task_types)),
           m_tasks(std::move(tasks)...)
     {
     }
 
-    explicit when_all_ready_awaitable(std::tuple<task_types...>&& tasks) noexcept
+    explicit when_all_ready_awaitable_base(std::tuple<task_types...>&& tasks) noexcept
         : m_latch(sizeof...(task_types)),
           m_tasks(std::move(tasks))
     {
     }
 
-    CORO_NO_COPY_MOVE(when_all_ready_awaitable);
+    CORO_NO_COPY_MOVE(when_all_ready_awaitable_base);
+
+protected:
+    latch                     m_latch;
+    std::tuple<task_types...> m_tasks;
+};
+
+template<typename... task_types>
+    requires(concepts::all_void_type<typename task_types::rt...>)
+class when_all_ready_awaitable<std::tuple<task_types...>> : public when_all_ready_awaitable_base<task_types...>
+{
+public:
+    using when_all_ready_awaitable_base<task_types...>::when_all_ready_awaitable_base;
 
     auto operator co_await() noexcept
     {
-        std::apply([this](auto&&... tasks) { ((tasks.start(m_latch)), ...); }, m_tasks);
-        return m_latch.wait();
+        std::apply([this](auto&&... tasks) { ((tasks.start(this->m_latch)), ...); }, this->m_tasks);
+        return this->m_latch.wait();
+    }
+};
+
+// https://www.open-std.org/jtc1/sc22/wg21/docs/cwg_active.html#1430
+template<typename task_type, typename... task_types>
+    requires(
+        concepts::all_noref_pod<typename task_type::rt, typename task_types::rt...> &&
+        concepts::all_same_type<typename task_type::rt, typename task_types::rt...>)
+class when_all_ready_awaitable<std::tuple<task_type, task_types...>>
+    : public when_all_ready_awaitable_base<task_type, task_types...>
+{
+public:
+    using storage_type = std::array<typename task_type::rt, 1 + sizeof...(task_types)>;
+
+    using when_all_ready_awaitable_base<task_type, task_types...>::when_all_ready_awaitable_base;
+
+    auto operator co_await() noexcept
+    {
+        struct awaiter
+        {
+            auto await_ready() const noexcept -> bool { return m_awaiter.await_ready(); }
+
+            auto await_suspend(std::coroutine_handle<> awaiting_coroutine) noexcept -> bool
+            {
+                return m_awaiter.await_suspend(awaiting_coroutine);
+            }
+
+            auto await_resume() noexcept -> decltype(auto) { return std::move(m_data); }
+
+            latch::event_t::awaiter m_awaiter;
+            storage_type&           m_data;
+        };
+
+        std::apply(
+            [this](auto&&... tasks)
+            {
+                size_t p{0};
+                ((tasks.start(this->m_latch, &(this->m_data[p++]))), ...);
+            },
+            this->m_tasks);
+
+        return awaiter{this->m_latch.wait(), m_data};
     }
 
 private:
-    latch                     m_latch;
-    std::tuple<task_types...> m_tasks;
+    storage_type m_data;
 };
 
 template<typename T>
 class when_all_task_promise;
 
-template<concepts::void_no_ref_pod T>
+template<concepts::void_noref_pod_type T>
 class when_all_task;
 
-template<concepts::void_no_ref_pod return_type>
+template<concepts::void_noref_pod_type return_type>
 class when_all_task_promise_base
 {
 public:
@@ -98,7 +151,7 @@ protected:
     latch* m_latch{nullptr};
 };
 
-template<concepts::no_ref_pod return_type>
+template<concepts::noref_pod_type return_type>
 class when_all_task_promise<return_type> : public when_all_task_promise_base<return_type>
 {
 public:
@@ -123,12 +176,14 @@ public:
     constexpr auto return_void() noexcept -> void {}
 };
 
-template<concepts::void_no_ref_pod return_type>
+template<concepts::void_noref_pod_type return_type>
 class when_all_task
 {
 public:
     using promise_type          = when_all_task_promise<return_type>;
     using coroutine_handle_type = typename promise_type::coroutine_handle_type;
+    using storage_type          = std::add_pointer_t<return_type>;
+    using rt                    = return_type;
 
     explicit when_all_task(coroutine_handle_type handle) noexcept : m_handle(handle) {}
     when_all_task(const when_all_task&) = delete;
@@ -145,8 +200,12 @@ public:
         }
     }
 
-    void start(latch& l) noexcept
+    void start(latch& l, storage_type p = nullptr) noexcept
     {
+        if constexpr (!std::is_void_v<return_type>)
+        {
+            m_handle.promise().set_pointer(p);
+        }
         m_handle.promise().start(l);
         local_context().submit_task(m_handle);
     }
@@ -183,7 +242,7 @@ template<concepts::awaitable... awaitables_type>
 
 namespace detail
 {
-template<concepts::no_ref_pod return_type>
+template<concepts::noref_pod_type return_type>
 auto when_all_task_promise<return_type>::get_return_object() noexcept -> decltype(auto)
 {
     return when_all_task<return_type>{

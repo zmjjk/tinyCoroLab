@@ -9,9 +9,8 @@ namespace coro
 
 class latch
 {
-    using event_t = event<>;
-
 public:
+    using event_t = event<>;
     latch(std::uint64_t count) noexcept : m_count(count), m_ev(count <= 0) {}
     latch(const latch&)                    = delete;
     latch(latch&&)                         = delete;

@@ -224,7 +224,8 @@ public:
     auto promise() const& -> const promise_type& { return m_coroutine.promise(); }
     auto promise() && -> promise_type&& { return std::move(m_coroutine.promise()); }
 
-    auto handle() -> coroutine_handle { return m_coroutine; }
+    auto handle() & -> coroutine_handle { return m_coroutine; }
+    auto handle() && -> coroutine_handle { return std::exchange(m_coroutine, nullptr); }
 
 private:
     coroutine_handle m_coroutine{nullptr};

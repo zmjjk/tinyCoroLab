@@ -51,7 +51,7 @@ endif()
 
 # TODO: add more options
 
-message("Complier path: ${CMAKE_CXX_COMPILER}")
+message(STATUS "Complier path: ${CMAKE_CXX_COMPILER}")
 message(STATUS "Enable testing: ${ENABLE_UNIT_TESTS}")
 message(STATUS "Enable debug mode: ${ENABLE_DEBUG_MODE}")
 message(STATUS "Enable build shared libs: ${ENABLE_BUILD_SHARED_LIBS}")
