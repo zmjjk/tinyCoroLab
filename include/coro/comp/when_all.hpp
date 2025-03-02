@@ -110,12 +110,15 @@ private:
 };
 
 template<typename T>
+concept when_all_task_return_type = std::is_void_v<T> || concepts::conventional_type<T>;
+
+template<typename T>
 class when_all_task_promise;
 
-template<concepts::void_noref_pod_type T>
+template<when_all_task_return_type T>
 class when_all_task;
 
-template<concepts::void_noref_pod_type return_type>
+template<when_all_task_return_type return_type>
 class when_all_task_promise_base
 {
 public:
@@ -151,7 +154,7 @@ protected:
     latch* m_latch{nullptr};
 };
 
-template<concepts::noref_pod_type return_type>
+template<concepts::conventional_type return_type>
 class when_all_task_promise<return_type> : public when_all_task_promise_base<return_type>
 {
 public:
@@ -176,7 +179,7 @@ public:
     constexpr auto return_void() noexcept -> void {}
 };
 
-template<concepts::void_noref_pod_type return_type>
+template<when_all_task_return_type return_type>
 class when_all_task
 {
 public:
@@ -235,14 +238,14 @@ template<
 template<concepts::awaitable... awaitables_type>
 [[CORO_AWAIT_HINT]] static auto when_all(awaitables_type... awaitables) noexcept -> decltype(auto)
 {
-    return detail::when_all_ready_awaitable<std::tuple<
-        detail::when_all_task<typename concepts::awaitable_traits<awaitables_type>::awaiter_return_type>...>>(
+    return detail::when_all_ready_awaitable<std::tuple<detail::when_all_task<
+        std::remove_reference_t<typename concepts::awaitable_traits<awaitables_type>::awaiter_return_type>>...>>(
         std::make_tuple(detail::make_when_all_task(std::move(awaitables))...));
 }
 
 namespace detail
 {
-template<concepts::noref_pod_type return_type>
+template<concepts::conventional_type return_type>
 auto when_all_task_promise<return_type>::get_return_object() noexcept -> decltype(auto)
 {
     return when_all_task<return_type>{

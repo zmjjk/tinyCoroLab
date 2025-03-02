@@ -8,7 +8,7 @@
 namespace coro::detail
 {
 template<typename T>
-// requires(!std::same_as<T, void> && !concepts::noref_pod_type<T>)
+// requires(!std::same_as<T, void> && !concepts::pod_type<T>)
 struct container
 {
 private:
@@ -141,7 +141,7 @@ private:
     variant_type m_storage{};
 };
 
-template<concepts::noref_pod_type T>
+template<concepts::pod_type T>
 struct container<T>
 {
 public:
