@@ -28,7 +28,7 @@ using engine = detail::engine;
 class context
 {
 public:
-    context() noexcept                 = default;
+    context() noexcept;
     ~context() noexcept                = default;
     context(const context&)            = delete;
     context(context&&)                 = delete;

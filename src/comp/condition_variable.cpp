@@ -22,6 +22,7 @@ auto condition_variable::cv_awaiter::register_cv() noexcept -> void
     m_register_state = false;
     m_next           = nullptr;
 
+    m_cv.m_lock.lock();
     if (m_cv.m_tail == nullptr)
     {
         m_cv.m_head = m_cv.m_tail = this;
@@ -31,11 +32,15 @@ auto condition_variable::cv_awaiter::register_cv() noexcept -> void
         m_cv.m_tail->m_next = this;
         m_cv.m_tail         = this;
     }
+    m_cv.m_lock.unlock();
 }
 
 auto condition_variable::cv_awaiter::wake_up() noexcept -> void
 {
-    mutex_awaiter::register_lock();
+    if (!mutex_awaiter::register_lock())
+    {
+        resume();
+    }
 }
 
 auto condition_variable::cv_awaiter::resume() noexcept -> void
@@ -64,8 +69,10 @@ auto condition_variable::wait(mutex& mtx, cond_type& cond) noexcept -> cv_awaite
     return cv_awaiter(local_context(), mtx, *this, cond);
 }
 
+// https://stackoverflow.com/questions/17101922/do-i-have-to-acquire-lock-before-calling-condition-variable-notify-one
 auto condition_variable::notify_one() noexcept -> void
 {
+    m_lock.lock();
     auto cur = m_head;
     if (cur != nullptr)
     {
@@ -74,15 +81,24 @@ auto condition_variable::notify_one() noexcept -> void
         {
             m_tail = nullptr;
         }
+        m_lock.unlock();
         cur->wake_up();
+    }
+    else
+    {
+        m_lock.unlock();
     }
 }
 
 auto condition_variable::notify_all() noexcept -> void
 {
     cv_awaiter* nxt{nullptr};
-    auto        cur_head = m_head;
+
+    m_lock.lock();
+    auto cur_head = m_head;
     m_head = m_tail = nullptr;
+    m_lock.unlock();
+
     while (cur_head != nullptr)
     {
         nxt = reinterpret_cast<cv_awaiter*>(cur_head->m_next);

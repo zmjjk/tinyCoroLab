@@ -2,9 +2,9 @@
 
 #include <functional>
 
-#include "coro/comp/mutex.hpp"
-
 #include "coro/attribute.hpp"
+#include "coro/comp/mutex.hpp"
+#include "coro/spinlock.hpp"
 
 namespace coro
 {
@@ -21,11 +21,7 @@ public:
     {
         friend condition_variable;
 
-        cv_awaiter(context& ctx, mutex& mtx, cond_var& cv) noexcept
-            : mutex_awaiter(ctx, mtx),
-              m_cv(cv)
-        {
-        }
+        cv_awaiter(context& ctx, mutex& mtx, cond_var& cv) noexcept : mutex_awaiter(ctx, mtx), m_cv(cv) {}
         cv_awaiter(context& ctx, mutex& mtx, cond_var& cv, cond_type& cond) noexcept
             : mutex_awaiter(ctx, mtx),
               m_cv(cv),
@@ -67,9 +63,9 @@ public:
     auto notify_all() noexcept -> void;
 
 private:
-    // Spinlock lock_;
-    cv_awaiter* m_head{nullptr};
-    cv_awaiter* m_tail{nullptr};
+    detail::spinlock m_lock;
+    alignas(config::kCacheLineSize) cv_awaiter* m_head{nullptr};
+    alignas(config::kCacheLineSize) cv_awaiter* m_tail{nullptr};
 };
 
 }; // namespace coro

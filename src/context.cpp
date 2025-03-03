@@ -3,6 +3,11 @@
 
 namespace coro
 {
+context::context() noexcept
+{
+    m_id = ginfo.context_id.fetch_add(1, std::memory_order_relaxed);
+}
+
 auto context::start() noexcept -> void
 {
     m_job = make_unique<jthread>(
@@ -23,7 +28,6 @@ auto context::stop() noexcept -> void
 
 auto context::init() noexcept -> void
 {
-    m_id      = ginfo.context_id++;
     linfo.ctx = this;
     m_engine.init();
 }
