@@ -54,6 +54,11 @@ auto condition_variable::cv_awaiter::resume() noexcept -> void
     mutex_awaiter::resume();
 }
 
+condition_variable::~condition_variable() noexcept
+{
+    assert(m_head == nullptr && m_tail == nullptr && "exist sleep awaiter when cv destruct");
+}
+
 auto condition_variable::wait(mutex& mtx) noexcept -> cv_awaiter
 {
     return cv_awaiter(local_context(), mtx, *this);

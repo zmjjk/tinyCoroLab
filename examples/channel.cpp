@@ -11,7 +11,6 @@ task<> producer(int i)
         co_await ch.send(i);
     }
 
-    utils::sleep(1);
     ch.close();
     co_return;
 }

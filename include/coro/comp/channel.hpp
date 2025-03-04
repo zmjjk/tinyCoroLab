@@ -14,30 +14,71 @@
 
 namespace coro
 {
+
+namespace detail
+{
+class channel_base
+{
+public:
+    ~channel_base() noexcept { assert(part_closed() && "detected channel destruct with no_close state"); }
+
+    void close() noexcept
+    {
+        std::atomic_ref<uint8_t>(m_close_state).store(part_close, std::memory_order_release);
+        m_producer_cv.notify_all();
+        m_consumer_cv.notify_all();
+    }
+
+    // TODO: Implement sync_close
+    // task<> sync_close() noexcept {}
+
+    // TODO: There are too many duplicated codes in send and recv of each channel,
+    // use CRTP to fix it.
+
+protected:
+    inline bool complete_closed_atomic() noexcept
+    {
+        return std::atomic_ref<uint8_t>(m_close_state).load(std::memory_order_acquire) <= complete_close;
+    }
+
+    inline bool part_closed_atomic() noexcept
+    {
+        return std::atomic_ref<uint8_t>(m_close_state).load(std::memory_order_acquire) <= part_close;
+    }
+
+    inline bool part_closed() noexcept { return m_close_state <= part_close; }
+
+protected:
+    inline static constexpr uint8_t complete_close = 0;
+    inline static constexpr uint8_t part_close     = 1;
+    inline static constexpr uint8_t no_close       = 2;
+
+    mutex              m_mtx;
+    condition_variable m_producer_cv;
+    condition_variable m_consumer_cv;
+    alignas(std::atomic_ref<uint8_t>::required_alignment) uint8_t m_close_state{no_close};
+};
+}; // namespace detail
+
 template<concepts::conventional_type T, size_t capacity = 0>
-class channel
+class channel : public detail::channel_base
 {
     using data_type = std::optional<T>;
 
 public:
-    ~channel() noexcept
-    {
-        close();
-        // FIXME: Maybe cause coredump
-    }
-
     template<typename value_type>
         requires(std::is_constructible_v<T, value_type &&>)
     task<bool> send(value_type&& value) noexcept
     {
-        if (closed())
+        if (part_closed_atomic())
         {
             co_return false;
         }
 
         auto lock = co_await m_mtx.lock_guard();
-        co_await m_producer_cv.wait(m_mtx, [this]() -> bool { return !full() || m_closed; });
-        if (m_closed)
+        co_await m_producer_cv.wait(m_mtx, [this]() -> bool { return !full() || part_closed(); });
+
+        if (part_closed())
         {
             co_return false;
         }
@@ -56,15 +97,16 @@ public:
 
     task<data_type> recv() noexcept
     {
-        if (closed())
+        if (complete_closed_atomic())
         {
             co_return std::nullopt;
         }
 
         auto lock = co_await m_mtx.lock_guard();
-        co_await m_consumer_cv.wait(m_mtx, [this]() -> bool { return !empty() || m_closed; });
-        if (m_closed)
+        co_await m_consumer_cv.wait(m_mtx, [this]() -> bool { return !empty() || part_closed(); });
+        if (empty() && part_closed())
         {
+            m_close_state = complete_close;
             co_return std::nullopt;
         }
 
@@ -80,58 +122,39 @@ public:
         co_return p;
     }
 
-    void close() noexcept
-    {
-        std::atomic_ref<bool>(m_closed).store(true, std::memory_order_release);
-        m_producer_cv.notify_all();
-        m_consumer_cv.notify_all();
-    }
-
 private:
     inline bool empty() noexcept { return m_num == 0; }
 
     inline bool full() noexcept { return m_num == capacity; }
 
-    inline bool closed() noexcept { return std::atomic_ref<bool>(m_closed).load(std::memory_order_acquire) == true; }
-
 private:
-    mutex                   m_mtx;
-    condition_variable      m_producer_cv;
-    condition_variable      m_consumer_cv;
     size_t                  m_head{0};
     size_t                  m_tail{0};
     size_t                  m_num{0};
     std::array<T, capacity> m_array;
-    alignas(std::atomic_ref<bool>::required_alignment) bool m_closed{false};
 };
 
 template<concepts::conventional_type T, size_t capacity>
     requires(std::has_single_bit(capacity))
-class channel<T, capacity>
+class channel<T, capacity> : public detail::channel_base
 {
     using data_type              = std::optional<T>;
     static constexpr size_t mask = capacity - 1;
 
 public:
-    ~channel() noexcept
-    {
-        close();
-        // FIXME: Same problem as before
-    }
-
     template<typename value_type>
         requires(std::is_constructible_v<T, value_type &&>)
     task<bool> send(value_type&& value) noexcept
     {
-        if (closed())
+        if (part_closed_atomic())
         {
             co_return false;
         }
 
         auto lock = co_await m_mtx.lock_guard();
-        co_await m_producer_cv.wait(m_mtx, [this]() -> bool { return !full() || m_closed; });
+        co_await m_producer_cv.wait(m_mtx, [this]() -> bool { return !full() || part_closed(); });
 
-        if (m_closed)
+        if (part_closed())
         {
             co_return false;
         }
@@ -145,15 +168,16 @@ public:
 
     task<data_type> recv() noexcept
     {
-        if (closed())
+        if (complete_closed_atomic())
         {
             co_return std::nullopt;
         }
 
         auto lock = co_await m_mtx.lock_guard();
-        co_await m_consumer_cv.wait(m_mtx, [this]() -> bool { return !empty() || m_closed; });
-        if (m_closed)
+        co_await m_consumer_cv.wait(m_mtx, [this]() -> bool { return !empty() || part_closed(); });
+        if (empty() && part_closed())
         {
+            m_close_state = complete_close;
             co_return std::nullopt;
         }
 
@@ -162,13 +186,6 @@ public:
 
         m_producer_cv.notify_one();
         co_return p;
-    }
-
-    void close() noexcept
-    {
-        std::atomic_ref<bool>(m_closed).store(true, std::memory_order_release);
-        m_producer_cv.notify_all();
-        m_consumer_cv.notify_all();
     }
 
 private:
@@ -180,43 +197,31 @@ private:
 
     inline bool full() noexcept { return (m_tail - m_head) == capacity; }
 
-    inline bool closed() noexcept { return std::atomic_ref<bool>(m_closed).load(std::memory_order_acquire) == true; }
-
 private:
-    mutex                   m_mtx;
-    condition_variable      m_producer_cv;
-    condition_variable      m_consumer_cv;
     size_t                  m_head{0};
     size_t                  m_tail{0};
     std::array<T, capacity> m_array;
-    alignas(std::atomic_ref<bool>::required_alignment) bool m_closed{false};
 };
 
 template<concepts::conventional_type T>
-class channel<T, 0>
+class channel<T, 0> : public detail::channel_base
 {
     using data_type = std::optional<T>;
 
 public:
-    ~channel() noexcept
-    {
-        close();
-        // FIXME: Same problem as before
-    }
-
     template<typename value_type>
         requires(std::is_constructible_v<T, value_type &&>)
     task<bool> send(value_type&& value) noexcept
     {
-        if (closed())
+        if (part_closed_atomic())
         {
             co_return false;
         }
 
         auto lock = co_await m_mtx.lock_guard();
-        co_await m_producer_cv.wait(m_mtx, [this]() -> bool { return !(this->m_data.has_value()) || m_closed; });
+        co_await m_producer_cv.wait(m_mtx, [this]() -> bool { return !full() || part_closed(); });
 
-        if (m_closed)
+        if (part_closed())
         {
             co_return false;
         }
@@ -229,41 +234,32 @@ public:
 
     task<data_type> recv() noexcept
     {
-        if (closed())
+        if (complete_closed_atomic())
         {
             co_return std::nullopt;
         }
 
         auto lock = co_await m_mtx.lock_guard();
-        co_await m_consumer_cv.wait(m_mtx, [this]() -> bool { return this->m_data.has_value() || m_closed; });
-
-        if (m_closed)
+        co_await m_consumer_cv.wait(m_mtx, [this]() -> bool { return !empty() || part_closed(); });
+        if (empty() && part_closed())
         {
+            m_close_state = complete_close;
             co_return std::nullopt;
         }
 
         auto p = std::move(m_data);
         m_data = std::nullopt;
+
         m_producer_cv.notify_one();
         co_return p;
     }
 
-    void close() noexcept
-    {
-        std::atomic_ref<bool>(m_closed).store(true, std::memory_order_release);
-        m_producer_cv.notify_all();
-        m_consumer_cv.notify_all();
-    }
+private:
+    inline bool empty() noexcept { return !m_data.has_value(); }
+    inline bool full() noexcept { return m_data.has_value(); }
 
 private:
-    inline bool closed() noexcept { return std::atomic_ref<bool>(m_closed).load(std::memory_order_acquire) == true; }
-
-private:
-    mutex              m_mtx;
-    condition_variable m_producer_cv;
-    condition_variable m_consumer_cv;
-    data_type          m_data{std::nullopt};
-    alignas(std::atomic_ref<bool>::required_alignment) bool m_closed{false};
+    data_type m_data{std::nullopt};
 };
 
 }; // namespace coro

@@ -50,6 +50,8 @@ public:
 
 public:
     condition_variable() noexcept = default;
+    ~condition_variable() noexcept;
+
     CORO_NO_COPY_MOVE(condition_variable);
 
     auto wait(mutex& mtx) noexcept -> cv_awaiter;
