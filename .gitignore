@@ -33,6 +33,8 @@
 .vscode
 logs
 build
+build_debug
+build_release
 Testing
 temp
 config/config.h
