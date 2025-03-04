@@ -22,31 +22,30 @@ class channel_base
 public:
     ~channel_base() noexcept { assert(part_closed() && "detected channel destruct with no_close state"); }
 
-    void close() noexcept
+    auto close() noexcept -> void
     {
         std::atomic_ref<uint8_t>(m_close_state).store(part_close, std::memory_order_release);
         m_producer_cv.notify_all();
         m_consumer_cv.notify_all();
     }
 
-    // TODO: Implement sync_close
+    // TODO: Implement sync_close.
     // task<> sync_close() noexcept {}
 
-    // TODO: There are too many duplicated codes in send and recv of each channel,
-    // use CRTP to fix it.
+    // TODO: There are too many duplicated codes in send and recv of each channel, use CRTP to fix it.
 
 protected:
-    inline bool complete_closed_atomic() noexcept
+    inline auto complete_closed_atomic() noexcept -> bool
     {
         return std::atomic_ref<uint8_t>(m_close_state).load(std::memory_order_acquire) <= complete_close;
     }
 
-    inline bool part_closed_atomic() noexcept
+    inline auto part_closed_atomic() noexcept -> bool
     {
         return std::atomic_ref<uint8_t>(m_close_state).load(std::memory_order_acquire) <= part_close;
     }
 
-    inline bool part_closed() noexcept { return m_close_state <= part_close; }
+    inline auto part_closed() noexcept -> bool { return m_close_state <= part_close; }
 
 protected:
     inline static constexpr uint8_t complete_close = 0;
@@ -68,7 +67,7 @@ class channel : public detail::channel_base
 public:
     template<typename value_type>
         requires(std::is_constructible_v<T, value_type &&>)
-    task<bool> send(value_type&& value) noexcept
+    auto send(value_type&& value) noexcept -> task<bool>
     {
         if (part_closed_atomic())
         {
@@ -95,7 +94,7 @@ public:
         co_return true;
     }
 
-    task<data_type> recv() noexcept
+    auto recv() noexcept -> task<data_type>
     {
         if (complete_closed_atomic())
         {
@@ -123,9 +122,9 @@ public:
     }
 
 private:
-    inline bool empty() noexcept { return m_num == 0; }
+    inline auto empty() noexcept -> bool { return m_num == 0; }
 
-    inline bool full() noexcept { return m_num == capacity; }
+    inline auto full() noexcept -> bool { return m_num == capacity; }
 
 private:
     size_t                  m_head{0};
@@ -144,7 +143,7 @@ class channel<T, capacity> : public detail::channel_base
 public:
     template<typename value_type>
         requires(std::is_constructible_v<T, value_type &&>)
-    task<bool> send(value_type&& value) noexcept
+    auto send(value_type&& value) noexcept -> task<bool>
     {
         if (part_closed_atomic())
         {
@@ -166,7 +165,7 @@ public:
         co_return true;
     }
 
-    task<data_type> recv() noexcept
+    auto recv() noexcept -> task<data_type>
     {
         if (complete_closed_atomic())
         {
@@ -189,13 +188,13 @@ public:
     }
 
 private:
-    inline size_t head() noexcept { return m_head & mask; }
+    inline auto head() noexcept -> size_t { return m_head & mask; }
 
-    inline size_t tail() noexcept { return m_tail & mask; }
+    inline auto tail() noexcept -> size_t { return m_tail & mask; }
 
-    inline bool empty() noexcept { return m_head == m_tail; }
+    inline auto empty() noexcept -> bool { return m_head == m_tail; }
 
-    inline bool full() noexcept { return (m_tail - m_head) == capacity; }
+    inline auto full() noexcept -> bool { return (m_tail - m_head) == capacity; }
 
 private:
     size_t                  m_head{0};
@@ -211,7 +210,7 @@ class channel<T, 0> : public detail::channel_base
 public:
     template<typename value_type>
         requires(std::is_constructible_v<T, value_type &&>)
-    task<bool> send(value_type&& value) noexcept
+    auto send(value_type&& value) noexcept -> task<bool>
     {
         if (part_closed_atomic())
         {
@@ -232,7 +231,7 @@ public:
         co_return true;
     }
 
-    task<data_type> recv() noexcept
+    auto recv() noexcept -> task<data_type>
     {
         if (complete_closed_atomic())
         {
@@ -255,8 +254,8 @@ public:
     }
 
 private:
-    inline bool empty() noexcept { return !m_data.has_value(); }
-    inline bool full() noexcept { return m_data.has_value(); }
+    inline auto empty() noexcept -> bool { return !m_data.has_value(); }
+    inline auto full() noexcept -> bool { return m_data.has_value(); }
 
 private:
     data_type m_data{std::nullopt};
