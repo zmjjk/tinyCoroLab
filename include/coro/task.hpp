@@ -18,10 +18,11 @@ enum class coro_state : uint8_t
 {
     normal,
     detach,
-    cancel,
+    cancel, // TODO: Impl cancel
     none
 };
 
+// TODO: Add yield value support
 struct promise_base
 {
     friend struct final_awaitable;

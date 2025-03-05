@@ -33,6 +33,8 @@ public:
     // task<> sync_close() noexcept {}
 
     // TODO: There are too many duplicated codes in send and recv of each channel, use CRTP to fix it.
+    // TODO: Add for loop fetch value
+    // eg: for(auto it:channel.recv)
 
 protected:
     inline auto complete_closed_atomic() noexcept -> bool
