@@ -1,6 +1,8 @@
 #include "coro/context.hpp"
 #include "coro/log.hpp"
 
+#include "coro/scheduler.hpp"
+
 namespace coro
 {
 context::context() noexcept

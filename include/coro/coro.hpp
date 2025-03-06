@@ -7,4 +7,5 @@
 #include "coro/comp/wait_group.hpp"
 #include "coro/comp/when_all.hpp"
 #include "coro/log.hpp"
+#include "coro/scheduler.hpp"
 #include "coro/utils.hpp"

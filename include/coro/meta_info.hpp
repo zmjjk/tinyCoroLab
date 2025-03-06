@@ -7,7 +7,7 @@
 namespace coro
 {
 class context;
-};
+}; // namespace coro
 
 namespace coro::detail
 {

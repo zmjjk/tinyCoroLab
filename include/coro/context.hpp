@@ -25,6 +25,8 @@ using detail::linfo;
 
 using engine = detail::engine;
 
+class scheduler;
+
 class context
 {
 public:
@@ -59,12 +61,12 @@ public:
 
     inline auto get_ctx_id() noexcept -> ctx_id { return m_id; }
 
-    inline auto register_wait_task(bool registered = true) noexcept -> void
+    inline auto register_wait(bool register_flag = true) noexcept -> void CORO_INLINE
     {
-        m_num_wait_task.fetch_add(int(registered), memory_order_relaxed);
+        m_num_wait_task.fetch_add(size_t(register_flag), memory_order_relaxed);
     }
 
-    inline auto unregister_wait_task() noexcept -> void { m_num_wait_task.fetch_sub(1, memory_order_relaxed); }
+    inline auto unregister_wait() noexcept -> void CORO_INLINE { m_num_wait_task.fetch_sub(1, memory_order_relaxed); }
 
 private:
     auto init() noexcept -> void;
@@ -77,7 +79,10 @@ private:
 
     inline auto poll_work() noexcept -> void { m_engine.poll_submit(); }
 
-    inline auto empty_wait_task() noexcept -> bool { return m_num_wait_task.load(memory_order_relaxed) == 0; }
+    inline auto empty_wait_task() noexcept -> bool CORO_INLINE
+    {
+        return m_num_wait_task.load(memory_order_relaxed) == 0;
+    }
 
 private:
     CORO_ALIGN engine   m_engine;
@@ -92,7 +97,7 @@ inline context& local_context() noexcept
 }
 
 template<typename T>
-inline void submit_task(task<T>&& task) noexcept
+inline void submit_to_context(task<T>&& task) noexcept
 {
     auto handle = task.handle();
     task.detach();
@@ -100,12 +105,12 @@ inline void submit_task(task<T>&& task) noexcept
 }
 
 template<typename T>
-inline void submit_task(task<T>& task) noexcept
+inline void submit_to_context(task<T>& task) noexcept
 {
     submit_task(task.handle());
 }
 
-inline void submit_task(std::coroutine_handle<> handle) noexcept
+inline void submit_to_context(std::coroutine_handle<> handle) noexcept
 {
     local_context().submit_task(handle);
 }

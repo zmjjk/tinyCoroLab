@@ -1,5 +1,7 @@
 #include "coro/comp/event.hpp"
 
+#include "coro/scheduler.hpp"
+
 namespace coro::detail
 {
 
@@ -24,8 +26,8 @@ auto event_base::resume_all_awaiter(awaiter_ptr waiter) noexcept -> void
     while (waiter != nullptr)
     {
         auto cur = static_cast<awaiter_base*>(waiter);
+        cur->m_ctx.unregister_wait();
         cur->m_ctx.submit_task(cur->m_await_coro);
-        cur->m_ctx.unregister_wait_task();
         waiter = cur->m_next;
     }
 }
@@ -46,7 +48,7 @@ auto event_base::register_awaiter(awaiter_base* waiter) noexcept -> bool
         waiter->m_next = static_cast<awaiter_base*>(old_value);
     } while (!m_state.compare_exchange_weak(old_value, waiter, std::memory_order_acquire));
 
-    waiter->m_ctx.register_wait_task();
+    waiter->m_ctx.register_wait();
     return true;
 }
 

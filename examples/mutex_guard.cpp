@@ -2,7 +2,7 @@
 
 using namespace coro;
 
-#define CONTEXTNUM 100
+#define TASK_NUM 100
 
 mutex mtx;
 int   data = 0;
@@ -21,21 +21,16 @@ task<> add_task(int i)
 int main(int argc, char const* argv[])
 {
     /* code */
-    context ctx[CONTEXTNUM];
-    for (int i = 0; i < CONTEXTNUM; i++)
+    scheduler::init();
+
+    for (int i = 0; i < TASK_NUM; i++)
     {
-        ctx[i].submit_task(add_task(i));
+        scheduler::submit(add_task(i));
     }
 
-    for (int i = 0; i < CONTEXTNUM; i++)
-    {
-        ctx[i].start();
-    }
+    scheduler::start();
 
-    for (int i = 0; i < CONTEXTNUM; i++)
-    {
-        ctx[i].stop();
-    }
+    scheduler::stop();
     assert(data == 1000000);
     return 0;
 }

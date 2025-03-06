@@ -17,15 +17,12 @@ task<> func(int x, int y)
 int main(int argc, char const* argv[])
 {
     /* code */
-    context ctx;
-    ctx.submit_task(func(3, 4));
-    log::info("context submit task finish");
+    scheduler::init();
 
-    ctx.start();
+    scheduler::submit(func(3, 4));
 
-    ctx.stop();
+    scheduler::start();
 
-    log::info("context stop");
-
+    scheduler::stop();
     return 0;
 }

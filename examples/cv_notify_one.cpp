@@ -48,22 +48,13 @@ task<> producer()
 int main(int argc, char const* argv[])
 {
     /* code */
-    context ctx[2];
-    ctx[0].submit_task(consumer());
-    log::info("context 0 submit consumer task");
+    scheduler::init();
 
-    ctx[1].submit_task(producer());
-    log::info("context 1 submit producer task");
+    scheduler::submit(consumer());
+    scheduler::submit(producer());
 
-    ctx[0].start();
-    log::info("context 0 start task");
+    scheduler::start();
 
-    ctx[1].start();
-    log::info("context 1 start task");
-
-    ctx[0].stop();
-    log::info("context 0 stop finish");
-    ctx[1].stop();
-    log::info("context 1 stop finish");
+    scheduler::stop();
     return 0;
 }

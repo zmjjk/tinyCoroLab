@@ -34,14 +34,13 @@ task<> consumer(int i)
 int main(int argc, char const* argv[])
 {
     /* code */
-    context ctx[2];
-    ctx[0].submit_task(producer(0));
-    ctx[1].submit_task(consumer(0));
+    scheduler::init();
 
-    ctx[0].start();
-    ctx[1].start();
+    scheduler::submit(producer(0));
+    scheduler::submit(consumer(1));
 
-    ctx[0].stop();
-    ctx[1].stop();
+    scheduler::start();
+
+    scheduler::stop();
     return 0;
 }

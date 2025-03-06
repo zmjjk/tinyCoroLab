@@ -9,6 +9,8 @@
 #include <cstdint>
 #include <string>
 
+#include "coro/detail/types.hpp"
+
 #define SOURCE_DIR "@PROJECT_SOURCE_DIR@"
 
 namespace coro::config
@@ -37,8 +39,9 @@ constexpr unsigned int kEntryLength = 1024;
 constexpr size_t kCacheLineSize = 64; // alignas(config::kCacheLineSize)
 
 // ===================== execute engine configuration =======================
-using ctx_id             = uint32_t;
-constexpr size_t kQueCap = 1024; // TODO: How to change?
+using ctx_id                                                = uint32_t;
+constexpr size_t                          kQueCap           = 1024; // TODO: How to change?
+constexpr coro::detail::dispatch_strategy kDispatchStrategy = coro::detail::dispatch_strategy::round_robin;
 
 // =========================== net configuration ============================
 constexpr int kDefaultPort = 8000;

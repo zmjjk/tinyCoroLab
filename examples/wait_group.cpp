@@ -21,23 +21,16 @@ task<> done()
 int main(int argc, char const* argv[])
 {
     /* code */
-    context ctx[4];
+    scheduler::init();
     wg.add(3);
 
-    ctx[0].submit_task(wait());
-    ctx[1].submit_task(done());
-    ctx[2].submit_task(done());
-    ctx[3].submit_task(done());
+    scheduler::submit(wait());
+    scheduler::submit(done());
+    scheduler::submit(done());
+    scheduler::submit(done());
 
-    ctx[0].start();
-    ctx[1].start();
-    ctx[2].start();
-    ctx[3].start();
-
-    ctx[0].stop();
-    ctx[1].stop();
-    ctx[2].stop();
-    ctx[3].stop();
+    scheduler::start();
+    scheduler::stop();
 
     return 0;
 }

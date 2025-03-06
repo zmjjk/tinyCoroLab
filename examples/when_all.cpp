@@ -19,9 +19,11 @@ task<> func(int i)
 int main(int argc, char const* argv[])
 {
     /* code */
-    context ctx;
-    ctx.submit_task(func(0));
-    ctx.start();
-    ctx.stop();
+    scheduler::init();
+
+    scheduler::submit(func(0));
+
+    scheduler::start();
+    scheduler::stop();
     return 0;
 }

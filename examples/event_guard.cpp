@@ -2,7 +2,7 @@
 
 using namespace coro;
 
-#define CONTEXTNUM 5
+#define TASK_NUM 5
 
 event<> ev;
 
@@ -25,22 +25,16 @@ task<> wait_task(int i)
 int main(int argc, char const* argv[])
 {
     /* code */
-    context ctx[CONTEXTNUM];
-    for (int i = 0; i < CONTEXTNUM - 1; i++)
-    {
-        ctx[i].submit_task(wait_task(i));
-    }
-    ctx[CONTEXTNUM - 1].submit_task(set_task());
+    scheduler::init();
 
-    for (int i = 0; i < CONTEXTNUM; i++)
+    for (int i = 0; i < TASK_NUM - 1; i++)
     {
-        ctx[i].start();
+        scheduler::submit(wait_task(i));
     }
+    scheduler::submit(set_task());
 
-    for (int i = 0; i < CONTEXTNUM; i++)
-    {
-        ctx[i].stop();
-    }
+    scheduler::start();
 
+    scheduler::stop();
     return 0;
 }

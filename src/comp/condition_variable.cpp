@@ -1,6 +1,6 @@
 #include "coro/comp/condition_variable.hpp"
 
-#include "coro/context.hpp"
+#include "coro/scheduler.hpp"
 
 namespace coro
 {
@@ -18,7 +18,7 @@ auto condition_variable::cv_awaiter::register_lock() noexcept -> bool
 
 auto condition_variable::cv_awaiter::register_cv() noexcept -> void
 {
-    m_ctx.register_wait_task(m_register_state);
+    m_ctx.register_wait(m_register_state);
     m_register_state = false;
     m_next           = nullptr;
 
