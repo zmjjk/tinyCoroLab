@@ -19,7 +19,7 @@ int main(int argc, char const* argv[])
     /* code */
     scheduler::init();
 
-    scheduler::submit(func(3, 4));
+    submit_to_scheduler(func(3, 4));
 
     scheduler::start();
 

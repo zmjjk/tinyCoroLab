@@ -50,8 +50,8 @@ int main(int argc, char const* argv[])
     /* code */
     scheduler::init();
 
-    scheduler::submit(consumer());
-    scheduler::submit(producer());
+    submit_to_scheduler(consumer());
+    submit_to_scheduler(producer());
 
     scheduler::start();
 

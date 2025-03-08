@@ -71,4 +71,21 @@ private:
     detail::dispatcher<coro::config::kDispatchStrategy> m_dispatcher;
 };
 
+template<typename T>
+inline void submit_to_scheduler(task<T>&& task) noexcept
+{
+    local_context().submit_task(std::move(task));
+}
+
+template<typename T>
+inline void submit_to_scheduler(task<T>& task) noexcept
+{
+    local_context().submit_task(task.handle());
+}
+
+inline void submit_to_scheduler(std::coroutine_handle<> handle) noexcept
+{
+    local_context().submit_task(handle);
+}
+
 }; // namespace coro

@@ -21,7 +21,7 @@ int main(int argc, char const* argv[])
     /* code */
     scheduler::init();
 
-    scheduler::submit(func(0));
+    submit_to_scheduler(func(0));
 
     scheduler::start();
     scheduler::stop();

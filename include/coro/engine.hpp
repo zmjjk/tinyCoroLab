@@ -44,7 +44,6 @@ public:
     auto operator=(const engine&) -> engine& = delete;
     auto operator=(engine&&) -> engine&      = delete;
 
-private:
     auto init() noexcept -> void;
 
     auto deinit() noexcept -> void;

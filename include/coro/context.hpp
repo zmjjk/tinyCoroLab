@@ -68,6 +68,8 @@ public:
 
     inline auto unregister_wait() noexcept -> void CORO_INLINE { m_num_wait_task.fetch_sub(1, memory_order_relaxed); }
 
+    inline auto get_engine() noexcept -> engine& { return m_engine; }
+
 private:
     auto init() noexcept -> void;
 
@@ -99,15 +101,13 @@ inline context& local_context() noexcept
 template<typename T>
 inline void submit_to_context(task<T>&& task) noexcept
 {
-    auto handle = task.handle();
-    task.detach();
-    submit_task(handle);
+    local_context().submit_task(std::move(task));
 }
 
 template<typename T>
 inline void submit_to_context(task<T>& task) noexcept
 {
-    submit_task(task.handle());
+    local_context().submit_task(task.handle());
 }
 
 inline void submit_to_context(std::coroutine_handle<> handle) noexcept

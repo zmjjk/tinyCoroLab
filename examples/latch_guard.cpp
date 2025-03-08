@@ -26,10 +26,10 @@ int main(int argc, char const* argv[])
     /* code */
     scheduler::init();
 
-    scheduler::submit(wait_task(TASK_NUM - 1));
+    submit_to_scheduler(wait_task(TASK_NUM - 1));
     for (int i = 0; i < TASK_NUM - 1; i++)
     {
-        scheduler::submit(set_task(i));
+        submit_to_scheduler(set_task(i));
     }
 
     scheduler::start();

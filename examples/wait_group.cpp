@@ -24,10 +24,10 @@ int main(int argc, char const* argv[])
     scheduler::init();
     wg.add(3);
 
-    scheduler::submit(wait());
-    scheduler::submit(done());
-    scheduler::submit(done());
-    scheduler::submit(done());
+    submit_to_scheduler(wait());
+    submit_to_scheduler(done());
+    submit_to_scheduler(done());
+    submit_to_scheduler(done());
 
     scheduler::start();
     scheduler::stop();

@@ -1,21 +1,19 @@
 # 待完成
 
-- 添加负载均衡模块使得任务支持跨线程
-- 解决context stop过慢的问题
-- 为各种组件添加make_task，类似libcoro
-- 拓展新功能
+- 添加负载均衡模块使得任务支持跨线程 [done]
+- 解决context stop过慢的问题 [done]
+- 拓展新功能 [future]
 - 重构优化
 - perf火焰图性能优化
-- 支持任务绑定context
-- 添加任务取消机制
+- 添加任务取消机制 [future]
 - 为cmake添加各项环境检查
 - 解决各项TODO
-- 为awaiter添加基类
+- 为awaiter添加基类[future]
 - 配置文件重新设计
-- 优化task等组件类型传递
 - 动态链接库接口可见性
-- 添加co_yield功能
+- 添加co_yield功能 [future]
 - README里添加更新日志
+- 添加注释
 
 ## 后续实验
 

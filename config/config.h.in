@@ -32,15 +32,15 @@ namespace coro::config
 constexpr const char* kLogFileName = "temp/logs/coro.log";
 constexpr int64_t     kFlushDura   = 3; // seconds
 
-// ========================== uring configuration ===========================
-constexpr unsigned int kEntryLength = 1024;
-
 // =========================== cpu configuration ============================
 constexpr size_t kCacheLineSize = 64; // alignas(config::kCacheLineSize)
 
+// ========================== uring configuration ===========================
+constexpr unsigned int kEntryLength = 1024;
+
 // ===================== execute engine configuration =======================
 using ctx_id                                                = uint32_t;
-constexpr size_t                          kQueCap           = 1024; // TODO: How to change?
+constexpr size_t                          kQueCap           = 1024;
 constexpr coro::detail::dispatch_strategy kDispatchStrategy = coro::detail::dispatch_strategy::round_robin;
 
 // =========================== net configuration ============================
