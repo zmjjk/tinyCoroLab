@@ -9,6 +9,7 @@
 #include "config.h"
 #include "coro/atomic_que.hpp"
 #include "coro/attribute.hpp"
+#include "coro/meta_info.hpp"
 #include "coro/uring_proxy.hpp"
 
 namespace coro
@@ -35,7 +36,11 @@ class engine
     friend class ::coro::context;
 
 public:
-    engine() noexcept : m_num_io_wait_submit(0), m_num_io_running(0) {}
+    engine() noexcept : m_num_io_wait_submit(0), m_num_io_running(0)
+    {
+        m_id = ginfo.engine_id.fetch_add(1, std::memory_order_relaxed);
+    }
+
     ~engine() noexcept = default;
 
     // forbidden to copy and move
@@ -66,13 +71,28 @@ public:
 
     auto wake_up() noexcept -> void;
 
-    inline auto add_wait_task() noexcept -> void { m_num_io_wait_submit.fetch_add(1, std::memory_order_relaxed); }
+    inline auto add_io_submit() noexcept -> void { m_num_io_wait_submit.fetch_add(1, std::memory_order_release); }
+
+    inline auto empty_io() noexcept -> bool
+    {
+        return m_num_io_wait_submit.load(std::memory_order_acquire) == 0 &&
+               m_num_io_running.load(std::memory_order_acquire) == 0;
+    }
+
+    inline auto get_id() noexcept -> uint32_t { return m_id; }
 
 private:
+    uint32_t                       m_id;
     uring_proxy                    m_upxy;
     spsc_queue<coroutine_handle<>> m_task_queue;
     array<urcptr, config::kQueCap> m_urc;
     atomic<size_t>                 m_num_io_wait_submit{0};
-    size_t                         m_num_io_running{0};
+    atomic<size_t>                 m_num_io_running{0};
 };
+
+inline engine& local_engine() noexcept
+{
+    return *linfo.egn;
+}
+
 }; // namespace coro::detail

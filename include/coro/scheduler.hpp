@@ -29,19 +29,14 @@ public:
 
     inline static auto join() noexcept -> void { get_instance()->join_impl(); }
 
-    template<typename T>
-    static inline auto submit(task<T>&& task) noexcept -> void
+    static inline auto submit(task<void>&& task) noexcept -> void
     {
         auto handle = task.handle();
         task.detach();
         submit(handle);
     }
 
-    template<typename T>
-    static inline auto submit(task<T>& task) noexcept -> void
-    {
-        submit(task.handle());
-    }
+    static inline auto submit(task<void>& task) noexcept -> void { submit(task.handle()); }
 
     inline static auto submit(std::coroutine_handle<> handle) noexcept -> void
     {
@@ -71,21 +66,19 @@ private:
     detail::dispatcher<coro::config::kDispatchStrategy> m_dispatcher;
 };
 
-template<typename T>
-inline void submit_to_scheduler(task<T>&& task) noexcept
+inline void submit_to_scheduler(task<void>&& task) noexcept
 {
-    local_context().submit_task(std::move(task));
+    scheduler::submit(std::move(task));
 }
 
-template<typename T>
-inline void submit_to_scheduler(task<T>& task) noexcept
+inline void submit_to_scheduler(task<void>& task) noexcept
 {
-    local_context().submit_task(task.handle());
+    scheduler::submit(task.handle());
 }
 
 inline void submit_to_scheduler(std::coroutine_handle<> handle) noexcept
 {
-    local_context().submit_task(handle);
+    scheduler::submit(handle);
 }
 
 }; // namespace coro

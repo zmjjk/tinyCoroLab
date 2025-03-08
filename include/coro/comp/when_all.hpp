@@ -210,7 +210,7 @@ public:
             m_handle.promise().set_pointer(p);
         }
         m_handle.promise().start(l);
-        local_context().submit_task(m_handle);
+        submit_to_context(m_handle);
     }
 
 private:

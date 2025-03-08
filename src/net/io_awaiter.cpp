@@ -2,11 +2,13 @@
 #include <sys/socket.h>
 #include <unistd.h>
 
+#include "coro/log.hpp"
 #include "coro/net/io_awaiter.hpp"
 #include "coro/scheduler.hpp"
 
 namespace coro::net
 {
+using ::coro::detail::local_engine;
 using detail::io_type;
 
 tcp_accept_awaiter::tcp_accept_awaiter(int listenfd, int flags) noexcept
@@ -17,13 +19,13 @@ tcp_accept_awaiter::tcp_accept_awaiter(int listenfd, int flags) noexcept
     // FIXME: this isn't atomic, maybe cause bug?
     io_uring_prep_accept(m_urs, listenfd, nullptr, &len, flags);
     io_uring_sqe_set_data(m_urs, &m_info); // old uring version need set data after prep
-    local_context().get_engine().add_wait_task();
+    local_engine().add_io_submit();
 }
 
 auto tcp_accept_awaiter::callback(io_info* data, int res) noexcept -> void
 {
     data->result = res;
-    submit_to_scheduler(data->handle);
+    submit_to_context(data->handle);
 }
 
 tcp_read_awaiter::tcp_read_awaiter(int sockfd, char* buf, size_t len, int flags) noexcept
@@ -33,13 +35,13 @@ tcp_read_awaiter::tcp_read_awaiter(int sockfd, char* buf, size_t len, int flags)
 
     io_uring_prep_recv(m_urs, sockfd, buf, len, flags);
     io_uring_sqe_set_data(m_urs, &m_info);
-    local_context().get_engine().add_wait_task();
+    local_engine().add_io_submit();
 }
 
 auto tcp_read_awaiter::callback(io_info* data, int res) noexcept -> void
 {
     data->result = res;
-    local_context().submit_task(data->handle);
+    submit_to_context(data->handle);
 }
 
 tcp_write_awaiter::tcp_write_awaiter(int sockfd, char* buf, size_t len, int flags) noexcept
@@ -49,13 +51,13 @@ tcp_write_awaiter::tcp_write_awaiter(int sockfd, char* buf, size_t len, int flag
 
     io_uring_prep_send(m_urs, sockfd, buf, len, flags);
     io_uring_sqe_set_data(m_urs, &m_info);
-    local_context().get_engine().add_wait_task();
+    local_engine().add_io_submit();
 }
 
 auto tcp_write_awaiter::callback(io_info* data, int res) noexcept -> void
 {
     data->result = res;
-    local_context().submit_task(data->handle);
+    submit_to_context(data->handle);
 }
 
 tcp_close_awaiter::tcp_close_awaiter(int sockfd) noexcept
@@ -65,13 +67,13 @@ tcp_close_awaiter::tcp_close_awaiter(int sockfd) noexcept
 
     io_uring_prep_close(m_urs, sockfd);
     io_uring_sqe_set_data(m_urs, &m_info);
-    local_context().get_engine().add_wait_task();
+    local_engine().add_io_submit();
 }
 
 auto tcp_close_awaiter::callback(io_info* data, int res) noexcept -> void
 {
     data->result = res;
-    local_context().submit_task(data->handle);
+    submit_to_context(data->handle);
 }
 
 tcp_connect_awaiter::tcp_connect_awaiter(int sockfd, const sockaddr* addr, socklen_t addrlen) noexcept
@@ -82,7 +84,7 @@ tcp_connect_awaiter::tcp_connect_awaiter(int sockfd, const sockaddr* addr, sockl
 
     io_uring_prep_connect(m_urs, sockfd, addr, addrlen);
     io_uring_sqe_set_data(m_urs, &m_info);
-    local_context().get_engine().add_wait_task();
+    local_engine().add_io_submit();
 }
 
 auto tcp_connect_awaiter::callback(io_info* data, int res) noexcept -> void
@@ -95,7 +97,7 @@ auto tcp_connect_awaiter::callback(io_info* data, int res) noexcept -> void
     {
         data->result = static_cast<int>(data->data);
     }
-    submit_to_scheduler(data->handle);
+    submit_to_context(data->handle);
 }
 
 stdin_awaiter::stdin_awaiter(char* buf, size_t len, int flags) noexcept
@@ -105,13 +107,13 @@ stdin_awaiter::stdin_awaiter(char* buf, size_t len, int flags) noexcept
 
     io_uring_prep_read(m_urs, STDIN_FILENO, buf, len, flags);
     io_uring_sqe_set_data(m_urs, &m_info);
-    local_context().get_engine().add_wait_task();
+    local_engine().add_io_submit();
 }
 
 auto stdin_awaiter::callback(io_info* data, int res) noexcept -> void
 {
     data->result = res;
-    local_context().submit_task(data->handle);
+    submit_to_context(data->handle);
 }
 
 }; // namespace coro::net

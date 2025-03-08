@@ -3,8 +3,8 @@
 #include <coroutine>
 
 #include "coro/context.hpp"
+#include "coro/net/io_info.hpp"
 #include "coro/uring_proxy.hpp"
-#include "net/io_info.hpp"
 
 namespace coro::net::detail
 {
@@ -12,7 +12,7 @@ namespace coro::net::detail
 class base_io_awaiter
 {
 public:
-    base_io_awaiter() noexcept : m_urs(local_context().get_engine().get_free_urs()) {}
+    base_io_awaiter() noexcept : m_urs(coro::detail::local_engine().get_free_urs()) {}
 
     constexpr auto await_ready() noexcept -> bool { return false; }
 

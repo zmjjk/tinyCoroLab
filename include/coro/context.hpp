@@ -6,7 +6,6 @@
 
 #include "config.h"
 #include "coro/engine.hpp"
-#include "coro/log.hpp"
 #include "coro/meta_info.hpp"
 #include "coro/task.hpp"
 
@@ -43,19 +42,14 @@ public:
 
     inline auto join() noexcept -> void { m_job->join(); }
 
-    template<typename T>
-    inline auto submit_task(task<T>&& task) noexcept -> void
+    inline auto submit_task(task<void>&& task) noexcept -> void
     {
         auto handle = task.handle();
         task.detach();
         this->submit_task(handle);
     }
 
-    template<typename T>
-    inline auto submit_task(task<T>& task) noexcept -> void
-    {
-        m_engine.submit_task(task.handle());
-    }
+    inline auto submit_task(task<void>& task) noexcept -> void { m_engine.submit_task(task.handle()); }
 
     inline auto submit_task(std::coroutine_handle<> handle) noexcept -> void { m_engine.submit_task(handle); }
 
@@ -83,7 +77,7 @@ private:
 
     inline auto empty_wait_task() noexcept -> bool CORO_INLINE
     {
-        return m_num_wait_task.load(memory_order_relaxed) == 0;
+        return m_num_wait_task.load(memory_order_relaxed) == 0 && m_engine.empty_io();
     }
 
 private:
@@ -98,14 +92,12 @@ inline context& local_context() noexcept
     return *linfo.ctx;
 }
 
-template<typename T>
-inline void submit_to_context(task<T>&& task) noexcept
+inline void submit_to_context(task<void>&& task) noexcept
 {
     local_context().submit_task(std::move(task));
 }
 
-template<typename T>
-inline void submit_to_context(task<T>& task) noexcept
+inline void submit_to_context(task<void>& task) noexcept
 {
     local_context().submit_task(task.handle());
 }

@@ -37,10 +37,10 @@ int main(int argc, char const* argv[])
     /* code */
     scheduler::init();
 
-    scheduler::submit(producer(0));
-    scheduler::submit(producer(1));
-    scheduler::submit(consumer(2));
-    scheduler::submit(consumer(3));
+    submit_to_scheduler(producer(0));
+    submit_to_scheduler(producer(1));
+    submit_to_scheduler(consumer(2));
+    submit_to_scheduler(consumer(3));
 
     scheduler::start();
 

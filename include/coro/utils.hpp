@@ -2,6 +2,7 @@
 
 #include <chrono>
 #include <cstdint>
+#include <string>
 #include <thread>
 
 namespace coro::utils
@@ -22,4 +23,6 @@ inline void usleep(int64_t t) noexcept
 {
     std::this_thread::sleep_for(std::chrono::microseconds(t));
 }
+
+std::string& trim(std::string& s, const char* to_trim);
 }; // namespace coro::utils

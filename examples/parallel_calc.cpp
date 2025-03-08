@@ -26,7 +26,7 @@ int main(int argc, char const* argv[])
 
     for (int i = 0; i < TASK_NUM; i++)
     {
-        scheduler::submit(calc(i, i * 3, (i + 1) * 3, vec));
+        submit_to_scheduler(calc(i, i * 3, (i + 1) * 3, vec));
     }
 
     scheduler::start();

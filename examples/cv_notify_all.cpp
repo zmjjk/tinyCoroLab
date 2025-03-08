@@ -31,9 +31,9 @@ int main(int argc, char const* argv[])
 
     for (int i = 0; i < TASK_NUM; i++)
     {
-        scheduler::submit(run(i));
+        submit_to_scheduler(run(i));
     }
-    scheduler::submit(run2());
+    submit_to_scheduler(run2());
 
     scheduler::start();
 
