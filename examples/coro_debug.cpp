@@ -4,6 +4,8 @@
 
 using namespace coro;
 
+#define ITEM_NUM 2
+
 cond_var        cv;
 mutex           mtx;
 std::queue<int> que;
@@ -14,7 +16,7 @@ task<> consumer()
     int  cnt{0};
     auto lock = co_await mtx.lock_guard();
     log::info("consumer hold lock");
-    while (cnt < 100)
+    while (cnt < ITEM_NUM)
     {
         co_await cv.wait(mtx, [&]() { return !que.empty(); });
         while (!que.empty())
@@ -31,15 +33,12 @@ task<> consumer()
 
 task<> producer()
 {
-    for (int i = 0; i < 10; i++)
+    for (int i = 0; i < ITEM_NUM; i++)
     {
         auto lock = co_await mtx.lock_guard();
         log::info("producer hold lock");
-        co_await cv.wait(mtx, [&]() { return que.size() < 10; });
-        for (int j = 0; j < 10; j++)
-        {
-            que.push(i * 10 + j);
-        }
+        co_await cv.wait(mtx, [&]() { return que.empty(); });
+        que.push(i);
         log::info("producer add value finish");
         cv.notify_one();
     }

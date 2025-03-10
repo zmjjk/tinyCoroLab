@@ -30,7 +30,7 @@ int main(int argc, char const* argv[])
     submit_to_scheduler(done());
 
     scheduler::start();
-    scheduler::stop();
+    scheduler::loop(false);
 
     return 0;
 }

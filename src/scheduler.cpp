@@ -22,6 +22,18 @@ auto scheduler::start_impl() noexcept -> void
     }
 }
 
+auto scheduler::loop_impl(bool long_run_mode) noexcept -> void
+{
+    if (long_run_mode)
+    {
+        join_impl();
+    }
+    else
+    {
+        stop_impl();
+    }
+}
+
 auto scheduler::stop_impl() noexcept -> void
 {
     for (int i = 0; i < m_ctx_cnt; i++)

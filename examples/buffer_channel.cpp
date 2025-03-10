@@ -47,6 +47,6 @@ int main(int argc, char const* argv[])
     utils::sleep(1);
     ch.close();
 
-    scheduler::stop();
+    scheduler::loop(false);
     return 0;
 }

@@ -2,7 +2,6 @@
 #include <sys/socket.h>
 #include <unistd.h>
 
-#include "coro/log.hpp"
 #include "coro/net/io_awaiter.hpp"
 #include "coro/scheduler.hpp"
 

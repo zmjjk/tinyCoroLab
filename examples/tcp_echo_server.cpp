@@ -39,6 +39,6 @@ int main(int argc, char const* argv[])
 
     submit_to_scheduler(server(8000));
     scheduler::start();
-    scheduler::join();
+    scheduler::loop(false);
     return 0;
 }

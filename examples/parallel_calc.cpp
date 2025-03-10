@@ -31,6 +31,6 @@ int main(int argc, char const* argv[])
 
     scheduler::start();
 
-    scheduler::stop();
+    scheduler::loop(false);
     return 0;
 }

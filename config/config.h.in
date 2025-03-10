@@ -38,10 +38,15 @@ constexpr size_t kCacheLineSize = 64; // alignas(config::kCacheLineSize)
 // ========================== uring configuration ===========================
 constexpr unsigned int kEntryLength = 1024;
 
+// uncomment below to open uring pooling mode
+// #define ENABLE_POOLING
+constexpr unsigned int kSqthreadIdle = 2000; // ms
+
 // ===================== execute engine configuration =======================
 using ctx_id                                                = uint32_t;
 constexpr size_t                          kQueCap           = 1024;
 constexpr coro::detail::dispatch_strategy kDispatchStrategy = coro::detail::dispatch_strategy::round_robin;
+inline bool                               kLongRunMode      = true;
 
 // =========================== net configuration ============================
 constexpr int kDefaultPort = 8000;

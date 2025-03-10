@@ -23,7 +23,7 @@ class uring_proxy
 public:
     uring_proxy() noexcept
     {
-        // Must init in construct func
+        // must init in construct func
         m_efd = eventfd(0, 0);
         assert(m_efd >= 0 && "uring_proxy init event_fd failed");
     }
@@ -32,8 +32,13 @@ public:
 
     auto init(unsigned int entry_length) noexcept -> void
     {
-        // Don't need to set m_para
+        // don't need to set m_para
         memset(&m_para, 0, sizeof(m_para));
+#ifdef ENABLE_POOLING
+        m_para.flags |= IORING_SETUP_SQPOLL;
+        m_para.sq_thread_idle = config::kSqthreadIdle;
+#endif // ENABLE_POOLING
+
         auto res = io_uring_queue_init_params(entry_length, &m_uring, &m_para);
         assert(res == 0 && "uring_proxy init uring failed");
 
@@ -43,7 +48,9 @@ public:
 
     auto deinit() noexcept -> void
     {
+        // this operation cost too much time, so don't call this function
         // io_uring_unregister_eventfd(&m_uring);
+
         close(m_efd);
         m_efd = -1;
         io_uring_queue_exit(&m_uring);

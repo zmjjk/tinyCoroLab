@@ -33,6 +33,6 @@ int main(int argc, char const* argv[])
     scheduler::init();
     scheduler::submit(client("localhost", 8000));
     scheduler::start();
-    scheduler::stop();
+    scheduler::loop(false);
     return 0;
 }

@@ -8,8 +8,6 @@
 #include "config.h"
 #include "coro/dispatcher.hpp"
 
-#include "coro/log.hpp"
-
 namespace coro
 {
 
@@ -25,9 +23,10 @@ public:
 
     inline static auto start() noexcept -> void { get_instance()->start_impl(); }
 
-    inline static auto stop() noexcept -> void { get_instance()->stop_impl(); }
-
-    inline static auto join() noexcept -> void { get_instance()->join_impl(); }
+    inline static auto loop(bool long_run_mode = config::kLongRunMode) noexcept -> void
+    {
+        get_instance()->loop_impl(long_run_mode);
+    }
 
     static inline auto submit(task<void>&& task) noexcept -> void
     {
@@ -54,6 +53,8 @@ private:
 
     auto start_impl() noexcept -> void;
 
+    auto loop_impl(bool long_run_mode) noexcept -> void;
+
     auto stop_impl() noexcept -> void;
 
     auto join_impl() noexcept -> void;
@@ -68,17 +69,38 @@ private:
 
 inline void submit_to_scheduler(task<void>&& task) noexcept
 {
-    scheduler::submit(std::move(task));
+    if (config::kLongRunMode)
+    {
+        scheduler::submit(std::move(task));
+    }
+    else
+    {
+        submit_to_context(std::move(task));
+    }
 }
 
 inline void submit_to_scheduler(task<void>& task) noexcept
 {
-    scheduler::submit(task.handle());
+    if (config::kLongRunMode)
+    {
+        scheduler::submit(task.handle());
+    }
+    else
+    {
+        submit_to_context(task.handle());
+    }
 }
 
 inline void submit_to_scheduler(std::coroutine_handle<> handle) noexcept
 {
-    scheduler::submit(handle);
+    if (config::kLongRunMode)
+    {
+        scheduler::submit(handle);
+    }
+    else
+    {
+        submit_to_context(handle);
+    }
 }
 
 }; // namespace coro

@@ -31,7 +31,7 @@ int main(int argc, char const* argv[])
 
     scheduler::start();
 
-    scheduler::stop();
+    scheduler::loop(false);
     assert(data == 1000000);
     return 0;
 }
