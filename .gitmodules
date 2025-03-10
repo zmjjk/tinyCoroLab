@@ -10,3 +10,9 @@
 [submodule "third_party/liburing"]
 	path = third_party/liburing
 	url = https://github.com/axboe/liburing.git
+[submodule "third_party/benchmark"]
+	path = third_party/benchmark
+	url = https://github.com/google/benchmark.git
+[submodule "third_party/rust_echo_bench"]
+	path = third_party/rust_echo_bench
+	url = https://github.com/haraldh/rust_echo_bench.git
