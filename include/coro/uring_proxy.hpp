@@ -5,6 +5,9 @@
 #include <functional>
 #include <liburing.h>
 #include <sys/eventfd.h>
+#ifdef ENABLE_POOLING
+    #include <time.h>
+#endif // ENABLE_POOLING
 
 #include "config.h"
 #include "coro/attribute.hpp"

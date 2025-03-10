@@ -38,9 +38,9 @@ constexpr size_t kCacheLineSize = 64; // alignas(config::kCacheLineSize)
 // ========================== uring configuration ===========================
 constexpr unsigned int kEntryLength = 1024;
 
-// uncomment below to open uring pooling mode
+// uncomment below to open uring pooling mode, but don't do that, this mode is not currently fully supported
 // #define ENABLE_POOLING
-constexpr unsigned int kSqthreadIdle = 2000; // ms
+constexpr unsigned int kSqthreadIdle = 2000; // millseconds
 
 // ===================== execute engine configuration =======================
 using ctx_id                                                = uint32_t;

@@ -9,11 +9,12 @@
 - 为cmake添加各项环境检查
 - 解决各项TODO
 - 为awaiter添加基类[future]
-- 配置文件重新设计
+- 配置文件重新设计[done]
 - 动态链接库接口可见性
 - 添加co_yield功能 [future]
 - README里添加更新日志
 - 添加注释
+- 为uring添加polling模式
 
 ## 后续实验
 
