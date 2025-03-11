@@ -112,7 +112,7 @@ private:
 template<typename T>
 concept when_all_task_return_type = std::is_void_v<T> || concepts::conventional_type<T>;
 
-template<typename T>
+template<when_all_task_return_type T>
 class when_all_task_promise;
 
 template<when_all_task_return_type T>
