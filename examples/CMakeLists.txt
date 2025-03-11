@@ -1,6 +1,6 @@
 file(GLOB SOURCES "*.cpp")
 
-# 自动化构建目标文件
+# auto build new examples
 foreach(SOURCE ${SOURCES})
     get_filename_component(FILENAME "${SOURCE}" NAME)
     get_filename_component(TARNAME "${SOURCE}" NAME_WE)

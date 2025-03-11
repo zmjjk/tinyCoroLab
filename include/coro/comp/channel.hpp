@@ -9,7 +9,6 @@
 #include "coro/comp/condition_variable.hpp"
 #include "coro/comp/mutex.hpp"
 #include "coro/concepts/common.hpp"
-#include "coro/log.hpp"
 #include "coro/task.hpp"
 
 namespace coro

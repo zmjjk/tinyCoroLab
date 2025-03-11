@@ -1,3 +1,6 @@
+#include <exception>
+
+#include "coro/log.hpp"
 #include "coro/net/tcp.hpp"
 #include "coro/utils.hpp"
 
@@ -17,7 +20,8 @@ tcp_server::tcp_server(const char* addr, int port) noexcept
     {
         if (inet_pton(AF_INET, addr, &m_servaddr.sin_addr.s_addr) < 0)
         {
-            assert(false && "addr invalid");
+            log::info("addr invalid");
+            std::terminate();
         }
     }
     else
@@ -27,12 +31,14 @@ tcp_server::tcp_server(const char* addr, int port) noexcept
 
     if (bind(m_listenfd, (sockaddr*)&m_servaddr, sizeof(m_servaddr)) != 0)
     {
-        assert(false);
+        log::info("server bind error");
+        std::terminate();
     }
 
     if (listen(m_listenfd, ::coro::config::kBacklog) != 0)
     {
-        assert(false);
+        log::info("server listen error");
+        std::terminate();
     }
 }
 

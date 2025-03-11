@@ -1,24 +1,25 @@
-# ´ýÍê³É
+# å¾…å®Œæˆ
 
-- Ìí¼Ó¸ºÔØ¾ùºâÄ£¿éÊ¹µÃÈÎÎñÖ§³Ö¿çÏß³Ì [done]
-- ½â¾öcontext stop¹ýÂýµÄÎÊÌâ [done]
-- ÍØÕ¹ÐÂ¹¦ÄÜ [future]
-- ÖØ¹¹ÓÅ»¯
-- perf»ðÑæÍ¼ÐÔÄÜÓÅ»¯
-- Ìí¼ÓÈÎÎñÈ¡Ïû»úÖÆ [future]
-- ÎªcmakeÌí¼Ó¸÷Ïî»·¾³¼ì²é
-- ½â¾ö¸÷ÏîTODO
-- ÎªawaiterÌí¼Ó»ùÀà[future]
-- ÅäÖÃÎÄ¼þÖØÐÂÉè¼Æ[done]
-- ¶¯Ì¬Á´½Ó¿â½Ó¿Ú¿É¼ûÐÔ
-- Ìí¼Óco_yield¹¦ÄÜ [future]
-- READMEÀïÌí¼Ó¸üÐÂÈÕÖ¾
-- Ìí¼Ó×¢ÊÍ
-- ÎªuringÌí¼ÓpollingÄ£Ê½
+- æ·»åŠ è´Ÿè½½å‡è¡¡æ¨¡å—ä½¿å¾—ä»»åŠ¡æ”¯æŒè·¨çº¿ç¨‹ [done]
+- è§£å†³context stopè¿‡æ…¢çš„é—®é¢˜ [done]
+- æ‹“å±•æ–°åŠŸèƒ½ [future]
+- é‡æž„ä¼˜åŒ–
+- perfç«ç„°å›¾æ€§èƒ½ä¼˜åŒ–
+- æ·»åŠ ä»»åŠ¡å–æ¶ˆæœºåˆ¶ [future]
+- ä¸ºcmakeæ·»åŠ å„é¡¹çŽ¯å¢ƒæ£€æŸ¥
+- è§£å†³å„é¡¹TODO
+- ä¸ºawaiteræ·»åŠ åŸºç±»[future]
+- é…ç½®æ–‡ä»¶é‡æ–°è®¾è®¡[done]
+- åŠ¨æ€é“¾æŽ¥åº“æŽ¥å£å¯è§æ€§
+- æ·»åŠ co_yieldåŠŸèƒ½ [future]
+- READMEé‡Œæ·»åŠ æ›´æ–°æ—¥å¿—
+- æ·»åŠ æ³¨é‡Š
+- ä¸ºuringæ·»åŠ pollingæ¨¡å¼[future]
+- é«˜QPSä¸‹éƒ¨åˆ†å“åº”å¤±è´¥
 
-## ºóÐøÊµÑé
+## åŽç»­å®žéªŒ
 
-- ¹¦ÄÜ
-- ÄÚ´æ°²È«
-- ÐÔÄÜ
-- ²âÊÔÃ÷È·¡¢ÀíÖÇ¡¢¼¯ÖÐ
+- åŠŸèƒ½
+- å†…å­˜å®‰å…¨
+- æ€§èƒ½
+- æµ‹è¯•æ˜Žç¡®ã€ç†æ™ºã€é›†ä¸­

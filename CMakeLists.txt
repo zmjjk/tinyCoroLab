@@ -84,6 +84,7 @@ generate_export_header(${PROJECT_NAME} BASE_NAME CORO EXPORT_FILE_NAME include/c
 
 add_subdirectory(tests)
 add_subdirectory(examples)
+add_subdirectory(benchmark)
 
 if(ENABLE_UNIT_TESTS)
   enable_testing()

@@ -5,9 +5,8 @@
 // #define VERSION_MINOR @PROJECT_VERSION_MINOR @
 // #define INSTALL_PREFIX "@CMAKE_INSTALL_PREFIX@"
 
-#include <cstddef>
-#include <cstdint>
-#include <string>
+#include "stddef.h"
+#include "stdint.h"
 
 #include "coro/detail/types.hpp"
 
@@ -36,7 +35,7 @@ constexpr int64_t     kFlushDura   = 3; // seconds
 constexpr size_t kCacheLineSize = 64; // alignas(config::kCacheLineSize)
 
 // ========================== uring configuration ===========================
-constexpr unsigned int kEntryLength = 1024;
+constexpr unsigned int kEntryLength = 10240;
 
 // uncomment below to open uring pooling mode, but don't do that, this mode is not currently fully supported
 // #define ENABLE_POOLING
@@ -44,7 +43,7 @@ constexpr unsigned int kSqthreadIdle = 2000; // millseconds
 
 // ===================== execute engine configuration =======================
 using ctx_id                                                = uint32_t;
-constexpr size_t                          kQueCap           = 1024;
+constexpr size_t                          kQueCap           = 10240;
 constexpr coro::detail::dispatch_strategy kDispatchStrategy = coro::detail::dispatch_strategy::round_robin;
 inline bool                               kLongRunMode      = true;
 
