@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.15)
 project(tinycoro
     VERSION 1.0
     LANGUAGES CXX
-    DESCRIPTION "C++20 coroutine library combined with io_uring"
+    DESCRIPTION "a high performance C++20 coroutine library combined with io_uring"
 )
 
 set(CMAKE_CXX_STANDARD 20)
@@ -82,18 +82,13 @@ target_include_directories(${PROJECT_NAME} PUBLIC ${SRC_INCLUDE_DIR} ${THIRD_PAR
 target_link_libraries(${PROJECT_NAME} PRIVATE ${URING_PATH})
 generate_export_header(${PROJECT_NAME} BASE_NAME CORO EXPORT_FILE_NAME include/coro/export.hpp)
 
+if(ENABLE_UNIT_TESTS)
+  enable_testing()
+endif()
+
 add_subdirectory(tests)
 add_subdirectory(examples)
 add_subdirectory(benchmark)
-
-if(ENABLE_UNIT_TESTS)
-  enable_testing()
-
-  add_test(
-    NAME base_test
-    COMMAND $<TARGET_FILE:base_test>
-    )
-endif()
 
 configure_file(tinycoro.pc.in tinycoro.pc @ONLY)
 

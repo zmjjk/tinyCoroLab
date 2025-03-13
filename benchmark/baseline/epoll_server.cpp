@@ -123,7 +123,7 @@ int main()
                     {
                         // 向客户端发数据
                         // 如果在windows中,向socket中写数据要用send()函数
-                        write(events[i].data.fd, buff, len);
+                        [[maybe_unused]] auto p = write(events[i].data.fd, buff, len);
                     }
                 }
             }

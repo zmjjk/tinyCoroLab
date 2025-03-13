@@ -28,3 +28,4 @@ endif()
 
 add_executable(uring_server baseline/uring_server.cpp)
 add_executable(epoll_server baseline/epoll_server.cpp)
+target_link_libraries(uring_server uring)
