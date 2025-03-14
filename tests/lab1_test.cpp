@@ -110,7 +110,7 @@ task<int> func7(int value, std::vector<int>& vec)
 TEST_F(TaskTest, SelfDestroy)
 {
     auto p = func0();
-    EXPECT_EQ(true, true);
+    EXPECT_TRUE(true);
 }
 
 // test a simple task running case.
@@ -154,8 +154,21 @@ TEST_F(TaskTest, VoidTaskMove2)
     EXPECT_EQ(vec[1], 2);
 }
 
+// test the move assignment operator of task, which will suspend once.
+TEST_F(TaskTest, VoidTaskMove3)
+{
+    auto p1 = func2(vec);
+    p1.resume();
+    EXPECT_EQ(vec[0], 1);
+    auto p2 = func2(vec);
+    p2      = std::move(p1);
+    EXPECT_EQ(p1.handle(), nullptr);
+    p2.resume();
+    EXPECT_EQ(vec[1], 2);
+}
+
 // test the detach func of task.
-TEST_F(TaskTest, VoidTaskDetach)
+TEST_F(TaskTest, VoidTaskDetach1)
 {
     auto p = func2(vec);
     p.resume();
@@ -167,6 +180,25 @@ TEST_F(TaskTest, VoidTaskDetach)
     EXPECT_EQ(vec.size(), 2);
     EXPECT_EQ(vec[1], 2);
     handle.destroy();
+}
+
+// test the clean func when task isn't detached.
+TEST_F(TaskTest, VoidTaskDetach2)
+{
+    auto p      = func0();
+    auto handle = p.handle();
+    clean(handle);
+    EXPECT_TRUE(true);
+}
+
+// test the clean func when task is detached.
+TEST_F(TaskTest, VoidTaskDetach3)
+{
+    auto p      = func0();
+    auto handle = p.handle();
+    p.detach();
+    clean(handle);
+    EXPECT_TRUE(true);
 }
 
 // test a simple task running case which returns a number.
