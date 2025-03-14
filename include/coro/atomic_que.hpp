@@ -4,7 +4,7 @@
 
 #include "atomic_queue/atomic_queue.h"
 
-namespace coro
+namespace coro::detail
 {
 // lib AtomicQueue
 template<class Queue, size_t Capacity>

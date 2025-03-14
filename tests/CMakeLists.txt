@@ -17,7 +17,7 @@ foreach (tinycoro_test_source ${TINYCORO_TEST_SOURCES})
     --gtest_color=auto
     --gtest_output=xml:${CMAKE_BINARY_DIR}/tests/${tinycoro_test_name}.xml
     --gtest_catch_exceptions=0
-    WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+    WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/tests
     DISCOVERY_TIMEOUT 120
     PROPERTIES
     TIMEOUT 120
@@ -28,9 +28,9 @@ foreach (tinycoro_test_source ${TINYCORO_TEST_SOURCES})
   # Set test target properties and dependencies.
   set_target_properties(${tinycoro_test_name}
     PROPERTIES
-    RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}"
+    RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/tests"
     COMMAND ${tinycoro_test_name}
-    )
+  )
 
   string(REPLACE "_test" "" tinycoro_test_command ${tinycoro_test_name})
   add_custom_target(${tinycoro_test_command}

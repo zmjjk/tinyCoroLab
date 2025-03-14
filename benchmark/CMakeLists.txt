@@ -1,31 +1,30 @@
-add_executable(tinycoro_bench_128b 128b/tinycoro_bench.cpp)
-target_link_libraries(tinycoro_bench_128b ${PROJECT_NAME})
-if(CMAKE_BUILD_TYPE STREQUAL "Debug")
-  target_compile_options(tinycoro_bench_128b PRIVATE "-g")
-endif()
-if(ENABLE_COMPILE_OPTIMIZE)
-  target_compile_options(tinycoro_bench_128b PUBLIC -O3)
-endif()
+file(GLOB_RECURSE TINYCORO_BENCH_SOURCES "${PROJECT_SOURCE_DIR}/benchmark/*/*.cpp")
 
-add_executable(tinycoro_bench_1k 1k/tinycoro_bench.cpp)
-target_link_libraries(tinycoro_bench_1k ${PROJECT_NAME})
-if(CMAKE_BUILD_TYPE STREQUAL "Debug")
-  target_compile_options(tinycoro_bench_1k PRIVATE "-g")
-endif()
-if(ENABLE_COMPILE_OPTIMIZE)
-  target_compile_options(tinycoro_bench_1k PUBLIC -O3)
-endif()
+add_custom_target(build-bench COMMAND echo "Building benchmark case...")
 
+foreach (tinycoro_bench_source ${TINYCORO_BENCH_SOURCES})
+  get_filename_component(tinycoro_bench_filename ${tinycoro_bench_source} NAME)
+  string(REPLACE ".cpp" "" tinycoro_bench_name ${tinycoro_bench_filename})
+  add_executable(${tinycoro_bench_name} EXCLUDE_FROM_ALL ${tinycoro_bench_source})
+  add_dependencies(build-bench ${tinycoro_bench_name})
 
-add_executable(tinycoro_bench_16k 16k/tinycoro_bench.cpp)
-target_link_libraries(tinycoro_bench_16k ${PROJECT_NAME})
-if(CMAKE_BUILD_TYPE STREQUAL "Debug")
-  target_compile_options(tinycoro_bench_16k PRIVATE "-g")
-endif()
-if(ENABLE_COMPILE_OPTIMIZE)
-  target_compile_options(tinycoro_bench_16k PUBLIC -O3)
-endif()
+  if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+    target_compile_options(${tinycoro_bench_name} PRIVATE "-g")
+  endif()
+  if(ENABLE_COMPILE_OPTIMIZE)
+    target_compile_options(${tinycoro_bench_name} PUBLIC -O3)
+  endif()
+  target_link_libraries(${tinycoro_bench_name} ${PROJECT_NAME})
 
-add_executable(uring_server baseline/uring_server.cpp)
-add_executable(epoll_server baseline/epoll_server.cpp)
-target_link_libraries(uring_server uring)
+  set_target_properties(${tinycoro_bench_name}
+    PROPERTIES
+    RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/benchmark"
+  )
+
+  string(REPLACE "_bench" "" tinycoro_bench_command ${tinycoro_bench_name})
+  add_custom_target(${tinycoro_bench_command}
+    COMMAND $<TARGET_FILE:${tinycoro_bench_name}>
+    DEPENDS ${tinycoro_bench_name}
+    COMMENT "Running ${tinycoro_bench_command} bench..."
+  )
+endforeach()
