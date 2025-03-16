@@ -110,7 +110,7 @@ task<int> func7(int value, std::vector<int>& vec)
 TEST_F(TaskTest, SelfDestroy)
 {
     auto p = func0();
-    EXPECT_TRUE(true);
+    ASSERT_TRUE(true);
 }
 
 // test a simple task running case.
@@ -118,7 +118,7 @@ TEST_F(TaskTest, VoidTaskCase1)
 {
     auto p = func1(vec);
     p.resume();
-    EXPECT_EQ(vec[0], 1);
+    ASSERT_EQ(vec[0], 1);
 }
 
 // test a simple task running case, which will suspend once.
@@ -126,10 +126,10 @@ TEST_F(TaskTest, VoidTaskCase2)
 {
     auto p = func2(vec);
     p.resume();
-    EXPECT_EQ(vec[0], 1);
+    ASSERT_EQ(vec[0], 1);
     p.resume();
-    EXPECT_EQ(vec.size(), 2);
-    EXPECT_EQ(vec[1], 2);
+    ASSERT_EQ(vec.size(), 2);
+    ASSERT_EQ(vec[1], 2);
 }
 
 // test the move constructor of task.
@@ -138,8 +138,8 @@ TEST_F(TaskTest, VoidTaskMove1)
     auto p1 = func1(vec);
     auto p2 = std::move(p1);
     p2.resume();
-    EXPECT_EQ(vec[0], 1);
-    EXPECT_EQ(p1.handle(), nullptr);
+    ASSERT_EQ(vec[0], 1);
+    ASSERT_EQ(p1.handle(), nullptr);
 }
 
 // test the move constructor of task, which will suspend once.
@@ -147,11 +147,11 @@ TEST_F(TaskTest, VoidTaskMove2)
 {
     auto p1 = func2(vec);
     p1.resume();
-    EXPECT_EQ(vec[0], 1);
+    ASSERT_EQ(vec[0], 1);
     auto p2 = std::move(p1);
     p2.resume();
-    EXPECT_EQ(vec.size(), 2);
-    EXPECT_EQ(vec[1], 2);
+    ASSERT_EQ(vec.size(), 2);
+    ASSERT_EQ(vec[1], 2);
 }
 
 // test the move assignment operator of task, which will suspend once.
@@ -159,12 +159,12 @@ TEST_F(TaskTest, VoidTaskMove3)
 {
     auto p1 = func2(vec);
     p1.resume();
-    EXPECT_EQ(vec[0], 1);
+    ASSERT_EQ(vec[0], 1);
     auto p2 = func2(vec);
     p2      = std::move(p1);
-    EXPECT_EQ(p1.handle(), nullptr);
+    ASSERT_EQ(p1.handle(), nullptr);
     p2.resume();
-    EXPECT_EQ(vec[1], 2);
+    ASSERT_EQ(vec[1], 2);
 }
 
 // test the detach func of task.
@@ -172,13 +172,13 @@ TEST_F(TaskTest, VoidTaskDetach1)
 {
     auto p = func2(vec);
     p.resume();
-    EXPECT_EQ(vec[0], 1);
+    ASSERT_EQ(vec[0], 1);
     auto handle = p.handle();
     p.detach();
-    EXPECT_EQ(p.handle(), nullptr);
+    ASSERT_EQ(p.handle(), nullptr);
     handle.resume();
-    EXPECT_EQ(vec.size(), 2);
-    EXPECT_EQ(vec[1], 2);
+    ASSERT_EQ(vec.size(), 2);
+    ASSERT_EQ(vec[1], 2);
     handle.destroy();
 }
 
@@ -188,7 +188,7 @@ TEST_F(TaskTest, VoidTaskDetach2)
     auto p      = func0();
     auto handle = p.handle();
     clean(handle);
-    EXPECT_TRUE(true);
+    ASSERT_TRUE(true);
 }
 
 // test the clean func when task is detached.
@@ -198,7 +198,7 @@ TEST_F(TaskTest, VoidTaskDetach3)
     auto handle = p.handle();
     p.detach();
     clean(handle);
-    EXPECT_TRUE(true);
+    ASSERT_TRUE(true);
 }
 
 // test a simple task running case which returns a number.
@@ -206,7 +206,7 @@ TEST_F(TaskTest, ValueTaskCase1)
 {
     auto p = func3();
     p.resume();
-    EXPECT_EQ(p.promise().result(), 1);
+    ASSERT_EQ(p.promise().result(), 1);
 }
 
 // test a simple task running case which returns a string.
@@ -216,7 +216,7 @@ TEST_F(TaskTest, ValueTaskCase2)
 
     auto p = func4();
     p.resume();
-    EXPECT_EQ(p.promise().result(), str);
+    ASSERT_EQ(p.promise().result(), str);
 }
 
 // test a simple task running case which calls other task.
@@ -224,7 +224,7 @@ TEST_F(TaskTest, SubcallCase1)
 {
     auto p = func5();
     p.resume();
-    EXPECT_EQ(p.promise().result(), 3);
+    ASSERT_EQ(p.promise().result(), 3);
 }
 
 // test the sum func implemented by task nested call.
@@ -232,7 +232,7 @@ TEST_F(TaskTest, SubcallCase2)
 {
     auto p = func6(4);
     p.resume();
-    EXPECT_EQ(p.promise().result(), 10);
+    ASSERT_EQ(p.promise().result(), 10);
 }
 
 // test the sum func implemented by task nested call.
@@ -240,7 +240,7 @@ TEST_F(TaskTest, SubcallCase3)
 {
     auto p = func6(100);
     p.resume();
-    EXPECT_EQ(p.promise().result(), 5050);
+    ASSERT_EQ(p.promise().result(), 5050);
 }
 
 // test the fibonacci func implemented by task nested call.
@@ -248,7 +248,7 @@ TEST_F(TaskTest, SubcallCase4)
 {
     auto p = fibonacci(10);
     p.resume();
-    EXPECT_EQ(p.promise().result(), 34);
+    ASSERT_EQ(p.promise().result(), 34);
 }
 
 // test the fibonacci func implemented by task nested call but task will suspend in the middle state.
@@ -256,7 +256,7 @@ TEST_F(TaskTest, SubcallCase5)
 {
     auto p = func7(10, vec);
     p.resume();
-    EXPECT_EQ(vec[0], 10);
+    ASSERT_EQ(vec[0], 10);
     // p.resume();
-    // EXPECT_EQ(p.promise().result(), 55);
+    // ASSERT_EQ(p.promise().result(), 55);
 }

@@ -8,6 +8,13 @@ namespace coro::net
 {
 using ::coro::net::detail::io_info;
 
+class noop_awaiter : public detail::base_io_awaiter
+{
+public:
+    noop_awaiter() noexcept;
+    static auto callback(io_info* data, int res) noexcept -> void;
+};
+
 class tcp_accept_awaiter : public detail::base_io_awaiter
 {
 public:

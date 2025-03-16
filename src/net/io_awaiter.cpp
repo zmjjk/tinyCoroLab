@@ -10,6 +10,22 @@ namespace coro::net
 using ::coro::detail::local_engine;
 using detail::io_type;
 
+noop_awaiter::noop_awaiter() noexcept
+{
+    m_info.type = io_type::nop;
+    m_info.cb   = &noop_awaiter::callback;
+
+    io_uring_prep_nop(m_urs);
+    io_uring_sqe_set_data(m_urs, &m_info);
+    local_engine().add_io_submit();
+}
+
+auto noop_awaiter::callback(io_info* data, int res) noexcept -> void
+{
+    data->result = res;
+    submit_to_context(data->handle);
+}
+
 tcp_accept_awaiter::tcp_accept_awaiter(int listenfd, int flags) noexcept
 {
     m_info.type = io_type::tcp_accept;

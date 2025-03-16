@@ -16,6 +16,7 @@ using cb_type = std::function<void(io_info*, int)>;
 
 enum io_type
 {
+    nop,
     tcp_accept,
     tcp_connect,
     tcp_read,
