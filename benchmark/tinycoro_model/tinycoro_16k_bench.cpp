@@ -13,10 +13,13 @@ task<> session(int fd)
     while ((ret = co_await conn.read(buf, BUFFLEN)) > 0)
     {
         ret = co_await conn.write(buf, ret);
+        if (ret <= 0)
+        {
+            break;
+        }
     }
 
     ret = co_await conn.close();
-    // log::info("client {} close connect", fd);
     assert(ret == 0);
 }
 
@@ -27,7 +30,6 @@ task<> server(int port)
     int client_fd;
     while ((client_fd = co_await server.accept()) > 0)
     {
-        // log::info("server receive new connect");
         submit_to_scheduler(session(client_fd));
     }
 }

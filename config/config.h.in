@@ -28,7 +28,7 @@ namespace coro::config
 #define LOG_LEVEL info
 #define USEMUTEX
 
-constexpr const char* kLogFileName = "temp/logs/coro.log";
+constexpr const char* kLogFileName = "/temp/logs/coro.log";
 constexpr int64_t     kFlushDura   = 3; // seconds
 
 // =========================== cpu configuration ============================

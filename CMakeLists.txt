@@ -5,6 +5,17 @@ project(tinycoro
     DESCRIPTION "a high performance C++20 coroutine library combined with io_uring"
 )
 
+# check build dir
+get_filename_component(BUILD_DIR_NAME ${CMAKE_BINARY_DIR} NAME)
+string(TOLOWER "${BUILD_DIR_NAME}" BUILD_DIR_NAME_LOWER)
+if(NOT BUILD_DIR_NAME_LOWER MATCHES "^build")
+    message(FATAL_ERROR 
+        "The build directory must be named 'build' or start with 'build'.\n"
+        "Current build directory: ${CMAKE_BINARY_DIR}\n"
+        "Please create a build directory with the correct name and run CMake again."
+    )
+endif()
+
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_EXTENSIONS OFF)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -58,7 +69,11 @@ message(STATUS "Enable debug mode: ${ENABLE_DEBUG_MODE}")
 message(STATUS "Enable build shared libs: ${ENABLE_BUILD_SHARED_LIBS}")
 message(STATUS "Enable compile options -O3: ${ENABLE_COMPILE_OPTIMIZE}")
 
-find_library(URING_PATH NAMES uring)
+find_library(URING_PATH 
+    NAMES uring
+    PATHS /usr/lib
+)
+
 if (URING_PATH)
     message(STATUS "Found liburing at ${URING_PATH}")
 else()

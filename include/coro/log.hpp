@@ -20,11 +20,13 @@ using spdlogger = shared_ptr<spdlog::logger>;
 class logger
 {
 public:
+#ifdef LOGTOFILE
     static auto get_logger() noexcept -> spdlogger&
     {
         static logger log;
         return log.m_logger;
     };
+#endif
 
     logger(const logger&)                    = delete;
     logger(logger&&)                         = delete;
@@ -34,17 +36,26 @@ public:
 private:
     logger() noexcept
     {
+#ifdef LOGTOFILE
         string log_path = string(SOURCE_DIR) + string(coro::config::kLogFileName);
-        m_logger        = spdlog::create<spdlog::sinks::basic_file_sink_mt>("corolog", log_path.c_str(), false);
+        m_logger        = spdlog::create<spdlog::sinks::basic_file_sink_mt>("corolog", log_path.c_str(), true);
         m_logger->set_pattern("[%n][%Y-%m-%d %H:%M:%S.%e] [%l] [%t]  %v");
         m_logger->set_level(CONFIG_LOG_LEVEL(LOG_LEVEL));
         spdlog::flush_every(std::chrono::seconds(config::kFlushDura));
+#endif
     }
 
-    ~logger() noexcept { m_logger->flush_on(CONFIG_LOG_LEVEL(LOG_LEVEL)); }
+    ~logger() noexcept
+    {
+#ifdef LOGTOFILE
+        m_logger->flush_on(CONFIG_LOG_LEVEL(LOG_LEVEL));
+#endif
+    }
 
 private:
+#ifdef LOGTOFILE
     spdlogger m_logger;
+#endif
 };
 
 template<typename... T>

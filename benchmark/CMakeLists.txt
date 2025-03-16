@@ -22,7 +22,7 @@ foreach (tinycoro_bench_source ${TINYCORO_BENCH_SOURCES})
   )
 
   string(REPLACE "_bench" "" tinycoro_bench_command ${tinycoro_bench_name})
-  add_custom_target(${tinycoro_bench_command}
+  add_custom_target(bench_${tinycoro_bench_command}
     COMMAND $<TARGET_FILE:${tinycoro_bench_name}>
     DEPENDS ${tinycoro_bench_name}
     COMMENT "Running ${tinycoro_bench_command} bench..."

@@ -63,18 +63,21 @@ auto engine::poll_submit() noexcept -> void
         m_num_io_wait_submit.fetch_sub(num, std::memory_order_release);
     }
 
-    auto cnt = m_upxy.wait_eventfd();
+    [[CORO_MAYBE_UNUSED]] auto cnt = m_upxy.wait_eventfd();
 
-    auto uringnum = GETURINGNUM(cnt);
+    // auto uringnum = GETURINGNUM(cnt);
 
-    auto num = m_upxy.peek_batch_cqe(m_urc.data(), uringnum);
-    assert(num == uringnum && "unexpected uringnum by peek cqe");
-    for (int i = 0; i < num; i++)
+    auto num = m_upxy.peek_batch_cqe(m_urc.data(), m_num_io_running.load(std::memory_order_acq_rel));
+    // assert(num == uringnum && "unexpected uringnum by peek cqe");
+    if (num != 0)
     {
-        handle_cqe_entry(m_urc[i]);
+        for (int i = 0; i < num; i++)
+        {
+            handle_cqe_entry(m_urc[i]);
+        }
+        m_upxy.cq_advance(num);
+        m_num_io_running.fetch_sub(num, std::memory_order_acq_rel);
     }
-    m_upxy.cq_advance(num);
-    m_num_io_running.fetch_sub(num, std::memory_order_release);
 }
 
 auto engine::wake_up() noexcept -> void

@@ -5,4 +5,4 @@ if [ "$#" -ne 2 ]; then
     exit 1
 fi
 
-cargo run --release -- --address "127.0.0.1:12345" --number $1 --duration 60 --length $2
+cargo run --release -- --address "127.0.0.1:8000" --number $1 --duration 30 --length $2
