@@ -105,7 +105,7 @@ public:
     auto wait_eventfd() noexcept -> uint64_t
     {
         uint64_t u;
-        auto     ret = read(m_efd, &u, sizeof(u));
+        auto     ret = eventfd_read(m_efd, &u);
         assert(ret != -1 && "eventfd read error");
         return u;
     }
@@ -117,7 +117,7 @@ public:
 
     inline auto write_eventfd(uint64_t num) noexcept -> void CORO_INLINE
     {
-        auto ret = write(m_efd, &num, sizeof(num));
+        auto ret = eventfd_write(m_efd, num);
         assert(ret != -1 && "eventfd write error");
     }
 
