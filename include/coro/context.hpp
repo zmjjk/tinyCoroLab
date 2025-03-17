@@ -38,10 +38,12 @@ public:
 
     auto start() noexcept -> void;
 
+    // mark
     auto stop() noexcept -> void;
 
     inline auto join() noexcept -> void { m_job->join(); }
 
+    // mark
     inline auto submit_task(task<void>&& task) noexcept -> void
     {
         auto handle = task.handle();
@@ -49,32 +51,42 @@ public:
         this->submit_task(handle);
     }
 
+    // mark
     inline auto submit_task(task<void>& task) noexcept -> void { m_engine.submit_task(task.handle()); }
 
+    // mark
     inline auto submit_task(std::coroutine_handle<> handle) noexcept -> void { m_engine.submit_task(handle); }
 
     inline auto get_ctx_id() noexcept -> ctx_id { return m_id; }
 
-    inline auto register_wait(bool register_flag = true) noexcept -> void CORO_INLINE
+    // mark
+    inline auto register_wait(int register_cnt = 1) noexcept -> void CORO_INLINE
     {
-        m_num_wait_task.fetch_add(size_t(register_flag), memory_order_relaxed);
+        m_num_wait_task.fetch_add(size_t(register_cnt), memory_order_relaxed);
     }
 
-    inline auto unregister_wait() noexcept -> void CORO_INLINE { m_num_wait_task.fetch_sub(1, memory_order_relaxed); }
+    // mark
+    inline auto unregister_wait(int register_cnt = 1) noexcept -> void CORO_INLINE
+    {
+        m_num_wait_task.fetch_sub(register_cnt, memory_order_relaxed);
+    }
 
     inline auto get_engine() noexcept -> engine& { return m_engine; }
 
-private:
+    // mark
     auto init() noexcept -> void;
 
+    // mark
     auto deinit() noexcept -> void;
 
+    // mark
     auto run(stop_token token) noexcept -> void;
 
     auto process_work() noexcept -> void;
 
     inline auto poll_work() noexcept -> void { m_engine.poll_submit(); }
 
+    // mark
     inline auto empty_wait_task() noexcept -> bool CORO_INLINE
     {
         return m_num_wait_task.load(memory_order_relaxed) == 0 && m_engine.empty_io();

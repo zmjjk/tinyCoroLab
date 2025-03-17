@@ -1,18 +1,18 @@
-128b-avg
+128b-avg(req/s)
         tinycoro        rust_echo_server        epoll_server
 1         
 10        
 50        
-100       
+100     1122398
 
-1k-avg
+1k-avg(req/s)
         tinycoro        rust_echo_server        epoll_server
 1       
 10      
 50      
 100      
 
-16k-avg
+16k-avg(req/s)
         tinycoro        rust_echo_server        epoll_server
 1       
 10      

@@ -50,8 +50,7 @@ auto engine::handle_cqe_entry(urcptr cqe) noexcept -> void
     data->cb(data, cqe->res);
 }
 
-// TODO: finish uring polling mode
-auto engine::poll_submit() noexcept -> void
+auto engine::do_io_submit() noexcept -> void
 {
     int num_task_wait = m_num_io_wait_submit.load(std::memory_order_acquire);
     if (num_task_wait > 0)
@@ -62,13 +61,20 @@ auto engine::poll_submit() noexcept -> void
         m_num_io_running.fetch_add(num, std::memory_order_release); // must set before m_num_io_wait_submit
         m_num_io_wait_submit.fetch_sub(num, std::memory_order_release);
     }
+}
 
-    [[CORO_MAYBE_UNUSED]] auto cnt = m_upxy.wait_eventfd();
-
-    // auto uringnum = GETURINGNUM(cnt);
+// TODO: finish uring polling mode
+auto engine::poll_submit() noexcept -> void
+{
+    do_io_submit();
+    auto cnt = m_upxy.wait_eventfd();
+    if (!wake_by_cqe(cnt))
+    {
+        return;
+    }
 
     auto num = m_upxy.peek_batch_cqe(m_urc.data(), m_num_io_running.load(std::memory_order_acq_rel));
-    // assert(num == uringnum && "unexpected uringnum by peek cqe");
+
     if (num != 0)
     {
         for (int i = 0; i < num; i++)
@@ -80,8 +86,8 @@ auto engine::poll_submit() noexcept -> void
     }
 }
 
-auto engine::wake_up() noexcept -> void
+auto engine::wake_up(uint64_t val) noexcept -> void
 {
-    m_upxy.write_eventfd(SETTASKNUM);
+    m_upxy.write_eventfd(val);
 }
 }; // namespace coro::detail

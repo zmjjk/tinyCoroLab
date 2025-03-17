@@ -14,9 +14,6 @@
 
 namespace coro::uring
 {
-#define GETURINGNUM(number) (number & 0xffff)
-#define SETTASKNUM          (uint64_t(1) << 32)
-
 using ursptr     = io_uring_sqe*;
 using urcptr     = io_uring_cqe*;
 using urchandler = std::function<void(urcptr)>;

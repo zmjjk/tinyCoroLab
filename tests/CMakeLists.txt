@@ -33,7 +33,7 @@ foreach (tinycoro_test_source ${TINYCORO_TEST_SOURCES})
   )
 
   string(REPLACE "_test" "" tinycoro_test_command ${tinycoro_test_name})
-  add_custom_target(${tinycoro_test_command}
+  add_custom_target(test-${tinycoro_test_command}
     COMMAND $<TARGET_FILE:${tinycoro_test_name}>
     DEPENDS ${tinycoro_test_name}
     COMMENT "Running ${tinycoro_test_command} tests..."
