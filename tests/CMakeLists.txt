@@ -40,3 +40,28 @@ foreach (tinycoro_test_source ${TINYCORO_TEST_SOURCES})
   )
 
 endforeach ()
+
+# special test for lab3
+
+add_executable(lab3 EXCLUDE_FROM_ALL lab3.cpp)
+add_dependencies(build-tests lab3)
+add_dependencies(check-tests lab3)
+target_link_libraries(lab3 ${PROJECT_NAME})
+if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+  target_compile_options(lab3 PRIVATE "-g")
+endif()
+if(ENABLE_COMPILE_OPTIMIZE)
+  target_compile_options(lab3 PUBLIC -O3)
+endif()
+set_target_properties(${tinycoro_test_name}
+  PROPERTIES
+  RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/tests"
+)
+
+add_custom_target(test-lab3
+  COMMAND python ${PROJECT_SOURCE_DIR}/tests/lab3_test.py $<TARGET_FILE:lab3> ${PROJECT_SOURCE_DIR}/third_party/rust_echo_bench/target/release/echo_bench
+  DEPENDS lab3
+)
+
+add_dependencies(test-lab3 build-benchtools)
+

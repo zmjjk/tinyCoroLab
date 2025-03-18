@@ -2,6 +2,10 @@ file(GLOB_RECURSE TINYCORO_BENCH_SOURCES "${PROJECT_SOURCE_DIR}/benchmark/*/*.cp
 
 add_custom_target(build-bench COMMAND echo "Building benchmark case...")
 
+add_custom_target(build-benchtools
+  COMMAND cargo run --release --manifest-path=${PROJECT_SOURCE_DIR}/third_party/rust_echo_bench/Cargo.toml -- --help
+)
+
 foreach (tinycoro_bench_source ${TINYCORO_BENCH_SOURCES})
   get_filename_component(tinycoro_bench_filename ${tinycoro_bench_source} NAME)
   string(REPLACE ".cpp" "" tinycoro_bench_name ${tinycoro_bench_filename})

@@ -5,4 +5,4 @@ if [ "$#" -ne 2 ]; then
     exit 1
 fi
 
-cargo run --release -- --address "127.0.0.1:8000" --number $1 --duration 30 --length $2
+./third_party/rust_echo_bench/target/release/echo_bench --address "127.0.0.1:8000" --number $1 --duration 30 --length $2
