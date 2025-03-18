@@ -18,6 +18,10 @@ class scheduler
 public:
     inline static auto init(size_t ctx_cnt = std::thread::hardware_concurrency()) noexcept -> void
     {
+        if (ctx_cnt == 0)
+        {
+            ctx_cnt = std::thread::hardware_concurrency();
+        }
         get_instance()->init_impl(ctx_cnt);
     }
 

@@ -32,7 +32,7 @@ public:
         bool                    m_register_state;
     };
 
-    wait_group(int count) noexcept : m_count(count) {}
+    explicit wait_group(int count = 0) noexcept : m_count(count) {}
 
     auto add(int count) noexcept -> void;
 

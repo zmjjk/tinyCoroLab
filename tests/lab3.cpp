@@ -49,14 +49,8 @@ int main(int argc, char const* argv[])
     {
         int num = std::stoi(argv[1]);
         port    = std::stoi(argv[2]);
-        if (num == 0)
-        {
-            scheduler::init();
-        }
-        else
-        {
-            scheduler::init(num);
-        }
+
+        scheduler::init(num);
     }
 
     submit_to_scheduler(server(port));
