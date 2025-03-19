@@ -82,14 +82,8 @@ TEST_P(EventTest, SetAndWait)
 {
     int thread_num, wait_num;
     std::tie(thread_num, wait_num) = GetParam();
-    if (thread_num > 0)
-    {
-        scheduler::init(thread_num);
-    }
-    else
-    {
-        scheduler::init();
-    }
+
+    scheduler::init(thread_num);
 
     m_wait_vec = std::vector<int>(wait_num, 0);
 

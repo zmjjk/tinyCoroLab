@@ -24,6 +24,12 @@ foreach (tinycoro_test_source ${TINYCORO_TEST_SOURCES})
   )
 
   target_link_libraries(${tinycoro_test_name} ${PROJECT_NAME} gtest)
+  if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+    target_compile_options(${tinycoro_test_name} PRIVATE "-g")
+  endif()
+  if(ENABLE_COMPILE_OPTIMIZE)
+    target_compile_options(${tinycoro_test_name} PUBLIC -O3)
+  endif()
 
   # Set test target properties and dependencies.
   set_target_properties(${tinycoro_test_name}
@@ -33,6 +39,12 @@ foreach (tinycoro_test_source ${TINYCORO_TEST_SOURCES})
   )
 
   string(REPLACE "_test" "" tinycoro_test_command ${tinycoro_test_name})
+  add_custom_target(build-${tinycoro_test_command}
+    COMMAND echo "build ${tinycoro_test_command} test..."
+    DEPENDS ${tinycoro_test_name}
+    COMMENT "build ${tinycoro_test_command} tests..."
+  )
+
   add_custom_target(test-${tinycoro_test_command}
     COMMAND $<TARGET_FILE:${tinycoro_test_name}>
     DEPENDS ${tinycoro_test_name}
@@ -56,6 +68,12 @@ endif()
 set_target_properties(${tinycoro_test_name}
   PROPERTIES
   RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/tests"
+)
+
+add_custom_target(build-lab3
+  COMMAND echo "build lab3 test..."
+  DEPENDS lab3
+  COMMENT "build lab3 tests..."
 )
 
 add_custom_target(test-lab3

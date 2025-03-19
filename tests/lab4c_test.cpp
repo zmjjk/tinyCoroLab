@@ -66,6 +66,7 @@ TEST_P(WaitgroupTest, DoneAndWait)
 
     for (int i = 0; i < done_num; i++)
     {
+        m_wg.add(1);
         submit_to_scheduler(done_func(m_wg, m_id, &(m_done_vec[i])));
     }
 

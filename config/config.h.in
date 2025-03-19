@@ -50,5 +50,8 @@ inline bool                               kLongRunMode      = true;
 // =========================== net configuration ============================
 constexpr int kDefaultPort = 8000;
 constexpr int kBacklog     = 5;
+
+// ========================== test configuration ============================
+constexpr int kMaxTestTaskNum = 100000; // TODO: change test with this para
 }; // namespace coro::config
 #endif // CONFIG_H
