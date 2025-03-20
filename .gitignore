@@ -39,3 +39,4 @@ build_release
 Testing
 temp
 config/config.h
+examples/coro_debug.cpp
