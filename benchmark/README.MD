@@ -37,7 +37,7 @@ tinycoro提供了5种服务端模型供压测
 
 这里以负载1k，并发量为10为样例，用户开启两个终端分别为服务端和测试端
 
-**step1.** 运行服务端程序，注意这里不用直接运行二进制文件，只需要`make`后跟上述的服务端模型的名字就行
+**step1.** 运行服务端程序，注意这里不用直接运行二进制文件，只需要`make`后跟上述的服务端模型的名字就行，服务端程序默认使用配置文件中的端口号
 
 ```shell
 # init_dir=tinycoro_path/build
@@ -50,7 +50,7 @@ make bench_tinycoro_1k
 ```shell
 # init_dir=tinycoro_path
 cd benchmark
-bash bench.sh 10 1024
+bash bench.sh 8000 10 1024
 ```
 
-注意`bench.sh`需要接收两个参数，并发量和负载大小，负载大小默认以byte为单位。
+注意`bench.sh`需要接收三个参数，端口号、并发量和负载大小，负载大小默认以byte为单位。
