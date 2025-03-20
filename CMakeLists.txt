@@ -8,9 +8,9 @@ project(tinycoro
 # check build dir
 get_filename_component(BUILD_DIR_NAME ${CMAKE_BINARY_DIR} NAME)
 string(TOLOWER "${BUILD_DIR_NAME}" BUILD_DIR_NAME_LOWER)
-if(NOT BUILD_DIR_NAME_LOWER MATCHES "^build")
+if(NOT BUILD_DIR_NAME_LOWER MATCHES "build")
     message(FATAL_ERROR 
-        "The build directory must be named 'build' or start with 'build'.\n"
+        "The build directory must be named include 'build'.\n"
         "Current build directory: ${CMAKE_BINARY_DIR}\n"
         "Please create a build directory with the correct name and run CMake again."
     )
