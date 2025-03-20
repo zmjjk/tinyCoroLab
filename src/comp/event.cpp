@@ -25,8 +25,8 @@ auto event_base::resume_all_awaiter(awaiter_ptr waiter) noexcept -> void
     while (waiter != nullptr)
     {
         auto cur = static_cast<awaiter_base*>(waiter);
-        cur->m_ctx.unregister_wait();
         cur->m_ctx.submit_task(cur->m_await_coro);
+        cur->m_ctx.unregister_wait();
         waiter = cur->m_next;
     }
 }

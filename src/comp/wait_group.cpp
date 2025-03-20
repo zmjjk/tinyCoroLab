@@ -27,8 +27,8 @@ auto wait_group::awaiter::await_suspend(std::coroutine_handle<> handle) noexcept
 
 auto wait_group::awaiter::resume() noexcept -> void
 {
-    m_ctx.unregister_wait();
     m_ctx.submit_task(m_await_coro);
+    m_ctx.unregister_wait();
     m_register_state = true;
 }
 

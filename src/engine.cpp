@@ -58,8 +58,8 @@ auto engine::do_io_submit() noexcept -> void
         int num = m_upxy.submit();
         num_task_wait -= num;
         assert(num_task_wait == 0);
-        m_num_io_running.fetch_add(num, std::memory_order_release); // must set before m_num_io_wait_submit
-        m_num_io_wait_submit.fetch_sub(num, std::memory_order_release);
+        m_num_io_running.fetch_add(num, std::memory_order_acq_rel); // must set before m_num_io_wait_submit
+        m_num_io_wait_submit.fetch_sub(num, std::memory_order_acq_rel);
     }
 }
 
@@ -67,13 +67,15 @@ auto engine::do_io_submit() noexcept -> void
 auto engine::poll_submit() noexcept -> void
 {
     do_io_submit();
+
+    // TODO: reduce call wait
     auto cnt = m_upxy.wait_eventfd();
     if (!wake_by_cqe(cnt))
     {
         return;
     }
 
-    auto num = m_upxy.peek_batch_cqe(m_urc.data(), m_num_io_running.load(std::memory_order_acq_rel));
+    auto num = m_upxy.peek_batch_cqe(m_urc.data(), m_num_io_running.load(std::memory_order_acquire));
 
     if (num != 0)
     {

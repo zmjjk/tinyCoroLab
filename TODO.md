@@ -16,6 +16,8 @@
 - 添加注释
 - 为uring添加polling模式[future]
 - 高QPS下部分响应失败
+- 更改context的stop为notify_stop，并修改测试用例
+- 修复内存invalid read的问题
 
 ## 后续实验
 

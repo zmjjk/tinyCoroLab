@@ -60,6 +60,11 @@ struct promise_base
 protected:
     std::coroutine_handle<> m_continuation{nullptr};
     coro_state              m_state{coro_state::normal};
+
+#ifdef DEBUG
+public:
+    int promise_id{0};
+#endif // DEBUG
 };
 
 template<typename return_type>
@@ -69,6 +74,13 @@ public:
     using task_type        = task<return_type>;
     using coroutine_handle = std::coroutine_handle<promise<return_type>>;
 
+#ifdef DEBUG
+    template<typename... Args>
+    promise(int id, Args&&... args) noexcept
+    {
+        promise_id = id;
+    }
+#endif // DEBUG
     promise() noexcept {}
     promise(const promise&)             = delete;
     promise(promise&& other)            = delete;
@@ -87,6 +99,13 @@ struct promise<void> : public promise_base
     using task_type        = task<void>;
     using coroutine_handle = std::coroutine_handle<promise<void>>;
 
+#ifdef DEBUG
+    template<typename... Args>
+    promise(int id, Args&&... args) noexcept
+    {
+        promise_id = id;
+    }
+#endif // DEBUG
     promise() noexcept                  = default;
     promise(const promise&)             = delete;
     promise(promise&& other)            = delete;
@@ -261,6 +280,16 @@ inline auto promise<void>::get_return_object() noexcept -> task<>
 {
     return task<>{coroutine_handle::from_promise(*this)};
 }
+
+#ifdef DEBUG
+template<typename T = void>
+inline auto get_promise(std::coroutine_handle<> handle) -> promise<T>&
+{
+    auto  specific_handle = std::coroutine_handle<detail::promise<T>>::from_address(handle.address());
+    auto& promise         = specific_handle.promise();
+    return promise;
+}
+#endif // DEBUG
 
 } // namespace detail
 

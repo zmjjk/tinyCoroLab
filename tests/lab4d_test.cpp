@@ -97,7 +97,8 @@ task<> set_func_hybrid_mutex(event<>& ev, int& setid, int& id)
 {
     auto guard = event_guard(ev);
     utils::msleep(100);
-    setid = (++id);
+    ++id;
+    setid = id;
     co_return;
 }
 
@@ -106,7 +107,8 @@ task<> wait_func_hybrid_mutex(event<>& ev, mutex& mtx, std::vector<int>& vec, in
     co_await ev.wait();
 
     auto p = co_await mtx.lock_guard();
-    vec.push_back((++id));
+    ++id;
+    vec.push_back(id);
 }
 
 task<> countdown_func_hybrid_mutex(latch& lt, mutex& mtx, std::vector<int>& vec, int& id)
@@ -145,67 +147,67 @@ task<> wait_func_hybrid_mutex(wait_group& wg, mutex& mtx, std::vector<int>& vec,
  *                          tests                            *
  *************************************************************/
 
-// TEST_P(MutexTest, MultiFetchLock)
-// {
-//     int thread_num, func_num;
-//     std::tie(thread_num, func_num) = GetParam();
+TEST_P(MutexTest, MultiFetchLock)
+{
+    int thread_num, func_num;
+    std::tie(thread_num, func_num) = GetParam();
 
-//     scheduler::init(thread_num);
+    scheduler::init(thread_num);
 
-//     for (int i = 0; i < func_num; i++)
-//     {
-//         submit_to_scheduler(lock_func(m_mtx, m_vec, m_id));
-//     }
+    for (int i = 0; i < func_num; i++)
+    {
+        submit_to_scheduler(lock_func(m_mtx, m_vec, m_id));
+    }
 
-//     scheduler::start();
-//     scheduler::loop(false);
+    scheduler::start();
+    scheduler::loop(false);
 
-//     ASSERT_EQ(m_vec.size(), func_num);
-//     ASSERT_EQ(m_id, func_num);
+    ASSERT_EQ(m_vec.size(), func_num);
+    ASSERT_EQ(m_id, func_num);
 
-//     std::sort(m_vec.begin(), m_vec.end());
-//     for (int i = 0; i < func_num; i++)
-//     {
-//         ASSERT_EQ(m_vec[i], i);
-//     }
-// }
+    std::sort(m_vec.begin(), m_vec.end());
+    for (int i = 0; i < func_num; i++)
+    {
+        ASSERT_EQ(m_vec[i], i);
+    }
+}
 
-// INSTANTIATE_TEST_SUITE_P(
-//     MutexTests,
-//     MutexTest,
-//     ::testing::Values(
-//         std::make_tuple(1, 1),
-//         std::make_tuple(1, 100),
-//         std::make_tuple(1, 10000),
-//         std::make_tuple(0, 1),
-//         std::make_tuple(0, 100),
-//         std::make_tuple(0, 10000),
-//         std::make_tuple(0, 100000)));
+INSTANTIATE_TEST_SUITE_P(
+    MutexTests,
+    MutexTest,
+    ::testing::Values(
+        std::make_tuple(1, 1),
+        std::make_tuple(1, 100),
+        std::make_tuple(1, 10000),
+        std::make_tuple(0, 1),
+        std::make_tuple(0, 100),
+        std::make_tuple(0, 10000),
+        std::make_tuple(0, 100000)));
 
-// TEST_F(MutexTrylockTest, MultiTryLock)
-// {
-//     const int thread_num = std::thread::hardware_concurrency();
-//     const int func_num   = thread_num;
+TEST_F(MutexTrylockTest, MultiTryLock)
+{
+    const int thread_num = std::thread::hardware_concurrency();
+    const int func_num   = thread_num;
 
-//     scheduler::init(thread_num);
+    scheduler::init(thread_num);
 
-//     for (int i = 0; i < func_num; i++)
-//     {
-//         submit_to_scheduler(trylock_func(m_mtx, m_vec, m_id));
-//     }
+    for (int i = 0; i < func_num; i++)
+    {
+        submit_to_scheduler(trylock_func(m_mtx, m_vec, m_id));
+    }
 
-//     scheduler::start();
-//     scheduler::loop(false);
+    scheduler::start();
+    scheduler::loop(false);
 
-//     ASSERT_EQ(m_vec.size(), func_num);
-//     ASSERT_EQ(m_id, func_num);
+    ASSERT_EQ(m_vec.size(), func_num);
+    ASSERT_EQ(m_id, func_num);
 
-//     std::sort(m_vec.begin(), m_vec.end());
-//     for (int i = 0; i < func_num; i++)
-//     {
-//         ASSERT_EQ(m_vec[i], i);
-//     }
-// }
+    std::sort(m_vec.begin(), m_vec.end());
+    for (int i = 0; i < func_num; i++)
+    {
+        ASSERT_EQ(m_vec[i], i);
+    }
+}
 
 TEST_P(MutexHybridEventTest, MutexHybridEvent)
 {
@@ -225,7 +227,7 @@ TEST_P(MutexHybridEventTest, MutexHybridEvent)
     scheduler::loop(false);
 
     ASSERT_EQ(m_setid, 1);
-    ASSERT_EQ(m_id, wait_num + 2);
+    ASSERT_EQ(m_id, wait_num + 1);
     ASSERT_EQ(m_vec.size(), wait_num);
 
     std::sort(m_vec.begin(), m_vec.end());
@@ -239,128 +241,127 @@ INSTANTIATE_TEST_SUITE_P(
     MutexHybridEventTests,
     MutexHybridEventTest,
     ::testing::Values(
-        // std::make_tuple(1, 1),
-        // std::make_tuple(1, 100),
-        // std::make_tuple(1, 10000),
-        // std::make_tuple(0, 1),
-        // std::make_tuple(0, 100),
-        std::make_tuple(0, 10000)
-        // std::make_tuple(0, 100000)
-        ));
+        std::make_tuple(1, 1),
+        std::make_tuple(1, 100),
+        std::make_tuple(1, 10000),
+        std::make_tuple(0, 1),
+        std::make_tuple(0, 100),
+        std::make_tuple(0, 10000),
+        std::make_tuple(0, 100000)));
 
-// TEST_P(MutexHybridLatchTest, MutexHybridLatch)
-// {
-//     int thread_num, countdown_num, wait_num;
-//     std::tie(thread_num, countdown_num, wait_num) = GetParam();
+TEST_P(MutexHybridLatchTest, MutexHybridLatch)
+{
+    int thread_num, countdown_num, wait_num;
+    std::tie(thread_num, countdown_num, wait_num) = GetParam();
 
-//     scheduler::init(thread_num);
+    scheduler::init(thread_num);
 
-//     latch lt(countdown_num);
+    latch lt(countdown_num);
 
-//     for (int i = 0; i < wait_num; i++)
-//     {
-//         submit_to_scheduler(wait_func_hybrid_mutex(lt, m_mtx, m_wait_vec, m_id));
-//     }
+    for (int i = 0; i < wait_num; i++)
+    {
+        submit_to_scheduler(wait_func_hybrid_mutex(lt, m_mtx, m_wait_vec, m_id));
+    }
 
-//     for (int i = 0; i < countdown_num; i++)
-//     {
-//         submit_to_scheduler(countdown_func_hybrid_mutex(lt, m_mtx, m_countdown_vec, m_id));
-//     }
+    for (int i = 0; i < countdown_num; i++)
+    {
+        submit_to_scheduler(countdown_func_hybrid_mutex(lt, m_mtx, m_countdown_vec, m_id));
+    }
 
-//     scheduler::start();
-//     scheduler::loop(false);
+    scheduler::start();
+    scheduler::loop(false);
 
-//     ASSERT_EQ(m_countdown_vec.size(), countdown_num);
-//     ASSERT_EQ(m_wait_vec.size(), wait_num);
+    ASSERT_EQ(m_countdown_vec.size(), countdown_num);
+    ASSERT_EQ(m_wait_vec.size(), wait_num);
 
-//     std::sort(m_countdown_vec.begin(), m_countdown_vec.end());
-//     std::sort(m_wait_vec.begin(), m_wait_vec.end());
+    std::sort(m_countdown_vec.begin(), m_countdown_vec.end());
+    std::sort(m_wait_vec.begin(), m_wait_vec.end());
 
-//     ASSERT_LT(*m_countdown_vec.rbegin(), *m_wait_vec.begin());
+    ASSERT_LT(*m_countdown_vec.rbegin(), *m_wait_vec.begin());
 
-//     for (int i = 0; i < countdown_num; i++)
-//     {
-//         ASSERT_EQ(m_countdown_vec[i], i);
-//     }
+    for (int i = 0; i < countdown_num; i++)
+    {
+        ASSERT_EQ(m_countdown_vec[i], i);
+    }
 
-//     for (int i = 0; i < wait_num; i++)
-//     {
-//         ASSERT_EQ(m_wait_vec[i], i + countdown_num);
-//     }
-// }
+    for (int i = 0; i < wait_num; i++)
+    {
+        ASSERT_EQ(m_wait_vec[i], i + countdown_num);
+    }
+}
 
-// INSTANTIATE_TEST_SUITE_P(
-//     MutexHybridLatchTests,
-//     MutexHybridLatchTest,
-//     ::testing::Values(
-//         std::make_tuple(1, 1, 1),
-//         std::make_tuple(1, 1, 100),
-//         std::make_tuple(1, 1, 10000),
-//         std::make_tuple(1, 100, 1),
-//         std::make_tuple(1, 100, 100),
-//         std::make_tuple(1, 100, 10000),
-//         std::make_tuple(0, 1, 1),
-//         std::make_tuple(0, 1, 100),
-//         std::make_tuple(0, 1, 10000),
-//         std::make_tuple(0, 100, 1),
-//         std::make_tuple(0, 100, 100),
-//         std::make_tuple(0, 100, 10000),
-//         std::make_tuple(0, 100, 100000)));
+INSTANTIATE_TEST_SUITE_P(
+    MutexHybridLatchTests,
+    MutexHybridLatchTest,
+    ::testing::Values(
+        std::make_tuple(1, 1, 1),
+        std::make_tuple(1, 1, 100),
+        std::make_tuple(1, 1, 10000),
+        std::make_tuple(1, 100, 1),
+        std::make_tuple(1, 100, 100),
+        std::make_tuple(1, 100, 10000),
+        std::make_tuple(0, 1, 1),
+        std::make_tuple(0, 1, 100),
+        std::make_tuple(0, 1, 10000),
+        std::make_tuple(0, 100, 1),
+        std::make_tuple(0, 100, 100),
+        std::make_tuple(0, 100, 10000),
+        std::make_tuple(0, 100, 100000)));
 
-// TEST_P(MutexHybridWaitgroupTest, MutexHybridWaitgroup)
-// {
-//     int thread_num, done_num, wait_num;
-//     std::tie(thread_num, done_num, wait_num) = GetParam();
+TEST_P(MutexHybridWaitgroupTest, MutexHybridWaitgroup)
+{
+    int thread_num, done_num, wait_num;
+    std::tie(thread_num, done_num, wait_num) = GetParam();
 
-//     scheduler::init(thread_num);
+    scheduler::init(thread_num);
 
-//     for (int i = 0; i < wait_num; i++)
-//     {
-//         submit_to_scheduler(wait_func_hybrid_mutex(m_wg, m_mtx, m_wait_vec, m_id));
-//     }
+    for (int i = 0; i < wait_num; i++)
+    {
+        submit_to_scheduler(wait_func_hybrid_mutex(m_wg, m_mtx, m_wait_vec, m_id));
+    }
 
-//     for (int i = 0; i < done_num; i++)
-//     {
-//         m_wg.add(1);
-//         submit_to_scheduler(done_func_hybrid_mutex(m_wg, m_mtx, m_done_vec, m_id));
-//     }
+    for (int i = 0; i < done_num; i++)
+    {
+        m_wg.add(1);
+        submit_to_scheduler(done_func_hybrid_mutex(m_wg, m_mtx, m_done_vec, m_id));
+    }
 
-//     scheduler::start();
-//     scheduler::loop(false);
+    scheduler::start();
+    scheduler::loop(false);
 
-//     ASSERT_EQ(m_done_vec.size(), done_num);
-//     ASSERT_EQ(m_wait_vec.size(), wait_num);
+    ASSERT_EQ(m_done_vec.size(), done_num);
+    ASSERT_EQ(m_wait_vec.size(), wait_num);
 
-//     std::sort(m_done_vec.begin(), m_done_vec.end());
-//     std::sort(m_wait_vec.begin(), m_wait_vec.end());
+    std::sort(m_done_vec.begin(), m_done_vec.end());
+    std::sort(m_wait_vec.begin(), m_wait_vec.end());
 
-//     ASSERT_LT(*m_done_vec.rbegin(), *m_wait_vec.begin());
+    ASSERT_LT(*m_done_vec.rbegin(), *m_wait_vec.begin());
 
-//     for (int i = 0; i < done_num; i++)
-//     {
-//         ASSERT_EQ(m_done_vec[i], i);
-//     }
+    for (int i = 0; i < done_num; i++)
+    {
+        ASSERT_EQ(m_done_vec[i], i);
+    }
 
-//     for (int i = 0; i < wait_num; i++)
-//     {
-//         ASSERT_EQ(m_wait_vec[i], i + done_num);
-//     }
-// }
+    for (int i = 0; i < wait_num; i++)
+    {
+        ASSERT_EQ(m_wait_vec[i], i + done_num);
+    }
+}
 
-// INSTANTIATE_TEST_SUITE_P(
-//     MutexHybridWaitgroupTests,
-//     MutexHybridWaitgroupTest,
-//     ::testing::Values(
-//         std::make_tuple(1, 1, 1),
-//         std::make_tuple(1, 1, 100),
-//         std::make_tuple(1, 1, 10000),
-//         std::make_tuple(1, 100, 1),
-//         std::make_tuple(1, 100, 100),
-//         std::make_tuple(1, 100, 10000),
-//         std::make_tuple(0, 1, 1),
-//         std::make_tuple(0, 1, 100),
-//         std::make_tuple(0, 1, 10000),
-//         std::make_tuple(0, 100, 1),
-//         std::make_tuple(0, 100, 100),
-//         std::make_tuple(0, 100, 10000),
-//         std::make_tuple(0, 100, 100000)));
+INSTANTIATE_TEST_SUITE_P(
+    MutexHybridWaitgroupTests,
+    MutexHybridWaitgroupTest,
+    ::testing::Values(
+        std::make_tuple(1, 1, 1),
+        std::make_tuple(1, 1, 100),
+        std::make_tuple(1, 1, 10000),
+        std::make_tuple(1, 100, 1),
+        std::make_tuple(1, 100, 100),
+        std::make_tuple(1, 100, 10000),
+        std::make_tuple(0, 1, 1),
+        std::make_tuple(0, 1, 100),
+        std::make_tuple(0, 1, 10000),
+        std::make_tuple(0, 100, 1),
+        std::make_tuple(0, 100, 100),
+        std::make_tuple(0, 100, 10000),
+        std::make_tuple(0, 100, 100000)));

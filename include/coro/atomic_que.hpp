@@ -15,5 +15,5 @@ struct CapacityToConstructor : Queue
 
 template<typename T>
 using AtomicQueue =
-    CapacityToConstructor<atomic_queue::AtomicQueueB2<T, std::allocator<T>, false, false, true>, config::kQueCap>;
+    CapacityToConstructor<atomic_queue::AtomicQueueB2<T, std::allocator<T>, true, false, false>, config::kQueCap>;
 }; // namespace coro

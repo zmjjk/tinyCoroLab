@@ -19,11 +19,10 @@ auto context::start() noexcept -> void
         });
 }
 
-auto context::stop() noexcept -> void
+auto context::notify_stop() noexcept -> void
 {
     m_job->request_stop();
     m_engine.wake_up();
-    m_job->join();
 }
 
 auto context::init() noexcept -> void

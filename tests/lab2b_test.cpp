@@ -157,7 +157,8 @@ TEST_P(ContextRunTaskTest, RunTask)
     }
 
     m_ctx.start();
-    m_ctx.stop();
+    m_ctx.notify_stop();
+    m_ctx.join();
 
     ASSERT_EQ(m_vec.size(), task_num);
     std::sort(m_vec.begin(), m_vec.end());
@@ -184,7 +185,8 @@ TEST_P(ContextMultiThreadAddTaskTest, MultiThreadAddTask)
     }
 
     m_ctx.start();
-    m_ctx.stop();
+    m_ctx.notify_stop();
+    m_ctx.join();
 
     ASSERT_EQ(m_vec.size(), thread_num);
     std::sort(m_vec.begin(), m_vec.end());
@@ -207,7 +209,8 @@ TEST_P(ContextAddNopIOTest, AddNopIO)
     }
 
     m_ctx.start();
-    m_ctx.stop();
+    m_ctx.notify_stop();
+    m_ctx.join();
 
     ASSERT_EQ(m_vec.size(), task_num);
     std::sort(m_vec.begin(), m_vec.end());

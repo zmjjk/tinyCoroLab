@@ -39,8 +39,8 @@ auto mutex::mutex_awaiter::register_lock() noexcept -> bool
 
 auto mutex::mutex_awaiter::resume() noexcept -> void
 {
-    m_ctx.unregister_wait();
     m_ctx.submit_task(m_await_coro);
+    m_ctx.unregister_wait();
     m_register_state = true;
 }
 

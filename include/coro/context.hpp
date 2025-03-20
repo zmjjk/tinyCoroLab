@@ -15,6 +15,8 @@ using config::ctx_id;
 using std::atomic;
 using std::jthread;
 using std::make_unique;
+using std::memory_order_acq_rel;
+using std::memory_order_acquire;
 using std::memory_order_relaxed;
 using std::stop_token;
 using std::unique_ptr;
@@ -39,7 +41,7 @@ public:
     auto start() noexcept -> void;
 
     // mark
-    auto stop() noexcept -> void;
+    auto notify_stop() noexcept -> void;
 
     inline auto join() noexcept -> void { m_job->join(); }
 
@@ -62,13 +64,17 @@ public:
     // mark
     inline auto register_wait(int register_cnt = 1) noexcept -> void CORO_INLINE
     {
-        m_num_wait_task.fetch_add(size_t(register_cnt), memory_order_relaxed);
+        m_num_wait_task.fetch_add(size_t(register_cnt), memory_order_acq_rel);
     }
 
     // mark
     inline auto unregister_wait(int register_cnt = 1) noexcept -> void CORO_INLINE
     {
-        m_num_wait_task.fetch_sub(register_cnt, memory_order_relaxed);
+        auto num = m_num_wait_task.fetch_sub(register_cnt, memory_order_acq_rel);
+        if (num == register_cnt)
+        {
+            m_engine.wake_up();
+        }
     }
 
     inline auto get_engine() noexcept -> engine& { return m_engine; }
@@ -89,7 +95,7 @@ public:
     // mark
     inline auto empty_wait_task() noexcept -> bool CORO_INLINE
     {
-        return m_num_wait_task.load(memory_order_relaxed) == 0 && m_engine.empty_io();
+        return m_num_wait_task.load(memory_order_acquire) == 0 && m_engine.empty_io();
     }
 
 private:

@@ -38,7 +38,12 @@ auto scheduler::stop_impl() noexcept -> void
 {
     for (int i = 0; i < m_ctx_cnt; i++)
     {
-        m_ctxs[i]->stop();
+        m_ctxs[i]->notify_stop();
+    }
+
+    for (int i = 0; i < m_ctx_cnt; i++)
+    {
+        m_ctxs[i]->join();
     }
 }
 

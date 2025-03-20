@@ -43,7 +43,7 @@ constexpr unsigned int kSqthreadIdle = 2000; // millseconds
 
 // ===================== execute engine configuration =======================
 using ctx_id                                                = uint32_t;
-constexpr size_t                          kQueCap           = 10240;
+constexpr size_t                          kQueCap           = 16384;
 constexpr coro::detail::dispatch_strategy kDispatchStrategy = coro::detail::dispatch_strategy::round_robin;
 inline bool                               kLongRunMode      = true;
 
