@@ -21,6 +21,7 @@
 - 测试数值改为配置项[done]
 - 添加版本号信息[done]
 - 更改所有同步组件register和resume的方式
+- 添加github CI和githooks
 
 ## 后续实验
 

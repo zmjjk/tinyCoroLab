@@ -46,7 +46,8 @@ set(SRC_INCLUDE_DIR
 set(THIRD_PARTY_INCLUDE_DIR
     "${PROJECT_SOURCE_DIR}/third_party/spdlog/include"
     "${PROJECT_SOURCE_DIR}/third_party/googletest/googletest/include"
-    "${PROJECT_SOURCE_DIR}/third_party/atomic_queue/include")
+    "${PROJECT_SOURCE_DIR}/third_party/atomic_queue/include"
+    "${PROJECT_SOURCE_DIR}/third_party/benchmark/include")
 
 option(ENABLE_UNIT_TESTS "Enable unit tests" ON)
 option(ENABLE_DEBUG_MODE "Enable debug mode" OFF)
@@ -105,6 +106,7 @@ if(ENABLE_UNIT_TESTS)
 endif()
 
 add_subdirectory(tests)
+add_subdirectory(benchtests)
 add_subdirectory(examples)
 add_subdirectory(benchmark)
 
