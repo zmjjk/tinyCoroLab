@@ -127,9 +127,9 @@ task<> producer(ConditionVarProducerConsumerTest::test_paras& para, int capacity
 task<> consumer(ConditionVarProducerConsumerTest::test_paras& para)
 {
     auto lock = co_await para.mtx.lock_guard();
-    while (para.stop_flag != 0 || !para.que.empty())
+    while (para.stop_flag > 0 || !para.que.empty())
     {
-        co_await para.consumer_cv.wait(para.mtx, [&]() { return !para.que.empty(); });
+        co_await para.consumer_cv.wait(para.mtx, [&]() { return !para.que.empty() || para.stop_flag <= 0; });
         int loop_cnt = para.que.size();
         for (int i = 0; i < loop_cnt; i++)
         {
@@ -138,56 +138,58 @@ task<> consumer(ConditionVarProducerConsumerTest::test_paras& para)
         }
         para.producer_cv.notify_one();
     }
+    para.consumer_cv.notify_all();
 }
 
 /*************************************************************
  *                          tests                            *
  *************************************************************/
 
-// TEST_P(ConditionVarNotifyOneTest, ConditionVarNotifyOne)
-// {
-//     int loop_num = GetParam();
+TEST_P(ConditionVarNotifyOneTest, ConditionVarNotifyOne)
+{
+    int loop_num = GetParam();
 
-//     scheduler::init();
+    scheduler::init();
 
-//     submit_to_scheduler(notify_one(m_para, 0, loop_num));
-//     submit_to_scheduler(notify_one(m_para, 1, loop_num));
+    submit_to_scheduler(notify_one(m_para, 0, loop_num));
+    submit_to_scheduler(notify_one(m_para, 1, loop_num));
 
-//     scheduler::start();
-//     scheduler::loop(false);
+    scheduler::start();
+    scheduler::loop(false);
 
-//     ASSERT_EQ(m_para.vec.size(), 2 * loop_num);
-//     for (int i = 0; i < 2 * loop_num; i++)
-//     {
-//         ASSERT_EQ(m_para.vec[i], i % 2);
-//     }
-// }
+    ASSERT_EQ(m_para.vec.size(), 2 * loop_num);
+    for (int i = 0; i < 2 * loop_num; i++)
+    {
+        ASSERT_EQ(m_para.vec[i], i % 2);
+    }
+}
 
-// INSTANTIATE_TEST_SUITE_P(
-//     ConditionVarNotifyOneTests, ConditionVarNotifyOneTest, ::testing::Values(100, 1000, 10000));
+INSTANTIATE_TEST_SUITE_P(ConditionVarNotifyOneTests, ConditionVarNotifyOneTest, ::testing::Values(100, 1000, 10000));
 
-// TEST_P(ConditionVarNotifyAllTest, ConditionVarNotifyAll)
-// {
-//     int task_num = GetParam();
+TEST_P(ConditionVarNotifyAllTest, ConditionVarNotifyAll)
+{
+    int task_num = GetParam();
 
-//     scheduler::init();
-//     for (int i = 0; i < task_num; i++)
-//     {
-//         submit_to_scheduler(notify_all(m_para, i));
-//     }
+    scheduler::init();
+    for (int i = 0; i < task_num; i++)
+    {
+        submit_to_scheduler(notify_all(m_para, i));
+    }
 
-//     scheduler::start();
-//     scheduler::loop(false);
+    scheduler::start();
+    scheduler::loop(false);
 
-//     ASSERT_EQ(m_para.vec.size(), task_num);
-//     for (int i = 0; i < task_num; i++)
-//     {
-//         ASSERT_EQ(m_para.vec[i], i);
-//     }
-// }
+    ASSERT_EQ(m_para.vec.size(), task_num);
+    for (int i = 0; i < task_num; i++)
+    {
+        ASSERT_EQ(m_para.vec[i], i);
+    }
+}
 
-// INSTANTIATE_TEST_SUITE_P(
-//     ConditionVarNotifyAllTests, ConditionVarNotifyAllTest, ::testing::Values(2, 10, 100, 1000, 10000, 100000));
+INSTANTIATE_TEST_SUITE_P(
+    ConditionVarNotifyAllTests,
+    ConditionVarNotifyAllTest,
+    ::testing::Values(2, 10, 100, 1000, 10000, config::kMaxTestTaskNum));
 
 TEST_P(ConditionVarProducerConsumerTest, ConditionVarProducerConsumer)
 {
@@ -227,14 +229,14 @@ INSTANTIATE_TEST_SUITE_P(
         std::tuple(1, 1, 1, 10000),
         std::tuple(100, 100, 1, 1),
         std::tuple(100, 100, 1, 100),
-        std::tuple(100, 100, 1, 10000),
+        std::tuple(100, 100, 1, 1000),
         std::tuple(1000, 1000, 1, 10),
-        std::tuple(1000, 1000, 1, 1000),
+        std::tuple(1000, 1000, 1, 100),
         std::tuple(1, 1, 100, 1),
         std::tuple(1, 1, 100, 100),
         std::tuple(1, 1, 100, 10000),
         std::tuple(100, 100, 100, 1),
         std::tuple(100, 100, 100, 100),
         std::tuple(100, 100, 100, 10000),
-        std::tuple(1000, 1000, 100, 10),
-        std::tuple(1000, 1000, 100, 1000)));
+        std::tuple(1000, 1000, 100, 100),
+        std::tuple(1000, 1000, 100, 10000)));

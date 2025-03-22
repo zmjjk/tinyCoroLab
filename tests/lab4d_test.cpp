@@ -182,7 +182,7 @@ INSTANTIATE_TEST_SUITE_P(
         std::make_tuple(0, 1),
         std::make_tuple(0, 100),
         std::make_tuple(0, 10000),
-        std::make_tuple(0, 100000)));
+        std::make_tuple(0, config::kMaxTestTaskNum)));
 
 TEST_F(MutexTrylockTest, MultiTryLock)
 {
@@ -247,7 +247,7 @@ INSTANTIATE_TEST_SUITE_P(
         std::make_tuple(0, 1),
         std::make_tuple(0, 100),
         std::make_tuple(0, 10000),
-        std::make_tuple(0, 100000)));
+        std::make_tuple(0, config::kMaxTestTaskNum)));
 
 TEST_P(MutexHybridLatchTest, MutexHybridLatch)
 {
@@ -306,7 +306,7 @@ INSTANTIATE_TEST_SUITE_P(
         std::make_tuple(0, 100, 1),
         std::make_tuple(0, 100, 100),
         std::make_tuple(0, 100, 10000),
-        std::make_tuple(0, 100, 100000)));
+        std::make_tuple(0, 100, config::kMaxTestTaskNum)));
 
 TEST_P(MutexHybridWaitgroupTest, MutexHybridWaitgroup)
 {
@@ -364,4 +364,4 @@ INSTANTIATE_TEST_SUITE_P(
         std::make_tuple(0, 100, 1),
         std::make_tuple(0, 100, 100),
         std::make_tuple(0, 100, 10000),
-        std::make_tuple(0, 100, 100000)));
+        std::make_tuple(0, 100, config::kMaxTestTaskNum)));

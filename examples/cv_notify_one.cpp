@@ -10,7 +10,6 @@ std::queue<int> que;
 
 task<> consumer()
 {
-    // utils::sleep(3);
     int  cnt{0};
     auto lock = co_await mtx.lock_guard();
     log::info("consumer hold lock");

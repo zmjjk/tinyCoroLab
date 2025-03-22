@@ -63,7 +63,7 @@ auto mutex::lock() noexcept -> mutex_awaiter
 
 auto mutex::unlock() noexcept -> void
 {
-    assert(m_state.load(std::memory_order_acquire) != nolocked);
+    assert(m_state.load(std::memory_order_acquire) != nolocked && "unlock the mutex with unlock state");
 
     auto to_resume = reinterpret_cast<mutex_awaiter*>(m_resume_list_head);
     if (to_resume == nullptr)

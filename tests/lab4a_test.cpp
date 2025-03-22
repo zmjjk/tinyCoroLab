@@ -115,7 +115,7 @@ INSTANTIATE_TEST_SUITE_P(
         std::make_tuple(0, 1),
         std::make_tuple(0, 100),
         std::make_tuple(0, 10000),
-        std::make_tuple(0, 100000)));
+        std::make_tuple(0, config::kMaxTestTaskNum)));
 
 TEST_P(EventValueTest, SetValueAndWait)
 {
@@ -157,4 +157,4 @@ INSTANTIATE_TEST_SUITE_P(
         std::make_tuple(0, 1),
         std::make_tuple(0, 100),
         std::make_tuple(0, 10000),
-        std::make_tuple(0, 100000)));
+        std::make_tuple(0, config::kMaxTestTaskNum)));

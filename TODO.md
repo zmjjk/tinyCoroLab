@@ -16,9 +16,11 @@
 - 添加注释
 - 为uring添加polling模式[future]
 - 高QPS下部分响应失败
-- 更改context的stop为notify_stop，并修改测试用例
+- 更改context的stop为notify_stop，并修改测试用例[done]
 - 修复内存invalid read的问题
-- 测试数值改为配置项
+- 测试数值改为配置项[done]
+- 添加版本号信息[done]
+- 更改所有同步组件register和resume的方式
 
 ## 后续实验
 

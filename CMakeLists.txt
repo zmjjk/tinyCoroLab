@@ -63,6 +63,7 @@ endif()
 
 # TODO: add more options
 
+message(STATUS "${PROJECT_NAME} version: ${PROJECT_VERSION}")
 message(STATUS "Complier path: ${CMAKE_CXX_COMPILER}")
 message(STATUS "Enable testing: ${ENABLE_UNIT_TESTS}")
 message(STATUS "Enable debug mode: ${ENABLE_DEBUG_MODE}")
