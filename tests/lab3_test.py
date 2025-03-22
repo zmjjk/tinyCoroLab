@@ -2,6 +2,11 @@ import sys
 import subprocess
 import time
 
+RED = "\033[31m"
+GREEN = "\033[32m"
+RESET = "\033[0m"
+
+# test cases: [(<threadnum>, <port>) ...]
 paras = [(1, 8000), (0, 8001)]
 
 
@@ -21,10 +26,10 @@ def run_test(
         time.sleep(2)
         if program_process.poll() is not None:  # terminate
             stdout, stderr = program_process.communicate()
-            print(f"[error] {benchprogram_path} start failed")
-            print(f"[return code] {program_process.returncode}")
-            print(f"[stdout] {stdout}")
-            print(f"[stderr] {stderr}")
+            print(f"{RED}[error] {benchprogram_path} start failed{RESET}")
+            print(f"{RED}[return code] {program_process.returncode}{RESET}")
+            print(f"{RED}[stdout] {stdout}{RESET}")
+            print(f"{RED}[stderr] {stderr}{RESET}")
             return False
 
         bench_process = subprocess.Popen(
@@ -46,10 +51,10 @@ def run_test(
 
         time.sleep(2)
         if bench_process.stderr.readline() != "":
-            print("[error] bench tools running error")
+            print(f"{RED}[error] bench tools running error{RESET}")
             bench_process.kill()
             _, stderr = bench_process.communicate()
-            print(f"[stderr] {stderr}")
+            print(f"{RED}[stderr] {stderr}{RESET}")
             if program_process.poll() is None:
                 program_process.kill()
             return False
@@ -60,7 +65,7 @@ def run_test(
         if bench_process.poll() is None:  # running
             stdout, stderr = program_process.communicate()
             print(
-                f"[error] {benchtool_path} hasn't finish running, please check your server code"
+                f"{RED}[error] {benchtool_path} hasn't finish running, please check your server code{RESET}"
             )
             bench_process.kill()
             if program_process.poll() is None:
@@ -69,20 +74,20 @@ def run_test(
 
         if program_process.poll() is not None:  # terminate
             stdout, stderr = program_process.communicate()
-            print(f"[error] {benchprogram_path} crashed when test")
-            print(f"[return code] {program_process.returncode}")
-            print(f"[stdout] {stdout}")
-            print(f"[stderr] {stderr}")
+            print(f"{RED}[error] {benchprogram_path} crashed when test{RESET}")
+            print(f"{RED}[return code] {program_process.returncode}{RESET}")
+            print(f"{RED}[stdout] {stdout}{RESET}")
+            print(f"{RED}[stderr] {stderr}{RESET}")
             return False
 
         # collect result
         stdout, _ = bench_process.communicate()
-        print(f"[test result] {stdout}")
+        print(f"{GREEN}[test result] {stdout}{RESET}")
 
         program_process.kill()
 
     except Exception as e:
-        print(f"exception occur! detail: {e}")
+        print(f"{RED}exception occur! detail: {e}{RESET}")
         return False
 
     return True
@@ -90,15 +95,21 @@ def run_test(
 
 if __name__ == "__main__":
     for i, para in enumerate(paras):
-        print(f"================== lab3 test case {i} begin ==================")
+        print(
+            f"{GREEN}================== lab3 test case {i} begin =================={RESET}"
+        )
         thread_num = para[0]
         if thread_num == 0:
             thread_num = "default core number"
-        print(f"thread number: {thread_num}, server port: {para[1]}")
+        print(f"{GREEN}thread number: {thread_num}, server port: {para[1]}{RESET}")
         if not run_test(para[0], para[1], sys.argv[1], sys.argv[2]):
-            print(f"xxxxxxxxxxxxxxxxxx lab3 test case {i} error xxxxxxxxxxxxxxxxxx")
+            print(
+                f"{RED}xxxxxxxxxxxxxxxxxx lab3 test case {i} error xxxxxxxxxxxxxxxxxx{RESET}"
+            )
             sys.exit(1)
         else:
-            print(f"================== lab3 test case {i} finish =================")
+            print(
+                f"{GREEN}================== lab3 test case {i} finish ================={RESET}"
+            )
             time.sleep(2)
-    print("you pass lab3 test, congratulations!")
+    print(f"{GREEN}you pass lab3 test, congratulations!{RESET}")

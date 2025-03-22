@@ -51,6 +51,14 @@ foreach (tinycoro_test_source ${TINYCORO_TEST_SOURCES})
     COMMENT "Running ${tinycoro_test_command} tests..."
   )
 
+  add_custom_target(memtest-${tinycoro_test_command}
+    COMMAND bash ${PROJECT_SOURCE_DIR}/scripts/memcheck.sh ${PROJECT_SOURCE_DIR}/temp/valgrind_output.xml $<TARGET_FILE:${tinycoro_test_name}>
+    COMMAND python ${PROJECT_SOURCE_DIR}/scripts/analysis_valgrind.py ${PROJECT_SOURCE_DIR}/temp/valgrind_output.xml
+    $<TARGET_FILE:${tinycoro_test_name}>
+    DEPENDS ${tinycoro_test_name}
+    COMMENT "Running ${tinycoro_test_command} memtests..."
+  )
+
 endforeach ()
 
 # special test for lab3
