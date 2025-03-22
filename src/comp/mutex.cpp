@@ -3,9 +3,15 @@
 
 namespace coro
 {
+auto mutex::mutex_awaiter::await_resume() noexcept -> void
+{
+    m_ctx.unregister_wait();
+}
+
 auto mutex::mutex_awaiter::await_suspend(std::coroutine_handle<> handle) noexcept -> bool
 {
     m_await_coro = handle;
+    m_ctx.register_wait();
     return register_lock();
 }
 
@@ -29,8 +35,8 @@ auto mutex::mutex_awaiter::register_lock() noexcept -> bool
             if (m_mtx.m_state.compare_exchange_weak(
                     state, reinterpret_cast<awaiter_ptr>(this), std::memory_order_acq_rel, std::memory_order_relaxed))
             {
-                m_ctx.register_wait(m_register_state);
-                m_register_state = false;
+                // m_ctx.register_wait(m_register_state);
+                // m_register_state = false;
                 return true;
             }
         }
@@ -40,8 +46,8 @@ auto mutex::mutex_awaiter::register_lock() noexcept -> bool
 auto mutex::mutex_awaiter::resume() noexcept -> void
 {
     m_ctx.submit_task(m_await_coro);
-    m_ctx.unregister_wait();
-    m_register_state = true;
+    // m_ctx.unregister_wait();
+    // m_register_state = true;
 }
 
 auto mutex::try_lock() noexcept -> bool

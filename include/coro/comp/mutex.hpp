@@ -20,13 +20,13 @@ class mutex
 public:
     struct mutex_awaiter
     {
-        mutex_awaiter(context& ctx, mutex& mtx) noexcept : m_ctx(ctx), m_mtx(mtx), m_register_state(true) {}
+        mutex_awaiter(context& ctx, mutex& mtx) noexcept : m_ctx(ctx), m_mtx(mtx) {}
 
         constexpr auto await_ready() noexcept -> bool { return false; }
 
         auto await_suspend(std::coroutine_handle<> handle) noexcept -> bool;
 
-        constexpr auto await_resume() noexcept -> void {}
+        auto await_resume() noexcept -> void;
 
         auto register_lock() noexcept -> bool;
 
@@ -36,7 +36,6 @@ public:
         mutex&                  m_mtx;
         mutex_awaiter*          m_next{nullptr};
         std::coroutine_handle<> m_await_coro{nullptr};
-        bool                    m_register_state;
     };
 
     struct mutex_guard_awaiter : public mutex_awaiter
@@ -44,7 +43,11 @@ public:
         using guard_type = detail::lock_guard<mutex>;
         using mutex_awaiter::mutex_awaiter;
 
-        auto await_resume() noexcept -> guard_type { return guard_type(m_mtx); }
+        auto await_resume() noexcept -> guard_type
+        {
+            mutex_awaiter::await_resume();
+            return guard_type(m_mtx);
+        }
     };
 
 public:

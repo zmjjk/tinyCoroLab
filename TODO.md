@@ -18,6 +18,7 @@
 - 高QPS下部分响应失败
 - 更改context的stop为notify_stop，并修改测试用例
 - 修复内存invalid read的问题
+- 测试数值改为配置项
 
 ## 后续实验
 

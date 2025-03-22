@@ -21,19 +21,23 @@ public:
     {
         friend condition_variable;
 
-        cv_awaiter(context& ctx, mutex& mtx, cond_var& cv) noexcept : mutex_awaiter(ctx, mtx), m_cv(cv) {}
+        cv_awaiter(context& ctx, mutex& mtx, cond_var& cv) noexcept
+            : mutex_awaiter(ctx, mtx),
+              m_cv(cv),
+              m_suspend_state(false)
+        {
+        }
         cv_awaiter(context& ctx, mutex& mtx, cond_var& cv, cond_type& cond) noexcept
             : mutex_awaiter(ctx, mtx),
               m_cv(cv),
-              m_cond(cond)
+              m_cond(cond),
+              m_suspend_state(false)
         {
         }
 
-        auto await_suspend(std::coroutine_handle<> handle) noexcept -> bool
-        {
-            m_await_coro = handle;
-            return register_lock();
-        }
+        auto await_suspend(std::coroutine_handle<> handle) noexcept -> bool;
+
+        auto await_resume() noexcept -> void;
 
     protected:
         auto register_lock() noexcept -> bool;
@@ -46,6 +50,7 @@ public:
 
         cond_type m_cond;
         cond_var& m_cv;
+        bool      m_suspend_state;
     };
 
 public:

@@ -1,15 +1,28 @@
 #include "coro/comp/condition_variable.hpp"
-
 #include "coro/scheduler.hpp"
 
 namespace coro
 {
+auto condition_variable::cv_awaiter::await_suspend(std::coroutine_handle<> handle) noexcept -> bool
+{
+    m_await_coro = handle;
+    return register_lock();
+}
+
+auto condition_variable::cv_awaiter::await_resume() noexcept -> void
+{
+    m_ctx.unregister_wait(m_suspend_state);
+}
+
 auto condition_variable::cv_awaiter::register_lock() noexcept -> bool
 {
     if (m_cond && m_cond())
     {
         return false;
     }
+
+    m_ctx.register_wait(!m_suspend_state);
+    m_suspend_state = true;
 
     register_cv();
     m_mtx.unlock();
@@ -18,9 +31,7 @@ auto condition_variable::cv_awaiter::register_lock() noexcept -> bool
 
 auto condition_variable::cv_awaiter::register_cv() noexcept -> void
 {
-    m_ctx.register_wait(m_register_state);
-    m_register_state = false;
-    m_next           = nullptr;
+    m_next = nullptr;
 
     m_cv.m_lock.lock();
     if (m_cv.m_tail == nullptr)
@@ -47,6 +58,9 @@ auto condition_variable::cv_awaiter::resume() noexcept -> void
 {
     if (m_cond && !m_cond())
     {
+        m_ctx.register_wait(!m_suspend_state);
+        m_suspend_state = true;
+
         register_cv();
         m_mtx.unlock();
         return;
