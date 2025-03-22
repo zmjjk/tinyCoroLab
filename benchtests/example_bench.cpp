@@ -1,12 +1,3 @@
-/*
- * @Author: Jiahui Wang
- * @Email: 393814041@qq.com
- * @Date: 2025-03-22 19:18:08
- * @Last Modified by:   Jiahui Wang
- * @Last Modified time: 2025-03-22 19:18:08
- * @Description: Description
- */
-
 #include <string>
 
 #include "benchmark/benchmark.h"
