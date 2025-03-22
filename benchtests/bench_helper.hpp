@@ -5,6 +5,7 @@
 #include <thread>
 
 #define loop_add                                                                                                       \
+    size_t cnt{0};                                                                                                     \
     for (int i = 0; i < loop_num; i++)                                                                                 \
     {                                                                                                                  \
         benchmark::DoNotOptimize(cnt += 1);                                                                            \

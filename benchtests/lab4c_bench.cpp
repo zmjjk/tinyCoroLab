@@ -13,14 +13,14 @@ static const int thread_num = std::thread::hardware_concurrency();
 template<typename waitgroup_type>
 void waitgroup_bench(const int loop_num);
 
-task<> done(std::latch& lt, size_t& cnt, const int loop_num)
+task<> done(std::latch& lt, const int loop_num)
 {
     loop_add;
     lt.count_down();
     co_return;
 }
 
-task<> wait(std::latch& lt, size_t& cnt, const int loop_num)
+task<> wait(std::latch& lt, const int loop_num)
 {
     lt.wait();
     loop_add;
@@ -41,17 +41,17 @@ BENCHMARK(stl_latch)
     ->UseRealTime()
     ->Unit(benchmark::TimeUnit::kMillisecond)
     ->Arg(100)
-    ->Arg(10000)
-    ->Arg(1000000);
+    ->Arg(100000)
+    ->Arg(100000000);
 
-task<> done(wait_group& wg, size_t& cnt, const int loop_num)
+task<> done(wait_group& wg, const int loop_num)
 {
     loop_add;
     wg.done();
     co_return;
 }
 
-task<> wait(wait_group& wg, size_t& cnt, const int loop_num)
+task<> wait(wait_group& wg, const int loop_num)
 {
     co_await wg.wait();
     loop_add;
@@ -72,8 +72,8 @@ BENCHMARK(coro_waitgroup)
     ->UseRealTime()
     ->Unit(benchmark::TimeUnit::kMillisecond)
     ->Arg(100)
-    ->Arg(10000)
-    ->Arg(1000000);
+    ->Arg(100000)
+    ->Arg(100000000);
 
 BENCHMARK_MAIN();
 
@@ -86,16 +86,15 @@ void waitgroup_bench(const int loop_num)
     scheduler::init();
 
     waitgroup_type wg(done_num);
-    size_t         cnt = 0;
 
     for (int i = 0; i < done_num; i++)
     {
-        submit_to_scheduler(done(wg, cnt, loop_num));
+        submit_to_scheduler(done(wg, loop_num));
     }
 
     for (int i = 0; i < wait_num; i++)
     {
-        submit_to_scheduler(wait(wg, cnt, loop_num));
+        submit_to_scheduler(wait(wg, loop_num));
     }
 
     scheduler::start();

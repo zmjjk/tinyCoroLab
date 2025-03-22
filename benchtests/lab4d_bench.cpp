@@ -13,7 +13,7 @@ static const int thread_num = std::thread::hardware_concurrency();
 template<typename mutex_type>
 void mutex_bench(const int loop_num);
 
-static task<> add(std::mutex& mtx, size_t& cnt, const int loop_num)
+static task<> add(std::mutex& mtx, const int loop_num)
 {
     mtx.lock();
     loop_add;
@@ -47,10 +47,10 @@ BENCHMARK(stl_mutex)
     ->UseRealTime()
     ->Unit(benchmark::TimeUnit::kMillisecond)
     ->Arg(100)
-    ->Arg(10000)
-    ->Arg(1000000);
+    ->Arg(100000)
+    ->Arg(100000000);
 
-static task<> add(detail::spinlock& mtx, size_t& cnt, const int loop_num)
+static task<> add(detail::spinlock& mtx, const int loop_num)
 {
     mtx.lock();
     loop_add;
@@ -84,10 +84,10 @@ BENCHMARK(spin_mutex)
     ->UseRealTime()
     ->Unit(benchmark::TimeUnit::kMillisecond)
     ->Arg(100)
-    ->Arg(10000)
-    ->Arg(1000000);
+    ->Arg(100000)
+    ->Arg(100000000);
 
-static task<> add(mutex& mtx, size_t& cnt, const int loop_num)
+static task<> add(mutex& mtx, const int loop_num)
 {
     co_await mtx.lock();
     loop_add;
@@ -108,8 +108,8 @@ BENCHMARK(coro_mutex)
     ->UseRealTime()
     ->Unit(benchmark::TimeUnit::kMillisecond)
     ->Arg(100)
-    ->Arg(10000)
-    ->Arg(1000000);
+    ->Arg(100000)
+    ->Arg(100000000);
 
 BENCHMARK_MAIN();
 
@@ -119,11 +119,10 @@ void mutex_bench(const int loop_num)
     scheduler::init();
 
     mutex_type mtx;
-    size_t     cnt = 0;
 
     for (int i = 0; i < thread_num; i++)
     {
-        submit_to_scheduler(add(mtx, cnt, loop_num));
+        submit_to_scheduler(add(mtx, loop_num));
     }
 
     scheduler::start();
