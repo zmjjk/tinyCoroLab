@@ -16,6 +16,10 @@
 #define CORO_ALIGN        alignas(::coro::config::kCacheLineSize)
 #define CORO_MAYBE_UNUSED maybe_unused
 
+// if one function is marked by CORO_TEST_USED, this means test
+// will use this function, don't modity this function declaration
+#define CORO_TEST_USED(...)
+
 #define CORO_NO_COPY_MOVE(classname)                                                                                   \
     classname(const classname&)            = delete;                                                                   \
     classname(classname&&)                 = delete;                                                                   \

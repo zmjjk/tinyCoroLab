@@ -7,6 +7,11 @@
 
 namespace coro::detail
 {
+/**
+ * @brief container is used to store variable and return
+ *
+ * @tparam T
+ */
 template<typename T>
 // requires(!std::same_as<T, void> && !concepts::pod_type<T>)
 struct container

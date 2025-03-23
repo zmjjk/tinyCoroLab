@@ -11,6 +11,11 @@
 namespace coro
 {
 
+/**
+ * @brief scheduler just control context to run and stop,
+ * it also use dispatcher to decide which context can accept the task
+ *
+ */
 class scheduler
 {
     friend context;
@@ -25,8 +30,18 @@ public:
         get_instance()->init_impl(ctx_cnt);
     }
 
+    /**
+     * @brief start all context
+     *
+     */
     inline static auto start() noexcept -> void { get_instance()->start_impl(); }
 
+    /**
+     * @brief if long_run_mode is true, scheduler will never let context stop,
+     * otherwise scheduler will send stop signal first to context
+     *
+     * @param long_run_mode
+     */
     inline static auto loop(bool long_run_mode = config::kLongRunMode) noexcept -> void
     {
         get_instance()->loop_impl(long_run_mode);

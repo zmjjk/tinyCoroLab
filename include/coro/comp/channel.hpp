@@ -61,7 +61,7 @@ protected:
 }; // namespace detail
 
 template<concepts::conventional_type T, size_t capacity = 0>
-class channel : public detail::channel_base
+class [[CORO_TEST_USED(lab5c)]] channel : public detail::channel_base
 {
     using data_type = std::optional<T>;
 

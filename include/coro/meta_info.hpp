@@ -15,6 +15,10 @@ using config::ctx_id;
 using std::atomic;
 class engine;
 
+/**
+ * @brief store thread local variables
+ *
+ */
 struct CORO_ALIGN local_info
 {
     context* ctx{nullptr};
@@ -22,6 +26,10 @@ struct CORO_ALIGN local_info
     // TODO: Add more local var
 };
 
+/**
+ * @brief store thread shared variables
+ *
+ */
 struct global_info
 {
     atomic<ctx_id>   context_id{0};

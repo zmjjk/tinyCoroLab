@@ -47,7 +47,7 @@ struct promise_base
 
     constexpr auto initial_suspend() noexcept { return std::suspend_always{}; }
 
-    constexpr auto final_suspend() noexcept { return final_awaitable{}; }
+    [[CORO_TEST_USED(lab1)]] constexpr auto final_suspend() noexcept { return final_awaitable{}; }
 
     auto continuation(std::coroutine_handle<> continuation) noexcept -> void { m_continuation = continuation; }
 
@@ -213,7 +213,7 @@ public:
         return false;
     }
 
-    auto detach() -> void
+    [[CORO_TEST_USED(lab1)]] auto detach() -> void
     {
         assert(m_coroutine != nullptr && "detach func expected no-nullptr coroutine_handler");
         auto& promise = m_coroutine.promise();
@@ -254,7 +254,12 @@ private:
 
 using coroutine_handle = std::coroutine_handle<detail::promise_base>;
 
-inline auto clean(std::coroutine_handle<> handle) noexcept -> void
+/**
+ * @brief do clean work when handle is done
+ *
+ * @param handle
+ */
+[[CORO_TEST_USED(lab1)]] inline auto clean(std::coroutine_handle<> handle) noexcept -> void
 {
     auto  specific_handle = coroutine_handle::from_address(handle.address());
     auto& promise         = specific_handle.promise();

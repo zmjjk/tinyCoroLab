@@ -52,6 +52,11 @@ public:
     auto dispatch() noexcept -> size_t { return 0; }
 };
 
+/**
+ * @brief round robin is an easy load balance algorithm
+ *
+ * @tparam
+ */
 template<>
 class dispatcher<dispatch_strategy::round_robin>
 {

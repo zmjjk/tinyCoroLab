@@ -7,7 +7,7 @@
 namespace coro
 {
 
-class latch
+class [[CORO_TEST_USED(lab4b)]] latch
 {
 public:
     using event_t = event<>;

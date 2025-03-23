@@ -16,7 +16,7 @@ auto engine::deinit() noexcept -> void
 {
     m_upxy.deinit();
     m_num_io_wait_submit = 0;
-    spsc_queue<coroutine_handle<>> task_queue;
+    mpmc_queue<coroutine_handle<>> task_queue;
     m_task_queue.swap(task_queue);
 }
 

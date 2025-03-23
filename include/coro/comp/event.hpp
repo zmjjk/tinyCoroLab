@@ -57,7 +57,7 @@ private:
 }; // namespace detail
 
 template<typename return_type = void>
-class event : public detail::event_base, public detail::container<return_type>
+class [[CORO_TEST_USED(lab4a)]] event : public detail::event_base, public detail::container<return_type>
 {
 public:
     using event_base::event_base;

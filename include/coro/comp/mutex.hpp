@@ -15,7 +15,7 @@ class context;
 
 using detail::awaiter_ptr;
 
-class mutex
+class [[CORO_TEST_USED(lab4d)]] mutex
 {
 public:
     struct mutex_awaiter
@@ -64,6 +64,8 @@ public:
 
 private:
     friend mutex_awaiter;
+
+    // make locked_no_waiting = 0 make state change easier
     inline static awaiter_ptr nolocked          = reinterpret_cast<awaiter_ptr>(1);
     inline static awaiter_ptr locked_no_waiting = 0; // nullptr
     std::atomic<awaiter_ptr>  m_state;

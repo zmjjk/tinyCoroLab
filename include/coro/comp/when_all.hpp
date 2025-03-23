@@ -236,7 +236,8 @@ template<
 }; // namespace detail
 
 template<concepts::awaitable... awaitables_type>
-[[CORO_AWAIT_HINT]] static auto when_all(awaitables_type... awaitables) noexcept -> decltype(auto)
+[[CORO_TEST_USED(lab5a)]] [[CORO_AWAIT_HINT]] static auto when_all(awaitables_type... awaitables) noexcept
+    -> decltype(auto)
 {
     return detail::when_all_ready_awaitable<std::tuple<detail::when_all_task<
         std::remove_reference_t<typename concepts::awaitable_traits<awaitables_type>::awaiter_return_type>>...>>(

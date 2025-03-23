@@ -56,6 +56,14 @@ public:
         io_uring_queue_exit(&m_uring);
     }
 
+    /**
+     * @brief return if uring has finished io
+     *
+     * @note no-block function
+     *
+     * @return true
+     * @return false
+     */
     auto peek_uring() noexcept -> bool
     {
         urcptr cqe{nullptr};
@@ -63,6 +71,13 @@ public:
         return cqe != nullptr;
     }
 
+    /**
+     * @brief wait the number of finished io
+     *
+     * @note block function
+     *
+     * @param num
+     */
     auto wait_uring(int num = 1) noexcept -> void
     {
         urcptr cqe;
@@ -76,12 +91,34 @@ public:
         }
     }
 
+    /**
+     * @brief mark the cqe entry has beed processed
+     *
+     * @param cqe
+     */
     inline auto seen_cqe_entry(urcptr cqe) noexcept -> void CORO_INLINE { io_uring_cqe_seen(&m_uring, cqe); }
 
+    /**
+     * @brief get the free uring sqe
+     *
+     * @return ursptr
+     */
     inline auto get_free_sqe() noexcept -> ursptr CORO_INLINE { return io_uring_get_sqe(&m_uring); }
 
+    /**
+     * @brief submit all sqe entry and return the number of submitted sqe entry
+     *
+     * @return int
+     */
     inline auto submit() noexcept -> int CORO_INLINE { return io_uring_submit(&m_uring); }
 
+    /**
+     * @brief use io_uring_for_each_cqe to process cqe entry
+     *
+     * @param f
+     * @param mark_finish
+     * @return size_t
+     */
     auto handle_for_each_cqe(urchandler f, bool mark_finish = false) noexcept -> size_t
     {
         urcptr   cqe;
@@ -107,6 +144,13 @@ public:
         return u;
     }
 
+    /**
+     * @brief batch fetch cqe entry
+     *
+     * @param cqes
+     * @param num
+     * @return int CORO_INLINE
+     */
     inline auto peek_batch_cqe(urcptr* cqes, unsigned int num) noexcept -> int CORO_INLINE
     {
         return io_uring_peek_batch_cqe(&m_uring, cqes, num);
@@ -118,6 +162,11 @@ public:
         assert(ret != -1 && "eventfd write error");
     }
 
+    /**
+     * @brief an efficient way of seen cqe entry
+     *
+     * @param num
+     */
     inline auto cq_advance(unsigned int num) noexcept -> void CORO_INLINE { io_uring_cq_advance(&m_uring, num); }
 
 private:
