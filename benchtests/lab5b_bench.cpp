@@ -38,13 +38,7 @@ static void stl_cv_notifyall(benchmark::State& state)
     }
 }
 
-BENCHMARK(stl_cv_notifyall)
-    ->MeasureProcessCPUTime()
-    ->UseRealTime()
-    ->Unit(benchmark::TimeUnit::kMillisecond)
-    ->Arg(100)
-    ->Arg(100000)
-    ->Arg(100000000);
+CORO_BENCHMARK3(stl_cv_notifyall, 100, 100000, 100000000);
 
 task<> notify_all(condition_variable& cv, mutex& mtx, int& gid, const int id, const int loop_num)
 {
@@ -62,13 +56,7 @@ static void coro_cv_notifyall(benchmark::State& state)
     }
 }
 
-BENCHMARK(coro_cv_notifyall)
-    ->MeasureProcessCPUTime()
-    ->UseRealTime()
-    ->Unit(benchmark::TimeUnit::kMillisecond)
-    ->Arg(100)
-    ->Arg(100000)
-    ->Arg(100000000);
+CORO_BENCHMARK3(coro_cv_notifyall, 100, 100000, 100000000);
 
 /*************************************************************
  *                        notifyone                          *
@@ -99,7 +87,7 @@ static void stl_cv_notifyone(benchmark::State& state)
     }
 }
 
-BENCHMARK(stl_cv_notifyone)->MeasureProcessCPUTime()->UseRealTime()->Unit(benchmark::TimeUnit::kMillisecond);
+CORO_BENCHMARK(stl_cv_notifyone);
 
 task<> notify_one(condition_variable& cv, mutex& mtx, int& gid, const int id, int run_cnt)
 {
@@ -121,7 +109,7 @@ static void coro_cv_notifyone(benchmark::State& state)
     }
 }
 
-BENCHMARK(coro_cv_notifyone)->MeasureProcessCPUTime()->UseRealTime()->Unit(benchmark::TimeUnit::kMillisecond);
+CORO_BENCHMARK(coro_cv_notifyone);
 
 BENCHMARK_MAIN();
 

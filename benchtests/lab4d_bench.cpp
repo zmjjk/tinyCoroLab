@@ -42,13 +42,7 @@ static void stl_mutex(benchmark::State& state)
     }
 }
 
-BENCHMARK(stl_mutex)
-    ->MeasureProcessCPUTime()
-    ->UseRealTime()
-    ->Unit(benchmark::TimeUnit::kMillisecond)
-    ->Arg(100)
-    ->Arg(100000)
-    ->Arg(100000000);
+CORO_BENCHMARK3(stl_mutex, 100, 100000, 100000000);
 
 static task<> add(detail::spinlock& mtx, const int loop_num)
 {
@@ -79,13 +73,7 @@ static void spin_mutex(benchmark::State& state)
     }
 }
 
-BENCHMARK(spin_mutex)
-    ->MeasureProcessCPUTime()
-    ->UseRealTime()
-    ->Unit(benchmark::TimeUnit::kMillisecond)
-    ->Arg(100)
-    ->Arg(100000)
-    ->Arg(100000000);
+CORO_BENCHMARK3(spin_mutex, 100, 100000, 100000000);
 
 static task<> add(mutex& mtx, const int loop_num)
 {
@@ -103,13 +91,7 @@ static void coro_mutex(benchmark::State& state)
     }
 }
 
-BENCHMARK(coro_mutex)
-    ->MeasureProcessCPUTime()
-    ->UseRealTime()
-    ->Unit(benchmark::TimeUnit::kMillisecond)
-    ->Arg(100)
-    ->Arg(100000)
-    ->Arg(100000000);
+CORO_BENCHMARK3(coro_mutex, 100, 100000, 100000000);
 
 BENCHMARK_MAIN();
 

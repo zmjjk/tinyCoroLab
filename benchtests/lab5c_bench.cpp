@@ -45,6 +45,7 @@ task<> channel_producer(std::condition_variable& cv, std::mutex& mtx, std::queue
             }
         }
         total_num -= cnt;
+        cv.notify_all();
     }
     co_return;
 }
@@ -63,6 +64,7 @@ task<> channel_consumer(std::condition_variable& cv, std::mutex& mtx, std::queue
             que.pop();
             total_num--;
         }
+        cv.notify_all();
     }
     co_return;
 }
@@ -72,31 +74,22 @@ static void stl_channel_int(benchmark::State& state)
     for (auto _ : state)
     {
         const int loop_num = state.range(0);
-        channel_bench<std::condition_variable, int>(loop_num * capacity);
+        channel_bench<std::condition_variable, int>(loop_num);
     }
 }
 
-BENCHMARK(stl_channel_int)
-    ->MeasureProcessCPUTime()
-    ->UseRealTime()
-    ->Unit(benchmark::TimeUnit::kMillisecond)
-    ->Arg(100)
-    ->Arg(10000);
+CORO_BENCHMARK2(stl_channel_int, 100, 10000);
 
 static void stl_channel_string(benchmark::State& state)
 {
     for (auto _ : state)
     {
         const int loop_num = state.range(0);
-        channel_bench<std::condition_variable, std::string>(loop_num * capacity);
+        channel_bench<std::condition_variable, std::string>(loop_num);
     }
 }
-BENCHMARK(stl_channel_string)
-    ->MeasureProcessCPUTime()
-    ->UseRealTime()
-    ->Unit(benchmark::TimeUnit::kMillisecond)
-    ->Arg(100)
-    ->Arg(10000);
+
+CORO_BENCHMARK2(stl_channel_string, 100, 10000);
 
 template<typename return_type>
 task<> channel_producer(channel<return_type, capacity>& ch, int total_num)
@@ -133,31 +126,22 @@ static void coro_channel_int(benchmark::State& state)
     for (auto _ : state)
     {
         const int loop_num = state.range(0);
-        channel_bench<channel<int>, int>(loop_num * capacity);
+        channel_bench<channel<int>, int>(loop_num);
     }
 }
 
-BENCHMARK(coro_channel_int)
-    ->MeasureProcessCPUTime()
-    ->UseRealTime()
-    ->Unit(benchmark::TimeUnit::kMillisecond)
-    ->Arg(100)
-    ->Arg(10000);
+CORO_BENCHMARK2(coro_channel_int, 100, 10000);
 
 static void coro_channel_string(benchmark::State& state)
 {
     for (auto _ : state)
     {
         const int loop_num = state.range(0);
-        channel_bench<channel<std::string>, std::string>(loop_num * capacity);
+        channel_bench<channel<std::string>, std::string>(loop_num);
     }
 }
-BENCHMARK(coro_channel_string)
-    ->MeasureProcessCPUTime()
-    ->UseRealTime()
-    ->Unit(benchmark::TimeUnit::kMillisecond)
-    ->Arg(100)
-    ->Arg(10000);
+
+CORO_BENCHMARK2(coro_channel_string, 100, 10000);
 
 BENCHMARK_MAIN();
 

@@ -36,13 +36,7 @@ static void stl_future(benchmark::State& state)
     }
 }
 
-BENCHMARK(stl_future)
-    ->MeasureProcessCPUTime()
-    ->UseRealTime()
-    ->Unit(benchmark::TimeUnit::kMillisecond)
-    ->Arg(100)
-    ->Arg(100000)
-    ->Arg(100000000);
+CORO_BENCHMARK3(stl_future, 100, 100000, 100000000);
 
 task<> set(event<>& ev, const int loop_num)
 {
@@ -66,13 +60,7 @@ static void coro_event(benchmark::State& state)
     }
 }
 
-BENCHMARK(coro_event)
-    ->MeasureProcessCPUTime()
-    ->UseRealTime()
-    ->Unit(benchmark::TimeUnit::kMillisecond)
-    ->Arg(100)
-    ->Arg(100000)
-    ->Arg(100000000);
+CORO_BENCHMARK3(coro_event, 100, 100000, 100000000);
 
 BENCHMARK_MAIN();
 

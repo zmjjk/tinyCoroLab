@@ -11,6 +11,29 @@
         benchmark::DoNotOptimize(cnt += 1);                                                                            \
     }
 
+#define CORO_BENCHMARK(bench_name)                                                                                     \
+    BENCHMARK(bench_name)->MeasureProcessCPUTime()->UseRealTime()->Unit(benchmark::TimeUnit::kMillisecond)
+
+#define CORO_BENCHMARK1(bench_name, para)                                                                              \
+    BENCHMARK(bench_name)->MeasureProcessCPUTime()->UseRealTime()->Unit(benchmark::TimeUnit::kMillisecond)->Arg(para)
+
+#define CORO_BENCHMARK2(bench_name, para, para2)                                                                       \
+    BENCHMARK(bench_name)                                                                                              \
+        ->MeasureProcessCPUTime()                                                                                      \
+        ->UseRealTime()                                                                                                \
+        ->Unit(benchmark::TimeUnit::kMillisecond)                                                                      \
+        ->Arg(para)                                                                                                    \
+        ->Arg(para2)
+
+#define CORO_BENCHMARK3(bench_name, para, para2, para3)                                                                \
+    BENCHMARK(bench_name)                                                                                              \
+        ->MeasureProcessCPUTime()                                                                                      \
+        ->UseRealTime()                                                                                                \
+        ->Unit(benchmark::TimeUnit::kMillisecond)                                                                      \
+        ->Arg(para)                                                                                                    \
+        ->Arg(para2)                                                                                                   \
+        ->Arg(para3)
+
 class [[deprecated("maybe unused")]] thread_pool
 {
 public:

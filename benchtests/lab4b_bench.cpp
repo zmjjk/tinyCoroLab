@@ -36,13 +36,7 @@ static void stl_latch(benchmark::State& state)
     }
 }
 
-BENCHMARK(stl_latch)
-    ->MeasureProcessCPUTime()
-    ->UseRealTime()
-    ->Unit(benchmark::TimeUnit::kMillisecond)
-    ->Arg(100)
-    ->Arg(100000)
-    ->Arg(100000000);
+CORO_BENCHMARK3(stl_latch, 100, 100000, 100000000);
 
 task<> countdown(latch& lt, const int loop_num)
 {
@@ -67,13 +61,7 @@ static void coro_latch(benchmark::State& state)
     }
 }
 
-BENCHMARK(coro_latch)
-    ->MeasureProcessCPUTime()
-    ->UseRealTime()
-    ->Unit(benchmark::TimeUnit::kMillisecond)
-    ->Arg(100)
-    ->Arg(100000)
-    ->Arg(100000000);
+CORO_BENCHMARK3(coro_latch, 100, 100000, 100000000);
 
 BENCHMARK_MAIN();
 

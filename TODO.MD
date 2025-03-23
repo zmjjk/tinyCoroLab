@@ -22,10 +22,11 @@
 - 添加版本号信息[done]
 - 更改所有同步组件register和resume的方式
 - 添加github CI和githooks
+- 为benchtests添加threadpool版本
 
 ## 后续实验
 
-- 功能
-- 内存安全
-- 性能
+- 功能测试
+- 内存安全测试
+- 性能测试
 - 测试明确、理智、集中
