@@ -10,7 +10,7 @@ namespace coro
 class context;
 using detail::awaiter_ptr;
 
-class [[CORO_TEST_USED(lab4c)]] wait_group
+class wait_group
 {
 public:
     struct awaiter

@@ -15,7 +15,7 @@ class context;
 
 using detail::awaiter_ptr;
 
-class [[CORO_TEST_USED(lab4d)]] mutex
+class mutex
 {
 public:
     struct mutex_awaiter

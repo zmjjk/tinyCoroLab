@@ -14,7 +14,7 @@ using cond_type = std::function<bool()>;
 class condition_variable;
 using cond_var = condition_variable;
 
-class [[CORO_TEST_USED(lab5b)]] condition_variable final
+class condition_variable final
 {
 public:
     struct cv_awaiter : public mutex::mutex_awaiter
