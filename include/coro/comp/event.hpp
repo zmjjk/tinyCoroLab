@@ -23,11 +23,11 @@ public:
 
         inline auto next() noexcept -> awaiter_base* { return m_next; }
 
-        inline auto await_ready() const noexcept -> bool { return m_ev.is_set(); }
+        auto await_ready() noexcept -> bool;
 
         auto await_suspend(std::coroutine_handle<> handle) noexcept -> bool;
 
-        constexpr auto await_resume() noexcept -> void {}
+        auto await_resume() noexcept -> void;
 
         context&                m_ctx;
         event_base&             m_ev;
@@ -64,7 +64,11 @@ public:
     struct [[CORO_AWAIT_HINT]] awaiter : public detail::event_base::awaiter_base
     {
         using awaiter_base::awaiter_base;
-        auto await_resume() noexcept -> decltype(auto) { return static_cast<event&>(m_ev).result(); }
+        auto await_resume() noexcept -> decltype(auto)
+        {
+            detail::event_base::awaiter_base::await_resume();
+            return static_cast<event&>(m_ev).result();
+        }
     };
 
     [[CORO_AWAIT_HINT]] awaiter wait() noexcept { return awaiter(local_context(), *this); }
@@ -85,7 +89,6 @@ public:
     struct [[CORO_AWAIT_HINT]] awaiter : public detail::event_base::awaiter_base
     {
         using awaiter_base::awaiter_base;
-        constexpr void await_resume() noexcept {};
     };
 
     [[CORO_AWAIT_HINT]] awaiter wait() noexcept { return awaiter(local_context(), *this); }

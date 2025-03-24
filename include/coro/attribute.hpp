@@ -17,7 +17,7 @@
 #define CORO_MAYBE_UNUSED maybe_unused
 
 // if one function is marked by CORO_TEST_USED, this means test
-// will use this function, don't modity this function declaration
+// will use this function, don't modify this function declaration
 #define CORO_TEST_USED(...)
 
 #define CORO_NO_COPY_MOVE(classname)                                                                                   \

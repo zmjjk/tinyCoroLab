@@ -7,6 +7,7 @@ namespace coro
 auto wait_group::awaiter::await_suspend(std::coroutine_handle<> handle) noexcept -> bool
 {
     m_await_coro = handle;
+    m_ctx.register_wait();
     while (true)
     {
         if (m_wg.m_count.load(std::memory_order_acquire) == 0)
@@ -18,18 +19,21 @@ auto wait_group::awaiter::await_suspend(std::coroutine_handle<> handle) noexcept
         if (m_wg.m_state.compare_exchange_weak(
                 head, static_cast<awaiter_ptr>(this), std::memory_order_acq_rel, std::memory_order_relaxed))
         {
-            m_ctx.register_wait(m_register_state);
-            m_register_state = false;
+            // m_ctx.register_wait(m_register_state);
+            // m_register_state = false;
             return true;
         }
     }
 }
 
+auto wait_group::awaiter::await_resume() noexcept -> void
+{
+    m_ctx.unregister_wait();
+}
+
 auto wait_group::awaiter::resume() noexcept -> void
 {
     m_ctx.submit_task(m_await_coro);
-    m_ctx.unregister_wait();
-    m_register_state = true;
 }
 
 auto wait_group::add(int count) noexcept -> void

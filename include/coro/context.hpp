@@ -104,12 +104,7 @@ public:
      */
     [[CORO_TEST_USED(lab2b)]] inline auto unregister_wait(int register_cnt = 1) noexcept -> void CORO_INLINE
     {
-        auto num = m_num_wait_task.fetch_sub(register_cnt, memory_order_acq_rel);
-        // FIXME: remove below after all component change register way
-        if (num == register_cnt)
-        {
-            m_engine.wake_up();
-        }
+        m_num_wait_task.fetch_sub(register_cnt, memory_order_acq_rel);
     }
 
     inline auto get_engine() noexcept -> engine& { return m_engine; }
@@ -130,9 +125,7 @@ public:
     inline auto poll_work() noexcept -> void { m_engine.poll_submit(); }
 
     /**
-     * @brief return if all work has been done, includes:
-     * 1. reference count is zero
-     * 2. engine.empty_io() is true
+     * @brief return if reference count is zero
      *
      * @return true
      * @return false

@@ -81,14 +81,18 @@ public:
     {
         struct awaiter
         {
-            auto await_ready() const noexcept -> bool { return m_awaiter.await_ready(); }
+            auto await_ready() noexcept -> bool { return m_awaiter.await_ready(); }
 
             auto await_suspend(std::coroutine_handle<> awaiting_coroutine) noexcept -> bool
             {
                 return m_awaiter.await_suspend(awaiting_coroutine);
             }
 
-            auto await_resume() noexcept -> decltype(auto) { return std::move(m_data); }
+            auto await_resume() noexcept -> decltype(auto)
+            {
+                m_awaiter.await_resume();
+                return std::move(m_data);
+            }
 
             latch::event_t::awaiter m_awaiter;
             storage_type&           m_data;

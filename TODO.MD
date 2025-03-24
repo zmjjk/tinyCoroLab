@@ -6,12 +6,12 @@
 - [ ] 为cmake添加各项环境检查
 - [ ] README里添加更新日志
 - [ ] 添加注释
-- [ ] 更改所有同步组件register和resume的方式
 - [ ] 添加perf火焰图生成脚本
 - [ ] 测试clang编译器
 
 ### 已完成
 
+- [x] 更改所有同步组件register和resume的方式
 - [x] 添加负载均衡模块使得任务支持跨线程
 - [x] 解决context stop过慢的问题
 - [x] 配置文件重新设计

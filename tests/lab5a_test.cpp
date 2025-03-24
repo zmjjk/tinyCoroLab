@@ -149,7 +149,7 @@ task<> empty_func()
 
 task<> whenall_hybrid_mutex(mutex& mtx, std::vector<int>& vec, int i)
 {
-    co_await mtx.lock_guard();
+    auto guard = co_await mtx.lock_guard();
     co_await when_all(empty_func(), empty_func(), empty_func(), empty_func());
     vec.push_back(i);
 }

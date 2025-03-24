@@ -3,11 +3,21 @@
 
 namespace coro::detail
 {
+auto event_base::awaiter_base::await_ready() noexcept -> bool
+{
+    m_ctx.register_wait();
+    return m_ev.is_set();
+}
 
 auto event_base::awaiter_base::await_suspend(std::coroutine_handle<> handle) noexcept -> bool
 {
     m_await_coro = handle;
     return m_ev.register_awaiter(this);
+}
+
+auto event_base::awaiter_base::await_resume() noexcept -> void
+{
+    m_ctx.unregister_wait();
 }
 
 auto event_base::set_state() noexcept -> void
@@ -26,7 +36,7 @@ auto event_base::resume_all_awaiter(awaiter_ptr waiter) noexcept -> void
     {
         auto cur = static_cast<awaiter_base*>(waiter);
         cur->m_ctx.submit_task(cur->m_await_coro);
-        cur->m_ctx.unregister_wait();
+        // cur->m_ctx.unregister_wait();
         waiter = cur->m_next;
     }
 }
@@ -47,7 +57,7 @@ auto event_base::register_awaiter(awaiter_base* waiter) noexcept -> bool
         waiter->m_next = static_cast<awaiter_base*>(old_value);
     } while (!m_state.compare_exchange_weak(old_value, waiter, std::memory_order_acquire));
 
-    waiter->m_ctx.register_wait();
+    // waiter->m_ctx.register_wait();
     return true;
 }
 
