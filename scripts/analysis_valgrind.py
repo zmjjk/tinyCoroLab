@@ -14,7 +14,7 @@ if __name__ == "__main__":
                 print(
                     f"{RED}[ERROR] exist memleak, you can see the detail report path in {sys.argv[1]}{RESET}"
                 )
-                sys.exit(0)
+                sys.exit(1)
         print(f"{GREEN}[PASS] pass memcheck test{RESET}")
     except Exception as e:
         print(
