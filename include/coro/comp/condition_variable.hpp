@@ -1,3 +1,13 @@
+/**
+ * @file condition_variable.hpp
+ * @author JiahuiWang
+ * @brief lab5b
+ * @version 0.1
+ * @date 2025-03-24
+ *
+ * @copyright Copyright (c) 2025
+ *
+ */
 #pragma once
 
 #include <functional>
