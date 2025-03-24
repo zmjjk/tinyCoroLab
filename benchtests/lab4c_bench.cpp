@@ -13,6 +13,53 @@ static const int thread_num = std::thread::hardware_concurrency();
 template<typename waitgroup_type>
 void waitgroup_bench(const int loop_num);
 
+/*************************************************************
+ *                 threadpool_stl_latch                      *
+ *************************************************************/
+
+void countdown_tp(std::latch& lt, const int loop_num)
+{
+    loop_add;
+    lt.count_down();
+}
+
+void wait_tp(std::latch& lt, const int loop_num)
+{
+    lt.wait();
+    loop_add;
+}
+
+static void threadpool_stl_latch(benchmark::State& state)
+{
+    for (auto _ : state)
+    {
+        const int loop_num = state.range(0);
+
+        const int countdown_num = thread_num / 2;
+        const int wait_num      = thread_num - countdown_num;
+
+        thread_pool pool;
+        std::latch  lt(countdown_num);
+
+        for (int i = 0; i < countdown_num; i++)
+        {
+            pool.submit_task([&]() { countdown_tp(lt, loop_num); });
+        }
+        for (int i = 0; i < wait_num; i++)
+        {
+            pool.submit_task([&]() { wait_tp(lt, loop_num); });
+        }
+        pool.start();
+        pool.join();
+    }
+}
+
+CORO_BENCHMARK3(threadpool_stl_latch, 100, 100000, 100000000);
+
+/*************************************************************
+ *                    coro_stl_latch                         *
+ *************************************************************/
+
 task<> done(std::latch& lt, const int loop_num)
 {
     loop_add;
@@ -27,7 +74,7 @@ task<> wait(std::latch& lt, const int loop_num)
     co_return;
 }
 
-static void stl_latch(benchmark::State& state)
+static void coro_stl_latch(benchmark::State& state)
 {
     for (auto _ : state)
     {
@@ -36,7 +83,11 @@ static void stl_latch(benchmark::State& state)
     }
 }
 
-CORO_BENCHMARK3(stl_latch, 100, 100000, 100000000);
+CORO_BENCHMARK3(coro_stl_latch, 100, 100000, 100000000);
+
+/*************************************************************
+ *                    coro_waitgroup                         *
+ *************************************************************/
 
 task<> done(wait_group& wg, const int loop_num)
 {

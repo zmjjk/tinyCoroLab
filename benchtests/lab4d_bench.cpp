@@ -13,6 +13,42 @@ static const int thread_num = std::thread::hardware_concurrency();
 template<typename mutex_type>
 void mutex_bench(const int loop_num);
 
+/*************************************************************
+ *                 threadpool_stl_mutex                      *
+ *************************************************************/
+
+static void add_tp(std::mutex& mtx, const int loop_num)
+{
+    mtx.lock();
+    loop_add;
+    mtx.unlock();
+}
+
+static void threadpool_stl_mutex(benchmark::State& state)
+{
+    for (auto _ : state)
+    {
+        const int loop_num = state.range(0);
+
+        thread_pool pool;
+        std::mutex  mtx;
+        size_t      cnt = 0;
+        for (int i = 0; i < thread_num; i++)
+        {
+            pool.submit_task([&]() { add_tp(mtx, loop_num); });
+        }
+
+        pool.start();
+        pool.join();
+    }
+}
+
+CORO_BENCHMARK3(threadpool_stl_mutex, 100, 100000, 100000000);
+
+/*************************************************************
+ *                    coro_stl_mutex                         *
+ *************************************************************/
+
 static task<> add(std::mutex& mtx, const int loop_num)
 {
     mtx.lock();
@@ -21,28 +57,20 @@ static task<> add(std::mutex& mtx, const int loop_num)
     co_return;
 }
 
-static void stl_mutex(benchmark::State& state)
+static void coro_stl_mutex(benchmark::State& state)
 {
     for (auto _ : state)
     {
-        // const int loop_num = state.range(0);
-
-        // thread_pool pool;
-        // std::mutex  mtx;
-        // size_t      cnt = 0;
-        // for (int i = 0; i < thread_num; i++)
-        // {
-        //     pool.submit_task([&]() { add(mtx, cnt, loop_num); });
-        // }
-
-        // pool.start();
-        // pool.join();
         const int loop_num = state.range(0);
         mutex_bench<std::mutex>(loop_num);
     }
 }
 
-CORO_BENCHMARK3(stl_mutex, 100, 100000, 100000000);
+CORO_BENCHMARK3(coro_stl_mutex, 100, 100000, 100000000);
+
+/*************************************************************
+ *                     coro_spinlock                         *
+ *************************************************************/
 
 static task<> add(detail::spinlock& mtx, const int loop_num)
 {
@@ -52,28 +80,20 @@ static task<> add(detail::spinlock& mtx, const int loop_num)
     co_return;
 }
 
-static void spin_mutex(benchmark::State& state)
+static void coro_spinlock(benchmark::State& state)
 {
     for (auto _ : state)
     {
-        // const int loop_num = state.range(0);
-
-        // thread_pool      pool;
-        // detail::spinlock mtx;
-        // size_t           cnt = 0;
-        // for (int i = 0; i < thread_num; i++)
-        // {
-        //     pool.submit_task([&]() { add(mtx, cnt, loop_num); });
-        // }
-
-        // pool.start();
-        // pool.join();
         const int loop_num = state.range(0);
         mutex_bench<detail::spinlock>(loop_num);
     }
 }
 
-CORO_BENCHMARK3(spin_mutex, 100, 100000, 100000000);
+CORO_BENCHMARK3(coro_spinlock, 100, 100000, 100000000);
+
+/*************************************************************
+ *                       coro_mutex                          *
+ *************************************************************/
 
 static task<> add(mutex& mtx, const int loop_num)
 {

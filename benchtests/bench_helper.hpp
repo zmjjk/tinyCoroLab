@@ -34,7 +34,11 @@
         ->Arg(para2)                                                                                                   \
         ->Arg(para3)
 
-class [[deprecated("maybe unused")]] thread_pool
+/**
+ * @brief a simple thread pool, must submit task before start
+ *
+ */
+class thread_pool
 {
 public:
     using task_type = std::function<void()>;

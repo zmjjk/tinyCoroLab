@@ -13,6 +13,48 @@ static const int thread_num = std::thread::hardware_concurrency();
 template<typename event_type>
 void event_bench(const int loop_num);
 
+/*************************************************************
+ *                  threadpool_stl_future                    *
+ *************************************************************/
+
+void set_tp(std::promise<void>& promise, const int loop_num)
+{
+    loop_add;
+    promise.set_value();
+}
+
+void wait_tp(std::future<void>& future, const int loop_num)
+{
+    future.wait();
+    loop_add;
+}
+
+static void threadpool_stl_future(benchmark::State& state)
+{
+    for (auto _ : state)
+    {
+        const int   loop_num = state.range(0);
+        thread_pool pool;
+
+        std::promise<void> pro;
+        auto               fut = pro.get_future();
+
+        for (int i = 0; i < thread_num - 1; i++)
+        {
+            pool.submit_task([&]() { wait_tp(fut, loop_num); });
+        }
+        pool.submit_task([&]() { set_tp(pro, loop_num); });
+        pool.start();
+        pool.join();
+    }
+}
+
+CORO_BENCHMARK3(threadpool_stl_future, 100, 100000, 100000000);
+
+/*************************************************************
+ *                    coro_stl_future                        *
+ *************************************************************/
+
 task<> set(std::promise<void>& promise, const int loop_num)
 {
     loop_add;
@@ -27,7 +69,7 @@ task<> wait(std::future<void>& future, const int loop_num)
     co_return;
 }
 
-static void stl_future(benchmark::State& state)
+static void coro_stl_future(benchmark::State& state)
 {
     for (auto _ : state)
     {
@@ -36,7 +78,11 @@ static void stl_future(benchmark::State& state)
     }
 }
 
-CORO_BENCHMARK3(stl_future, 100, 100000, 100000000);
+CORO_BENCHMARK3(coro_stl_future, 100, 100000, 100000000);
+
+/*************************************************************
+ *                       coro_event                          *
+ *************************************************************/
 
 task<> set(event<>& ev, const int loop_num)
 {

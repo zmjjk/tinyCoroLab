@@ -18,6 +18,38 @@ static const int thread_num = std::thread::hardware_concurrency();
 template<typename cv_type, typename mtx_type>
 void cv_notifyall_bench(const int loop_num);
 
+void notify_all_tp(std::condition_variable& cv, std::mutex& mtx, int& gid, const int id, const int loop_num)
+{
+    std::unique_lock<std::mutex> lck(mtx);
+    cv.wait(lck, [&]() -> bool { return id == gid; });
+    loop_add;
+    gid += 1;
+    cv.notify_all();
+    mtx.unlock();
+}
+
+static void threadpool_stl_cv_notifyall(benchmark::State& state)
+{
+    for (auto _ : state)
+    {
+        const int loop_num = state.range(0);
+
+        thread_pool             pool;
+        std::condition_variable cv;
+        std::mutex              mtx;
+        int                     gid = 0;
+
+        for (int i = thread_num - 1; i >= 0; i--)
+        {
+            pool.submit_task([&]() { notify_all_tp(cv, mtx, gid, i, loop_num); });
+        }
+        pool.start();
+        pool.join();
+    }
+}
+
+CORO_BENCHMARK3(threadpool_stl_cv_notifyall, 100, 100000, 100000000);
+
 task<> notify_all(std::condition_variable& cv, std::mutex& mtx, int& gid, const int id, const int loop_num)
 {
     std::unique_lock<std::mutex> lck(mtx);
@@ -29,7 +61,7 @@ task<> notify_all(std::condition_variable& cv, std::mutex& mtx, int& gid, const 
     co_return;
 }
 
-static void stl_cv_notifyall(benchmark::State& state)
+static void coro_stl_cv_notifyall(benchmark::State& state)
 {
     for (auto _ : state)
     {
@@ -38,7 +70,7 @@ static void stl_cv_notifyall(benchmark::State& state)
     }
 }
 
-CORO_BENCHMARK3(stl_cv_notifyall, 100, 100000, 100000000);
+CORO_BENCHMARK3(coro_stl_cv_notifyall, 100, 100000, 100000000);
 
 task<> notify_all(condition_variable& cv, mutex& mtx, int& gid, const int id, const int loop_num)
 {
@@ -66,6 +98,38 @@ const int notifyone_run_cnt = 1000;
 template<typename cv_type, typename mtx_type>
 void cv_notifyone_bench();
 
+void notify_one_tp(std::condition_variable& cv, std::mutex& mtx, int& gid, const int id, int run_cnt)
+{
+    while (run_cnt > 0)
+    {
+        std::unique_lock<std::mutex> lck(mtx);
+        cv.wait(lck, [&]() -> bool { return id == gid; });
+        gid = (gid + 1) % 2;
+        run_cnt -= 1;
+        cv.notify_one();
+    }
+}
+
+static void threadpool_stl_cv_notifyone(benchmark::State& state)
+{
+    for (auto _ : state)
+    {
+        thread_pool             pool;
+        std::condition_variable cv;
+        std::mutex              mtx;
+        int                     gid = 0;
+
+        for (int i = 0; i < 2; i++)
+        {
+            pool.submit_task([&]() { notify_one_tp(cv, mtx, gid, i, notifyone_run_cnt); });
+        }
+        pool.start();
+        pool.join();
+    }
+}
+
+CORO_BENCHMARK(threadpool_stl_cv_notifyone);
+
 task<> notify_one(std::condition_variable& cv, std::mutex& mtx, int& gid, const int id, int run_cnt)
 {
     while (run_cnt > 0)
@@ -79,7 +143,7 @@ task<> notify_one(std::condition_variable& cv, std::mutex& mtx, int& gid, const 
     co_return;
 }
 
-static void stl_cv_notifyone(benchmark::State& state)
+static void coro_stl_cv_notifyone(benchmark::State& state)
 {
     for (auto _ : state)
     {
@@ -87,7 +151,7 @@ static void stl_cv_notifyone(benchmark::State& state)
     }
 }
 
-CORO_BENCHMARK(stl_cv_notifyone);
+CORO_BENCHMARK(coro_stl_cv_notifyone);
 
 task<> notify_one(condition_variable& cv, mutex& mtx, int& gid, const int id, int run_cnt)
 {
