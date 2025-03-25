@@ -16,3 +16,6 @@
 [submodule "third_party/rust_echo_bench"]
 	path = third_party/rust_echo_bench
 	url = https://github.com/haraldh/rust_echo_bench.git
+[submodule "third_party/FlameGraph"]
+	path = third_party/FlameGraph
+	url = https://github.com/brendangregg/FlameGraph.git
