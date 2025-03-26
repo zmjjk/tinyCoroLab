@@ -2,7 +2,7 @@
  * @file channel.hpp
  * @author JiahuiWang
  * @brief lab5c
- * @version 0.1
+ * @version 1.0
  * @date 2025-03-24
  *
  * @copyright Copyright (c) 2025
@@ -23,55 +23,31 @@
 
 namespace coro
 {
-
+/**
+ * @brief Welcome to tinycoro lab5c, in this part you will build the basic coroutine
+ * synchronization component¡ª¡ªchannel by modifing channel.hpp and channel.cpp.
+ * Please ensure you have read the document of lab5c.
+ *
+ * @warning You should carefully consider whether each implementation should be thread-safe.
+ *
+ * You should follow the rules below in this part:
+ *
+ * @note The location marked by todo is where you must add code, but you can also add code anywhere
+ * you want, such as function and class definitions, even member variables.
+ *
+ * @note lab4 and lab5 are free designed lab, leave the interfaces that the test case will use,
+ * and then, enjoy yourself!
+ */
 namespace detail
 {
-class channel_base
-{
-public:
-    ~channel_base() noexcept { assert(part_closed() && "detected channel destruct with no_close state"); }
-
-    auto close() noexcept -> void
-    {
-        std::atomic_ref<uint8_t>(m_close_state).store(part_close, std::memory_order_release);
-        m_producer_cv.notify_all();
-        m_consumer_cv.notify_all();
-    }
-
-    // TODO: Implement sync_close.
-    // task<> sync_close() noexcept {}
-
-    // TODO: There are too many duplicated codes in send and recv of each channel, use CRTP to fix it.
-    // TODO: Add for loop fetch value
-    // eg: for(auto it:channel.recv)
-
-protected:
-    inline auto complete_closed_atomic() noexcept -> bool
-    {
-        return std::atomic_ref<uint8_t>(m_close_state).load(std::memory_order_acquire) <= complete_close;
-    }
-
-    inline auto part_closed_atomic() noexcept -> bool
-    {
-        return std::atomic_ref<uint8_t>(m_close_state).load(std::memory_order_acquire) <= part_close;
-    }
-
-    inline auto part_closed() noexcept -> bool { return m_close_state <= part_close; }
-
-protected:
-    inline static constexpr uint8_t complete_close = 0;
-    inline static constexpr uint8_t part_close     = 1;
-    inline static constexpr uint8_t no_close       = 2;
-
-    mutex              m_mtx;
-    condition_variable m_producer_cv;
-    condition_variable m_consumer_cv;
-    alignas(std::atomic_ref<uint8_t>::required_alignment) uint8_t m_close_state{no_close};
-};
+// TODO[lab5c]: Add code that you don't want to use externally in namespace detail
 }; // namespace detail
 
+// TODO[lab5c]: This channel is an example to make complie success,
+// You should delete it and add your implementation, I don't care what you do,
+// but keep the member function and construct function's declaration same with example.
 template<concepts::conventional_type T, size_t capacity = 0>
-class channel : public detail::channel_base
+class channel
 {
     using data_type = std::optional<T>;
 
@@ -80,196 +56,12 @@ public:
         requires(std::is_constructible_v<T, value_type &&>)
     auto send(value_type&& value) noexcept -> task<bool>
     {
-        if (part_closed_atomic())
-        {
-            co_return false;
-        }
-
-        auto lock = co_await m_mtx.lock_guard();
-        co_await m_producer_cv.wait(m_mtx, [this]() -> bool { return !full() || part_closed(); });
-
-        if (part_closed())
-        {
-            co_return false;
-        }
-
-        m_array[m_tail] = std::forward<value_type>(value);
-        m_tail++;
-        m_num++;
-        if (m_tail >= capacity)
-        {
-            m_tail = 0;
-        }
-
-        m_consumer_cv.notify_one();
-        co_return true;
+        co_return {};
     }
 
-    auto recv() noexcept -> task<data_type>
-    {
-        if (complete_closed_atomic())
-        {
-            co_return std::nullopt;
-        }
+    auto recv() noexcept -> task<data_type> { co_return {}; }
 
-        auto lock = co_await m_mtx.lock_guard();
-        co_await m_consumer_cv.wait(m_mtx, [this]() -> bool { return !empty() || part_closed(); });
-        if (empty() && part_closed())
-        {
-            m_close_state = complete_close;
-            co_return std::nullopt;
-        }
-
-        data_type p = std::make_optional<T>(std::move(m_array[m_head]));
-        m_head++;
-        m_num--;
-        if (m_head >= capacity)
-        {
-            m_head = 0;
-        }
-
-        m_producer_cv.notify_one();
-        co_return p;
-    }
-
-private:
-    inline auto empty() noexcept -> bool { return m_num == 0; }
-
-    inline auto full() noexcept -> bool { return m_num == capacity; }
-
-private:
-    size_t                  m_head{0};
-    size_t                  m_tail{0};
-    size_t                  m_num{0};
-    std::array<T, capacity> m_array;
-};
-
-template<concepts::conventional_type T, size_t capacity>
-    requires(std::has_single_bit(capacity))
-class channel<T, capacity> : public detail::channel_base
-{
-    using data_type              = std::optional<T>;
-    static constexpr size_t mask = capacity - 1;
-
-public:
-    template<typename value_type>
-        requires(std::is_constructible_v<T, value_type &&>)
-    auto send(value_type&& value) noexcept -> task<bool>
-    {
-        if (part_closed_atomic())
-        {
-            co_return false;
-        }
-
-        auto lock = co_await m_mtx.lock_guard();
-        co_await m_producer_cv.wait(m_mtx, [this]() -> bool { return !full() || part_closed(); });
-
-        if (part_closed())
-        {
-            co_return false;
-        }
-
-        m_array[tail()] = std::forward<value_type>(value);
-        m_tail++;
-
-        m_consumer_cv.notify_one();
-        co_return true;
-    }
-
-    auto recv() noexcept -> task<data_type>
-    {
-        if (complete_closed_atomic())
-        {
-            co_return std::nullopt;
-        }
-
-        auto lock = co_await m_mtx.lock_guard();
-        co_await m_consumer_cv.wait(m_mtx, [this]() -> bool { return !empty() || part_closed(); });
-        if (empty() && part_closed())
-        {
-            m_close_state = complete_close;
-            co_return std::nullopt;
-        }
-
-        data_type p = std::make_optional<T>(std::move(m_array[head()]));
-        m_head++;
-
-        m_producer_cv.notify_one();
-        co_return p;
-    }
-
-private:
-    inline auto head() noexcept -> size_t { return m_head & mask; }
-
-    inline auto tail() noexcept -> size_t { return m_tail & mask; }
-
-    inline auto empty() noexcept -> bool { return m_head == m_tail; }
-
-    inline auto full() noexcept -> bool { return (m_tail - m_head) == capacity; }
-
-private:
-    size_t                  m_head{0};
-    size_t                  m_tail{0};
-    std::array<T, capacity> m_array;
-};
-
-template<concepts::conventional_type T>
-class channel<T, 0> : public detail::channel_base
-{
-    using data_type = std::optional<T>;
-
-public:
-    template<typename value_type>
-        requires(std::is_constructible_v<T, value_type &&>)
-    auto send(value_type&& value) noexcept -> task<bool>
-    {
-        if (part_closed_atomic())
-        {
-            co_return false;
-        }
-
-        auto lock = co_await m_mtx.lock_guard();
-        co_await m_producer_cv.wait(m_mtx, [this]() -> bool { return !full() || part_closed(); });
-
-        if (part_closed())
-        {
-            co_return false;
-        }
-
-        m_data = std::make_optional<T>(std::forward<value_type>(value));
-
-        m_consumer_cv.notify_one();
-        co_return true;
-    }
-
-    auto recv() noexcept -> task<data_type>
-    {
-        if (complete_closed_atomic())
-        {
-            co_return std::nullopt;
-        }
-
-        auto lock = co_await m_mtx.lock_guard();
-        co_await m_consumer_cv.wait(m_mtx, [this]() -> bool { return !empty() || part_closed(); });
-        if (empty() && part_closed())
-        {
-            m_close_state = complete_close;
-            co_return std::nullopt;
-        }
-
-        auto p = std::move(m_data);
-        m_data = std::nullopt;
-
-        m_producer_cv.notify_one();
-        co_return p;
-    }
-
-private:
-    inline auto empty() noexcept -> bool { return !m_data.has_value(); }
-    inline auto full() noexcept -> bool { return m_data.has_value(); }
-
-private:
-    data_type m_data{std::nullopt};
+    auto close() noexcept -> void {}
 };
 
 }; // namespace coro

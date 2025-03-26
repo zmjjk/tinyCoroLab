@@ -2,7 +2,7 @@
  * @file event.hpp
  * @author JiahuiWang
  * @brief lab4a
- * @version 0.1
+ * @version 1.0
  * @date 2025-03-24
  *
  * @copyright Copyright (c) 2025
@@ -20,92 +20,61 @@
 
 namespace coro
 {
+/**
+ * @brief Welcome to tinycoro lab4a, in this part you will build the basic coroutine
+ * synchronization component - event by modifing event.hpp and event.cpp. Please ensure
+ * you have read the document of lab4a.
+ *
+ * @warning You should carefully consider whether each implementation should be thread-safe.
+ *
+ * You should follow the rules below in this part:
+ *
+ * @note The location marked by todo is where you must add code, but you can also add code anywhere
+ * you want, such as function and class definitions, even member variables.
+ *
+ * @note lab4 and lab5 are free designed lab, leave the interfaces that the test case will use,
+ * and then, enjoy yourself!
+ */
 class context;
 
 namespace detail
 {
-class event_base
-{
-public:
-    struct awaiter_base
-    {
-        awaiter_base(context& ctx, event_base& e) noexcept : m_ctx(ctx), m_ev(e) {}
-
-        inline auto next() noexcept -> awaiter_base* { return m_next; }
-
-        auto await_ready() noexcept -> bool;
-
-        auto await_suspend(std::coroutine_handle<> handle) noexcept -> bool;
-
-        auto await_resume() noexcept -> void;
-
-        context&                m_ctx;
-        event_base&             m_ev;
-        awaiter_base*           m_next{nullptr};
-        std::coroutine_handle<> m_await_coro{nullptr};
-    };
-
-    event_base(bool initial_set = false) noexcept : m_state((initial_set) ? this : nullptr) {}
-    ~event_base() noexcept = default;
-
-    event_base(const event_base&)            = delete;
-    event_base(event_base&&)                 = delete;
-    event_base& operator=(const event_base&) = delete;
-    event_base& operator=(event_base&&)      = delete;
-
-    inline auto is_set() const noexcept -> bool { return m_state.load(std::memory_order_acquire) == this; }
-
-    auto set_state() noexcept -> void;
-
-    auto resume_all_awaiter(awaiter_ptr waiter) noexcept -> void;
-
-    auto register_awaiter(awaiter_base* waiter) noexcept -> bool;
-
-private:
-    std::atomic<awaiter_ptr> m_state{nullptr};
-};
+// TODO[lab4a]: Add code that you don't want to use externally in namespace detail
 }; // namespace detail
 
+// TODO[lab4a]: This event is an example to make complie success,
+// You should delete it and add your implementation, I don't care what you do,
+// but keep the function set() and wait()'s declaration same with example.
 template<typename return_type = void>
-class event : public detail::event_base, public detail::container<return_type>
+class event
 {
-public:
-    using event_base::event_base;
-    struct [[CORO_AWAIT_HINT]] awaiter : public detail::event_base::awaiter_base
+    // Just make compile success
+    struct awaiter : detail::noop_awaiter
     {
-        using awaiter_base::awaiter_base;
-        auto await_resume() noexcept -> decltype(auto)
-        {
-            detail::event_base::awaiter_base::await_resume();
-            return static_cast<event&>(m_ev).result();
-        }
+        auto await_resume() -> return_type { return {}; }
     };
 
-    [[CORO_AWAIT_HINT]] awaiter wait() noexcept { return awaiter(local_context(), *this); }
+public:
+    auto wait() noexcept -> awaiter { return {}; } // return awaitable
 
     template<typename value_type>
     auto set(value_type&& value) noexcept -> void
     {
-        this->return_value(std::forward<value_type>(value));
-        set_state();
     }
 };
 
 template<>
-class event<void> : public detail::event_base
+class event<>
 {
 public:
-    using event_base::event_base;
-    struct [[CORO_AWAIT_HINT]] awaiter : public detail::event_base::awaiter_base
-    {
-        using awaiter_base::awaiter_base;
-    };
-
-    [[CORO_AWAIT_HINT]] awaiter wait() noexcept { return awaiter(local_context(), *this); }
-
-    auto set() noexcept -> void { set_state(); }
+    auto wait() noexcept -> detail::noop_awaiter { return {}; } // return awaitable
+    auto set() noexcept -> void {}
 };
 
+/**
+ * @brief RAII for event
+ *
+ */
 class event_guard
 {
     using guard_type = event<>;

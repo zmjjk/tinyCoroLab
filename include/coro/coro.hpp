@@ -2,6 +2,7 @@
 
 #include "coro/comp/channel.hpp"
 #include "coro/comp/condition_variable.hpp"
+#include "coro/comp/event.hpp"
 #include "coro/comp/latch.hpp"
 #include "coro/comp/mutex.hpp"
 #include "coro/comp/wait_group.hpp"

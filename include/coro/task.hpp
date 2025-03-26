@@ -1,3 +1,13 @@
+/**
+ * @file task.hpp
+ * @author JiahuiWang
+ * @brief lab1
+ * @version 1.0
+ * @date 2025-03-26
+ *
+ * @copyright Copyright (c) 2025
+ *
+ */
 #pragma once
 
 #include <cassert>
@@ -10,56 +20,39 @@
 
 namespace coro
 {
+/**
+ * @brief Welcome to tinycoro lab1, in this part you will add codes for task.hpp to make task can be
+ * detached and after the execution is completed, the executive power will be transferred to the
+ * parent level.
+ *
+ * You should follow the rules below in this part:
+ *
+ * @note Do not modify existing functions and class declaration, which may cause the test to not run
+ * correctly, but you can change the implementation logic if you need.
+ *
+ * @note The location marked by todo is where you must add code, but you can also add code anywhere
+ * you want, such as function and class definitions, even member variables.
+ */
+
 template<typename return_type = void>
 class task;
 
 namespace detail
 {
-enum class coro_state : uint8_t
-{
-    normal,
-    detach,
-    cancel, // TODO: Impl cancel
-    none
-};
-
-// TODO: Add yield value support
 struct promise_base
 {
-    friend struct final_awaitable;
-    struct final_awaitable
-    {
-        constexpr auto await_ready() const noexcept -> bool { return false; }
-
-        template<typename promise_type>
-        auto await_suspend(std::coroutine_handle<promise_type> coroutine) noexcept -> std::coroutine_handle<>
-        {
-            // If there is a continuation call it, otherwise this is the end of the line.
-            auto& promise = coroutine.promise();
-            return promise.m_continuation != nullptr ? promise.m_continuation : std::noop_coroutine();
-        }
-
-        constexpr auto await_resume() noexcept -> void {}
-    };
-
     promise_base() noexcept = default;
     ~promise_base()         = default;
 
     constexpr auto initial_suspend() noexcept { return std::suspend_always{}; }
 
-    [[CORO_TEST_USED(lab1)]] constexpr auto final_suspend() noexcept { return final_awaitable{}; }
-
-    auto continuation(std::coroutine_handle<> continuation) noexcept -> void { m_continuation = continuation; }
-
-    inline auto set_state(coro_state state) -> void { m_state = state; }
-
-    inline auto get_state() -> coro_state { return m_state; }
-
-    inline auto is_detach() -> bool { return m_state == coro_state::detach; }
-
-protected:
-    std::coroutine_handle<> m_continuation{nullptr};
-    coro_state              m_state{coro_state::normal};
+    [[CORO_TEST_USED(lab1)]] auto final_suspend() noexcept -> std::suspend_always
+    {
+        // TODO[lab1]: Add you codes
+        // Return suspend_always is incorrect,
+        // so you should modify the return type and define new awaiter to return
+        return {};
+    }
 
 #ifdef DEBUG
 public:
@@ -149,7 +142,7 @@ public:
 
         auto await_suspend(std::coroutine_handle<> awaiting_coroutine) noexcept -> std::coroutine_handle<>
         {
-            m_coroutine.promise().continuation(awaiting_coroutine);
+            // TODO[lab1]: Add you codes
             return m_coroutine;
         }
 
@@ -215,10 +208,7 @@ public:
 
     [[CORO_TEST_USED(lab1)]] auto detach() -> void
     {
-        assert(m_coroutine != nullptr && "detach func expected no-nullptr coroutine_handler");
-        auto& promise = m_coroutine.promise();
-        promise.set_state(detail::coro_state::detach);
-        m_coroutine = nullptr;
+        // TODO[lab1]: Add you codes
     }
 
     auto operator co_await() const& noexcept
@@ -261,16 +251,7 @@ using coroutine_handle = std::coroutine_handle<detail::promise_base>;
  */
 [[CORO_TEST_USED(lab1)]] inline auto clean(std::coroutine_handle<> handle) noexcept -> void
 {
-    auto  specific_handle = coroutine_handle::from_address(handle.address());
-    auto& promise         = specific_handle.promise();
-    switch (promise.get_state())
-    {
-        case detail::coro_state::detach:
-            handle.destroy();
-            break;
-        default:
-            break;
-    }
+    // TODO[lab1]: Add you codes
 }
 
 namespace detail

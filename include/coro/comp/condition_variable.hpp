@@ -2,7 +2,7 @@
  * @file condition_variable.hpp
  * @author JiahuiWang
  * @brief lab5b
- * @version 0.1
+ * @version 1.0
  * @date 2025-03-24
  *
  * @copyright Copyright (c) 2025
@@ -18,71 +18,47 @@
 
 namespace coro
 {
+/**
+ * @brief Welcome to tinycoro lab5b, in this part you will build the basic coroutine
+ * synchronization component¡ª¡ªcondition_variable by modifing condition_variable.hpp
+ * and condition_variable.cpp. Please ensure you have read the document of lab5b.
+ *
+ * @warning You should carefully consider whether each implementation should be thread-safe.
+ *
+ * You should follow the rules below in this part:
+ *
+ * @note The location marked by todo is where you must add code, but you can also add code anywhere
+ * you want, such as function and class definitions, even member variables.
+ *
+ * @note lab4 and lab5 are free designed lab, leave the interfaces that the test case will use,
+ * and then, enjoy yourself!
+ */
 
 using cond_type = std::function<bool()>;
 
 class condition_variable;
 using cond_var = condition_variable;
 
+// TODO[lab5b]: This condition_variable is an example to make complie success,
+// You should delete it and add your implementation, I don't care what you do,
+// but keep the member function and construct function's declaration same with example.
 class condition_variable final
 {
 public:
-    struct cv_awaiter : public mutex::mutex_awaiter
-    {
-        friend condition_variable;
-
-        cv_awaiter(context& ctx, mutex& mtx, cond_var& cv) noexcept
-            : mutex_awaiter(ctx, mtx),
-              m_cv(cv),
-              m_suspend_state(false)
-        {
-        }
-        cv_awaiter(context& ctx, mutex& mtx, cond_var& cv, cond_type& cond) noexcept
-            : mutex_awaiter(ctx, mtx),
-              m_cv(cv),
-              m_cond(cond),
-              m_suspend_state(false)
-        {
-        }
-
-        auto await_suspend(std::coroutine_handle<> handle) noexcept -> bool;
-
-        auto await_resume() noexcept -> void;
-
-    protected:
-        auto register_lock() noexcept -> bool;
-
-        auto register_cv() noexcept -> void;
-
-        auto wake_up() noexcept -> void;
-
-        auto resume() noexcept -> void override;
-
-        cond_type m_cond;
-        cond_var& m_cv;
-        bool      m_suspend_state;
-    };
-
-public:
-    condition_variable() noexcept = default;
-    ~condition_variable() noexcept;
+    condition_variable() noexcept  = default;
+    ~condition_variable() noexcept = default;
 
     CORO_NO_COPY_MOVE(condition_variable);
 
-    auto wait(mutex& mtx) noexcept -> cv_awaiter;
+    auto wait(mutex& mtx) noexcept -> detail::noop_awaiter { return {}; }
 
-    auto wait(mutex& mtx, cond_type&& cond) noexcept -> cv_awaiter;
+    auto wait(mutex& mtx, cond_type&& cond) noexcept -> detail::noop_awaiter { return {}; }
 
-    auto wait(mutex& mtx, cond_type& cond) noexcept -> cv_awaiter;
+    auto wait(mutex& mtx, cond_type& cond) noexcept -> detail::noop_awaiter { return {}; }
 
-    auto notify_one() noexcept -> void;
+    auto notify_one() noexcept -> void {};
 
-    auto notify_all() noexcept -> void;
-
-private:
-    detail::spinlock m_lock;
-    alignas(config::kCacheLineSize) cv_awaiter* m_head{nullptr};
-    alignas(config::kCacheLineSize) cv_awaiter* m_tail{nullptr};
+    auto notify_all() noexcept -> void {};
 };
 
 }; // namespace coro

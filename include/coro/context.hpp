@@ -1,3 +1,13 @@
+/**
+ * @file context.hpp
+ * @author JiahuiWang
+ * @brief lab2b
+ * @version 1.0
+ * @date 2025-03-26
+ *
+ * @copyright Copyright (c) 2025
+ *
+ */
 #pragma once
 
 #include <atomic>
@@ -11,6 +21,21 @@
 
 namespace coro
 {
+/**
+ * @brief Welcome to tinycoro lab2b, in this part you will use engine to build context. Like
+ * equipping soldiers with weapons, context will use engine to execute io task and computation task.
+ *
+ * @warning You should carefully consider whether each implementation should be thread-safe.
+ *
+ * You should follow the rules below in this part:
+ *
+ * @note Do not modify existing functions and class declaration, which may cause the test to not run
+ * correctly, but you can change the implementation logic if you need.
+ *
+ * @note The location marked by todo is where you must add code, but you can also add code anywhere
+ * you want, such as function and class definitions, even member variables.
+ */
+
 using config::ctx_id;
 using std::atomic;
 using std::jthread;
@@ -29,7 +54,7 @@ using engine = detail::engine;
 class scheduler;
 
 /**
- * @brief each context own one engine, it's the core part of tinycoro,
+ * @brief Each context own one engine, it's the core part of tinycoro,
  * which can process computation task and io task
  *
  */
@@ -42,6 +67,10 @@ public:
     context(context&&)                 = delete;
     context& operator=(const context&) = delete;
     context& operator=(context&&)      = delete;
+
+    [[CORO_TEST_USED(lab2b)]] auto init() noexcept -> void;
+
+    [[CORO_TEST_USED(lab2b)]] auto deinit() noexcept -> void;
 
     /**
      * @brief work thread start running
@@ -75,10 +104,7 @@ public:
      *
      * @param handle
      */
-    [[CORO_TEST_USED(lab2b)]] inline auto submit_task(std::coroutine_handle<> handle) noexcept -> void
-    {
-        m_engine.submit_task(handle);
-    }
+    [[CORO_TEST_USED(lab2b)]] auto submit_task(std::coroutine_handle<> handle) noexcept -> void;
 
     /**
      * @brief get context unique id
@@ -92,26 +118,16 @@ public:
      *
      * @param register_cnt
      */
-    [[CORO_TEST_USED(lab2b)]] inline auto register_wait(int register_cnt = 1) noexcept -> void CORO_INLINE
-    {
-        m_num_wait_task.fetch_add(size_t(register_cnt), memory_order_acq_rel);
-    }
+    [[CORO_TEST_USED(lab2b)]] auto register_wait(int register_cnt = 1) noexcept -> void;
 
     /**
      * @brief reduce reference count of context
      *
      * @param register_cnt
      */
-    [[CORO_TEST_USED(lab2b)]] inline auto unregister_wait(int register_cnt = 1) noexcept -> void CORO_INLINE
-    {
-        m_num_wait_task.fetch_sub(register_cnt, memory_order_acq_rel);
-    }
+    [[CORO_TEST_USED(lab2b)]] auto unregister_wait(int register_cnt = 1) noexcept -> void;
 
     inline auto get_engine() noexcept -> engine& { return m_engine; }
-
-    [[CORO_TEST_USED(lab2b)]] auto init() noexcept -> void;
-
-    [[CORO_TEST_USED(lab2b)]] auto deinit() noexcept -> void;
 
     /**
      * @brief main logic of work thread
@@ -120,26 +136,22 @@ public:
      */
     [[CORO_TEST_USED(lab2b)]] auto run(stop_token token) noexcept -> void;
 
-    auto process_work() noexcept -> void;
-
-    inline auto poll_work() noexcept -> void { m_engine.poll_submit(); }
-
     /**
      * @brief return if reference count is zero
      *
      * @return true
      * @return false
      */
-    [[CORO_TEST_USED(lab2b)]] inline auto empty_wait_task() noexcept -> bool CORO_INLINE
-    {
-        return m_num_wait_task.load(memory_order_acquire) == 0 && m_engine.empty_io();
-    }
+    [[CORO_TEST_USED(lab2b)]] auto empty_wait_task() noexcept -> bool;
+
+    // TODO[lab2b]: Add more function if you need
 
 private:
     CORO_ALIGN engine   m_engine;
     unique_ptr<jthread> m_job;
     ctx_id              m_id;
-    atomic<size_t>      m_num_wait_task{0};
+
+    // TODO[lab2b]: Add more member variables if you need
 };
 
 inline context& local_context() noexcept

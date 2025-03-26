@@ -1,5 +1,6 @@
 #pragma once
 
+#include <coroutine>
 #include <cstdint>
 
 namespace coro::detail
@@ -21,5 +22,7 @@ enum class dispatch_strategy : uint8_t
 
 // TODO: Add awaiter base support
 using awaiter_ptr = void*;
+
+using noop_awaiter = std::suspend_always;
 
 }; // namespace coro::detail

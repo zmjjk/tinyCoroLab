@@ -8,6 +8,16 @@ context::context() noexcept
     m_id = ginfo.context_id.fetch_add(1, std::memory_order_relaxed);
 }
 
+auto context::init() noexcept -> void
+{
+    // TODO[lab2b]: Add you codes
+}
+
+auto context::deinit() noexcept -> void
+{
+    // TODO[lab2b]: Add you codes
+}
+
 auto context::start() noexcept -> void
 {
     m_job = make_unique<jthread>(
@@ -21,53 +31,33 @@ auto context::start() noexcept -> void
 
 auto context::notify_stop() noexcept -> void
 {
-    m_job->request_stop();
-    m_engine.wake_up();
+    // TODO[lab2b]: Add you codes
 }
 
-auto context::init() noexcept -> void
+auto context::submit_task(std::coroutine_handle<> handle) noexcept -> void
 {
-    linfo.ctx = this;
-    m_engine.init();
+    // TODO[lab2b]: Add you codes
 }
 
-auto context::deinit() noexcept -> void
+auto context::register_wait(int register_cnt) noexcept -> void
 {
-    linfo.ctx = nullptr;
-    m_engine.deinit();
+    // TODO[lab2b]: Add you codes
+}
+
+auto context::unregister_wait(int register_cnt) noexcept -> void
+{
+    // TODO[lab2b]: Add you codes
 }
 
 auto context::run(stop_token token) noexcept -> void
 {
-    while (true)
-    {
-        process_work();
-        if (token.stop_requested() && empty_wait_task())
-        {
-            if (!m_engine.ready())
-            {
-                break;
-            }
-            else
-            {
-                continue;
-            }
-        }
-        poll_work();
-        if (token.stop_requested() && empty_wait_task() && !m_engine.ready())
-        {
-            break;
-        }
-    }
+    // TODO[lab2b]: Add you codes
 }
 
-auto context::process_work() noexcept -> void
+auto context::empty_wait_task() noexcept -> bool
 {
-    auto num = m_engine.num_task_schedule();
-    for (int i = 0; i < num; i++)
-    {
-        m_engine.exec_one_task();
-    }
+    // TODO[lab2b]: Add you codes
+    return {};
 }
 
 }; // namespace coro
