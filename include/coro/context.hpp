@@ -97,7 +97,7 @@ public:
         this->submit_task(handle);
     }
 
-    // inline auto submit_task(task<void>& task) noexcept -> void { submit_task(task.handle()); }
+    inline auto submit_task(task<void>& task) noexcept -> void { submit_task(task.handle()); }
 
     /**
      * @brief submit one task handle to context
