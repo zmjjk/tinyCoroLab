@@ -54,7 +54,7 @@ public:
         submit(handle);
     }
 
-    static inline auto submit(task<void>& task) noexcept -> void { submit(task.handle()); }
+    // static inline auto submit(task<void>& task) noexcept -> void { submit(task.handle()); }
 
     inline static auto submit(std::coroutine_handle<> handle) noexcept -> void
     {
@@ -98,17 +98,17 @@ inline void submit_to_scheduler(task<void>&& task) noexcept
     }
 }
 
-inline void submit_to_scheduler(task<void>& task) noexcept
-{
-    if (config::kLongRunMode)
-    {
-        scheduler::submit(task.handle());
-    }
-    else
-    {
-        submit_to_context(task.handle());
-    }
-}
+// inline void submit_to_scheduler(task<void>& task) noexcept
+// {
+//     if (config::kLongRunMode)
+//     {
+//         scheduler::submit(task.handle());
+//     }
+//     else
+//     {
+//         submit_to_context(task.handle());
+//     }
+// }
 
 inline void submit_to_scheduler(std::coroutine_handle<> handle) noexcept
 {
