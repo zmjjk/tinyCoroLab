@@ -54,10 +54,4 @@ auto context::run(stop_token token) noexcept -> void
     // TODO[lab2b]: Add you codes
 }
 
-auto context::empty_wait_task() noexcept -> bool
-{
-    // TODO[lab2b]: Add you codes
-    return {};
-}
-
 }; // namespace coro
