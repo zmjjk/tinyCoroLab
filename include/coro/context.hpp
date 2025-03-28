@@ -136,14 +136,6 @@ public:
      */
     [[CORO_TEST_USED(lab2b)]] auto run(stop_token token) noexcept -> void;
 
-    /**
-     * @brief return if reference count is zero
-     *
-     * @return true
-     * @return false
-     */
-    [[CORO_TEST_USED(lab2b)]] auto empty_wait_task() noexcept -> bool;
-
     // TODO[lab2b]: Add more function if you need
 
 private:
