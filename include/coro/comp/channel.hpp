@@ -46,7 +46,7 @@ namespace detail
 // TODO[lab5c]: This channel is an example to make complie success,
 // You should delete it and add your implementation, I don't care what you do,
 // but keep the member function and construct function's declaration same with example.
-template<concepts::conventional_type T, size_t capacity = 0>
+template<concepts::conventional_type T, size_t capacity = 1>
 class channel
 {
     using data_type = std::optional<T>;
