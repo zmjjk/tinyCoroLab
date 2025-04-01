@@ -48,7 +48,9 @@
 
 扫描下方二维码加入tinyCoroLab课程交流qq群，任何问题都可向作者本人直接提问哦！
 
-![tinycoro_qq_group](./resource/tinycoro_qq.JPG){height=400px}
+<!-- ![tinycoro_qq_group](./resource/tinycoro_qq.JPG){height=400px} -->
+
+<img src="./resource/tinycoro_qq.JPG" height="400">
 
 点击免费的在线文档链接[tinycorolab-docs](https://sakurs2.gitbook.io/tinycorolab-docs/)来开启属于你的tinyCoroLab之旅吧！
 
