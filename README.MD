@@ -52,6 +52,8 @@
 
 <img src="./resource/tinycoro_qq.JPG" height="400">
 
+当然，你也可以通过我的邮箱<393814041@qq.com>直接与我联系！
+
 点击免费的在线文档链接[tinycorolab-docs](https://sakurs2.gitbook.io/tinycorolab-docs/)来开启属于你的tinyCoroLab之旅吧！
 
 ## tinyCoroLab实验必读
