@@ -6,8 +6,8 @@
 
 # tinyCoroLab Course
 
-[![C++20](https://img.shields.io/badge/dialect-C%2B%2B20-blue)](https://en.cppreference.com/w/cpp/20)[![MIT license](https://img.shields.io/github/license/max0x7ba/atomic_queue)](https://github.com/sakurs2/tinyCoro/blob/master/LICENSE)
-![platform Linux x86_64](https://img.shields.io/badge/platform-Linux%20x86_64--bit-yellow)
+[![C++20](https://img.shields.io/badge/dialect-C%2B%2B20-blue)](https://en.cppreference.com/w/cpp/20)[![MIT license](https://img.shields.io/github/license/max0x7ba/atomic_queue)](https://github.com/sakurs2/tinyCoro/blob/master/LICENSE)![platform Linux x86_64](https://img.shields.io/badge/platform-Linux%20x86_64--bit-yellow)
+![Version Badge](https://img.shields.io/badge/version-v1%2E0-red)
 <!-- support below -->
 <!-- [![Build Status](link/actions/workflows/cmake.yml/badge.svg)](link/actions/workflows/cmake.yml) -->
 <!-- [![CI](https://github.com/jbaldwin/libcoro/actions/workflows/ci-coverage.yml/badge.svg)](https://github.com/jbaldwin/libcoro/actions/workflows/ci-coverage.yml)
@@ -148,7 +148,7 @@ $ tree -d -A -I third_party -I build -I .vscode -I resource -I temp
 - **[net](https://github.com/sakurs2/tinyCoroLab/tree/master/include/coro/net):** 这是[tinyCoroLab](https://github.com/sakurs2/tinyCoroLab)的网络模块，目前只实现了简易的tcp支持，在实验者完成lab1和lab2之后就可以利用该模块实现针对tcp的网络I/O编程了。
 - **[atomic_que.hpp](https://github.com/sakurs2/tinyCoroLab/blob/master/include/coro/atomic_que.hpp):** 这里对第三方库[AtomicQueue](https://github.com/max0x7ba/atomic_queue)提供的高性能无锁环形队列进行了封装。
 - **[log.hpp](https://github.com/sakurs2/tinyCoroLab/blob/master/include/coro/log.hpp):** [tinyCoroLab](https://github.com/sakurs2/tinyCoroLab)借助第三方库[spdlog](https://github.com/gabime/spdlog)提供的线程安全日志功能，引入该头文件后使用`log::info("hello {}","tinyCoro")`这种形式即可打印日志到终端，通过更改配置文件可实现额外打印到文件以及更改日志级别的功能。
-- **[meta_info.hpp](https://github.com/sakurs2/tinyCoroLab/blob/master/include/coro/meta_info.hpp):**存储全局共享以及线程局部变量的定义，有利于协程运行时获取上下文信息。
+- **[meta_info.hpp](https://github.com/sakurs2/tinyCoroLab/blob/master/include/coro/meta_info.hpp):** 存储全局共享以及线程局部变量的定义，有利于协程运行时获取上下文信息。
 - **[spinlock.hpp](https://github.com/sakurs2/tinyCoroLab/blob/master/include/coro/spinlock.hpp):** 利用原子变量实现的一种自旋锁。
 - **[uring_proxy.hpp](https://github.com/sakurs2/tinyCoroLab/blob/master/include/coro/uring_proxy.hpp):** 该文件对[liburing](https://github.com/axboe/liburing)进行了简单的二次封装，实验者可以在此基础上封装更多的功能。
 - **[utils.hpp](https://github.com/sakurs2/tinyCoroLab/blob/master/include/coro/utils.hpp):** 存放工具函数。
@@ -166,7 +166,7 @@ $ tree -d -A -I third_party -I build -I .vscode -I resource -I temp
 
 在了解[tinyCoroLab](https://github.com/sakurs2/tinyCoroLab)各个模块后，本节将会告诉大家如何正确的使用本实验精心构建并提供给实验者的各个技巧。注意本节提到的所有指令必须在构建目录下运行。
 
-> ?**什么是构建目录？**
+> **💡什么是构建目录？**
 > 在cmake组织的C++项目根目录下新建build文件夹并在build下执行cmake ..构建项目，这个build文件夹即构建目录。
 
 #### 特殊标记
