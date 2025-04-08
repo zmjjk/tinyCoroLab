@@ -13,6 +13,7 @@
 #include <array>
 #include <atomic>
 #include <coroutine>
+#include <cstddef>
 #include <functional>
 #include <queue>
 
@@ -28,7 +29,7 @@ class context;
 };
 
 /**
- * @brief Welcome to tinycoro lab2a, in this part you will build the heart of tinycoro����engine by
+ * @brief Welcome to tinycoro lab2a, in this part you will build the heart of tinycoro����engine by
  * modifing engine.hpp and engine.cpp, please ensure you have read the document of lab2a.
  *
  * @warning You should carefully consider whether each implementation should be thread-safe.
@@ -61,6 +62,18 @@ class engine
     friend class ::coro::context;
 
 public:
+        // 标志位定义
+        static constexpr uint64_t task_mask = (0xFFFFF00000000000);
+        static constexpr uint64_t io_mask   = (0x00000FFFFF000000);
+        static constexpr uint64_t cqe_mask  = (0x0000000000FFFFFF);
+    
+        static constexpr uint64_t task_flag = (((uint64_t)1) << 44);
+        static constexpr uint64_t io_flag   = (((uint64_t)1) << 24);
+    
+        // 唤醒判断宏
+        #define wake_by_task(val) (((val) & engine::task_mask) > 0)
+        #define wake_by_io(val)   (((val) & engine::io_mask) > 0)
+        #define wake_by_cqe(val)  (((val) & engine::cqe_mask) > 0)
     engine() noexcept { m_id = ginfo.engine_id.fetch_add(1, std::memory_order_relaxed); }
 
     ~engine() noexcept = default;
@@ -158,17 +171,54 @@ public:
     inline auto get_id() noexcept -> uint32_t { return m_id; }
 
     // TODO[lab2a]: Add more function if you need
+    auto wake_up(uint64_t val) noexcept -> void;
+    auto do_io_submit() noexcept -> void;
 
 private:
-    uint32_t    m_id;
+    /**
+     * @brief 引擎唯一标识符
+     * 
+     * 在构造函数中通过原子操作从全局计数器获取，确保每个引擎实例拥有唯一ID
+     * 用于区分不同的引擎实例，特别是在多线程环境中
+     */
+    uint32_t m_id;
+
+    /**
+     * @brief io_uring 代理对象
+     * 
+     * 封装了 Linux io_uring 异步 I/O 接口，提供高性能的异步 I/O 操作
+     * 负责管理 SQE(提交队列条目)和 CQE(完成队列条目)
+     * 在 init() 中初始化，在 deinit() 中释放资源
+     */
     uring_proxy m_upxy;
 
-    // store task handle
-    mpmc_queue<coroutine_handle<>> m_task_queue; // You can replace it with another data structure
+    /**
+     * @brief 协程任务队列
+     * 
+     * 存储待执行的协程句柄，使用无锁队列实现，支持多生产者多消费者模式
+     * submit_task() 向队列添加任务，schedule() 从队列获取任务
+     * 无锁设计确保在多线程环境中的高性能
+     */
+    mpmc_queue<coroutine_handle<>> m_task_queue;
 
-    // used to fetch cqe entry
+    /**
+     * @brief 完成队列条目数组
+     * 
+     * 用于批量获取 io_uring 完成队列中的条目
+     * 大小由 config::kQueCap 常量决定，与 io_uring 队列容量一致
+     * 在 poll_submit() 中用于存储批量获取的 CQE
+     */
     array<urcptr, config::kQueCap> m_urc;
 
+    /**
+     * @brief 待提交 IO 操作计数器
+     * 
+     * 原子变量，记录当前等待提交到 io_uring 的 IO 操作数量
+     * add_io_submit() 增加计数，poll_submit() 提交后减少计数
+     * 用于 empty_io() 判断是否还有待处理的 IO 操作
+     */
+    std::atomic<size_t> m_pending_io_submits{0};
+    std::atomic<size_t> m_num_io_running{0};
     // TODO[lab2a]: Add more member variables if you need
 };
 

@@ -7,7 +7,7 @@ GREEN = "\033[32m"
 RESET = "\033[0m"
 
 # test cases: [(<threadnum>, <port>) ...]
-paras = [(1, 8000), (0, 8001)]
+paras = [(1,  18000), (0, 18001)]
 
 
 def run_test(
@@ -36,7 +36,7 @@ def run_test(
             [
                 benchtool_path,
                 "--address",
-                f"127.0.0.1:8002",
+                f"127.0.0.1:{server_port}",
                 "--number",
                 "100",
                 "--duration",
