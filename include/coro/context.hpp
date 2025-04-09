@@ -2,7 +2,7 @@
  * @file context.hpp
  * @author JiahuiWang
  * @brief lab2b
- * @version 1.0
+ * @version 1.1
  * @date 2025-03-26
  *
  * @copyright Copyright (c) 2025
@@ -76,7 +76,7 @@ public:
      * @brief work thread start running
      *
      */
-    auto start() noexcept -> void;
+    [[CORO_TEST_USED(lab2b)]] auto start() noexcept -> void;
 
     /**
      * @brief send stop signal to work thread

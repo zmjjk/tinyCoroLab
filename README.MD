@@ -7,12 +7,14 @@
 # tinyCoroLab Course
 
 [![C++20](https://img.shields.io/badge/dialect-C%2B%2B20-blue)](https://en.cppreference.com/w/cpp/20)[![MIT license](https://img.shields.io/github/license/max0x7ba/atomic_queue)](https://github.com/sakurs2/tinyCoro/blob/master/LICENSE)![platform Linux x86_64](https://img.shields.io/badge/platform-Linux%20x86_64--bit-yellow)
-![Version Badge](https://img.shields.io/badge/version-v1%2E0-red)
+![Version Badge](https://img.shields.io/badge/version-v1%2E1-red)
 <!-- support below -->
 <!-- [![Build Status](link/actions/workflows/cmake.yml/badge.svg)](link/actions/workflows/cmake.yml) -->
 <!-- [![CI](https://github.com/jbaldwin/libcoro/actions/workflows/ci-coverage.yml/badge.svg)](https://github.com/jbaldwin/libcoro/actions/workflows/ci-coverage.yml)
 [![Coverage Status](https://coveralls.io/repos/github/jbaldwin/libcoro/badge.svg?branch=main)](https://coveralls.io/github/jbaldwin/libcoro?branch=main)
 [![Codacy Badge](https://app.codacy.com/project/badge/Grade/c190d4920e6749d4b4d1a9d7d6687f4f)](https://www.codacy.com/gh/jbaldwin/libcoro/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=jbaldwin/libcoro&amp;utm_campaign=Badge_Grade) -->
+
+> **⚠️查看旧版本请切换分支**
 
 ## tinyCoro介绍
 
@@ -126,7 +128,15 @@ $ tree -d -A -I third_party -I build -I .vscode -I resource -I temp
 
 该文件存放了[tinyCoroLab](https://github.com/sakurs2/tinyCoroLab)的配置项，由于项目使用了cmake传递的变量所以配置文件是.h.in的文件格式并由cmake指令生成项目真正使用的配置文件config.h，因此实验者对配置的任何修改必须在[config.h.in](https://github.com/sakurs2/tinyCoroLab/blob/master/config/config.h.in)文件里，而对于config.h文件的修改会在重新执行cmake构建指令后被覆盖掉。
 
-关于各个配置项的内容文件内均添加了注释，但关于[tinyCoroLab](https://github.com/sakurs2/tinyCoroLab)运行模式的配置项kLongRunMode务必重点说明一下，首先实验者需要理解[tinyCoroLab](https://github.com/sakurs2/tinyCoroLab)的核心设计是一个scheduler掌管多个context，而一个context即一个工作线程。
+关于各个配置项的内容文件内均添加了注释，实验者保持默认设置参数即可。
+
+1.1版本之前存在运行模式这一概念，在短期运行模式下没有任何待执行的任务的context会立刻退出，那么scheduler便无法派发任务至该context，这是不合理的。
+
+在1.1版本`kLongRunMode=true`参数已废弃，含糊不清的运行模式概念已被删除，现在scheduler会在全部context完成执行后统一发送退出信号，这样协程在运行过程中就可以自由的向scheduler派发任务了，具体示意图如下：
+
+![tinyCoroLab loop](./resource/tinycoro_loop.png)
+
+<!-- 但关于[tinyCoroLab](https://github.com/sakurs2/tinyCoroLab)运行模式的配置项kLongRunMode务必重点说明一下，首先实验者需要理解[tinyCoroLab](https://github.com/sakurs2/tinyCoroLab)的核心设计是一个scheduler掌管多个context，而一个context即一个工作线程。
 
 对于`kLongRunMode=true`即开启长期运行模式，此时所有的context永远都不会停止，且均有可能收到scheduler派发的任务，如果context在运行过程中产生新任务会交给scheduler来决定调度逻辑，这通过调用`submit_to_scheduler`函数实现。该模式适用于利用tinyCoro搭建长期运行的服务比如web服务器。
 
@@ -136,7 +146,7 @@ $ tree -d -A -I third_party -I build -I .vscode -I resource -I temp
 
 ![tinyCoroLab mode](./resource/tinycoro_mode.png)
 
-不过具体运行逻辑受到多个参数影响，后续会详细介绍，实验者将`kLongRunMode`保持为默认true就可以。
+不过具体运行逻辑受到多个参数影响，后续会详细介绍，实验者将`kLongRunMode`保持为默认true就可以。 -->
 
 #### [include/coro](https://github.com/sakurs2/tinyCoroLab/tree/master/include/coro)
 

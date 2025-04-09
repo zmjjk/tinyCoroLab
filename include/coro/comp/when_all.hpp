@@ -2,7 +2,7 @@
  * @file when_all.hpp
  * @author JiahuiWang
  * @brief lab5a
- * @version 1.0
+ * @version 1.1
  * @date 2025-03-24
  *
  * @copyright Copyright (c) 2025

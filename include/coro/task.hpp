@@ -2,7 +2,7 @@
  * @file task.hpp
  * @author JiahuiWang
  * @brief lab1
- * @version 1.0
+ * @version 1.1
  * @date 2025-03-26
  *
  * @copyright Copyright (c) 2025
