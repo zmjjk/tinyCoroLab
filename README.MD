@@ -15,6 +15,7 @@
 [![Codacy Badge](https://app.codacy.com/project/badge/Grade/c190d4920e6749d4b4d1a9d7d6687f4f)](https://www.codacy.com/gh/jbaldwin/libcoro/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=jbaldwin/libcoro&amp;utm_campaign=Badge_Grade) -->
 
 > **⚠️查看旧版本请切换分支**
+> **⭐项目制作不易，请点击star支持一下❤️**
 
 ## tinyCoro介绍
 
